@@ -9,6 +9,8 @@ export interface CourseProgress {
   known: Record<string, number>; // lessonKey -> «уже знаю» (через чекпоинт или роадмап)
   last?: { lesson: string; step: number; at: number };
   variant?: string; // выбранный вариант курса (course.yaml → variants)
+  resets?: Record<string, number>; // lessonKey → когда сброшен прогресс урока (чтобы синк не вернул старое)
+  resetAt?: number; // когда сброшен весь курс
 }
 
 export interface ProgressState {
@@ -20,6 +22,7 @@ export interface ProgressState {
   notes?: Record<string, Record<string, { text: string; at: number }>>; // курс → "lesson#step" → заметка
   katas?: Record<string, number>; // slug задачи Codewars → когда отмечена решённой
   achievements: Record<string, number>; // id -> когда получено
+  resetAt?: number; // когда стёрт весь прогресс: при синке всё, что было до этого, не возвращается
   /** устарело: перенесено в prefs.theme */
   theme?: 'light' | 'dark' | 'system';
   prefs?: Prefs;
@@ -160,6 +163,7 @@ export const progress = {
       delete c.solved[lesson];
       delete c.known[lesson];
       for (const k of Object.keys(c.attempts)) if (k.startsWith(lesson + '#')) delete c.attempts[k];
+      c.resets = { ...(c.resets ?? {}), [lesson]: Date.now() };
       return c;
     });
   },
@@ -204,9 +208,24 @@ export const progress = {
   setPrefs(patch: Partial<Prefs>) {
     commit({ ...state, theme: undefined, prefs: { ...prefsOf(state), ...patch } });
   },
+  /** Сброс курса: прогресс, отметки роадмапа и черновики кода курса. Заметки остаются. */
+  resetCourse(courseId: string) {
+    try {
+      for (const k of Object.keys(localStorage)) if (k.startsWith(`${DRAFT_PREFIX}${courseId}:`)) localStorage.removeItem(k);
+    } catch {
+      /* ignore */
+    }
+    const marks = { ...(state.marks ?? {}) };
+    delete marks[courseId];
+    commit({
+      ...state,
+      marks,
+      courses: { ...state.courses, [courseId]: { visited: {}, solved: {}, attempts: {}, known: {}, resetAt: Date.now(), variant: state.courses[courseId]?.variant } },
+    });
+  },
   resetAll() {
     for (const k of Object.keys(localStorage)) if (k.startsWith(DRAFT_PREFIX)) localStorage.removeItem(k);
-    commit(empty());
+    commit({ ...empty(), resetAt: Date.now() });
   },
   export(): string {
     return JSON.stringify(this.exportData(), null, 2);
@@ -223,8 +242,15 @@ export const progress = {
   import(text: string) {
     this.importData(JSON.parse(text));
   },
-  importData(data: { app?: string; state?: ProgressState; drafts?: Record<string, string> }) {
+  /** replaceDrafts — убрать локальные черновики, которых нет в data (весь прогресс стёрли на другом устройстве). */
+  importData(data: { app?: string; state?: ProgressState; drafts?: Record<string, string> }, replaceDrafts = false) {
     if (data?.app !== 'dojo' || !data.state) throw new Error('Это не файл прогресса Dojo');
+    if (replaceDrafts)
+      try {
+        for (const k of Object.keys(localStorage)) if (k.startsWith(DRAFT_PREFIX) && !(k in (data.drafts ?? {}))) localStorage.removeItem(k);
+      } catch {
+        /* ignore */
+      }
     for (const [k, v] of Object.entries(data.drafts ?? {})) {
       try {
         localStorage.setItem(k, String(v));

@@ -2,8 +2,10 @@
 // токен хранится только в этом браузере и не попадает в экспорт прогресса.
 // Слияние без потерь: решённое, просмотренное, достижения и активность объединяются,
 // заметки — побеждает более свежая правка, настройки и раскладка роадмапа — локальные.
+// Сбросы побеждают: после «стереть всё» берётся только сторона с более поздним сбросом,
+// после сброса урока из другой стороны не возвращается то, что было в уроке до сброса.
 import { useSyncExternalStore } from 'react';
-import { onProgress, progress, type CourseProgress, type ProgressState } from './progress';
+import { getProgress, onProgress, progress, type CourseProgress, type ProgressState } from './progress';
 
 const CFG = 'dojo:sync';
 const FILE = 'dojo-progress.json';
@@ -84,9 +86,30 @@ function mergeTimes(a: Record<string, number> = {}, b: Record<string, number> = 
   for (const [k, v] of Object.entries(a)) out[k] = minTime(v, out[k])!;
   return out;
 }
+/** Убирает из прогресса урока то, что было до сброса урока (сброс мог случиться на другом устройстве). */
+function dropBeforeReset(c: CourseProgress, resets: Record<string, number>): CourseProgress {
+  c = structuredClone(c);
+  for (const [lesson, at] of Object.entries(resets)) {
+    if ((c.resets?.[lesson] ?? 0) >= at) continue;
+    delete c.visited[lesson]; // у просмотров нет времени — после сброса доверяем только стороне, где был сброс
+    for (const k of Object.keys(c.attempts)) if (k.startsWith(lesson + '#')) delete c.attempts[k];
+    if ((c.known[lesson] ?? 0) < at) delete c.known[lesson];
+    const solved = Object.entries(c.solved[lesson] ?? {}).filter(([, t]) => t > at);
+    if (solved.length) c.solved[lesson] = Object.fromEntries(solved);
+    else delete c.solved[lesson];
+  }
+  return c;
+}
 function mergeCourse(a: CourseProgress | undefined, b: CourseProgress | undefined): CourseProgress {
   if (!a) return b!;
   if (!b) return a;
+  // курс сброшен на одном из устройств — берём сторону с более поздним сбросом
+  if ((a.resetAt ?? 0) > (b.resetAt ?? 0)) return a;
+  if ((b.resetAt ?? 0) > (a.resetAt ?? 0)) return b;
+  const resets: Record<string, number> = { ...(b.resets ?? {}) };
+  for (const [k, v] of Object.entries(a.resets ?? {})) resets[k] = Math.max(v, resets[k] ?? 0);
+  a = dropBeforeReset(a, resets);
+  b = dropBeforeReset(b, resets);
   const visited: Record<string, number[]> = { ...b.visited };
   for (const [k, v] of Object.entries(a.visited)) visited[k] = [...new Set([...(visited[k] ?? []), ...v])].sort((x, y) => x - y);
   const solved: Record<string, Record<string, number>> = { ...b.solved };
@@ -104,6 +127,9 @@ function mergeCourse(a: CourseProgress | undefined, b: CourseProgress | undefine
   };
 }
 export function mergeState(a: ProgressState, b: ProgressState): ProgressState {
+  // весь прогресс стёрт на одном из устройств — берём только более свежую сторону, настройки — локальные
+  if ((a.resetAt ?? 0) > (b.resetAt ?? 0)) return a;
+  if ((b.resetAt ?? 0) > (a.resetAt ?? 0)) return { ...b, prefs: a.prefs, theme: a.theme, roadmap: a.roadmap };
   const courses: Record<string, CourseProgress> = {};
   for (const id of new Set([...Object.keys(a.courses), ...Object.keys(b.courses)])) courses[id] = mergeCourse(a.courses[id], b.courses[id]);
   const activity: Record<string, number> = { ...b.activity };
@@ -116,6 +142,15 @@ export function mergeState(a: ProgressState, b: ProgressState): ProgressState {
   }
   const marks: NonNullable<ProgressState['marks']> = { ...(b.marks ?? {}) };
   for (const [c, m] of Object.entries(a.marks ?? {})) marks[c] = { ...(marks[c] ?? {}), ...m };
+  // отметки роадмапа сброшенного курса — только со стороны, где был сброс
+  for (const c of Object.keys(courses)) {
+    const ra = a.courses[c]?.resetAt ?? 0;
+    const rb = b.courses[c]?.resetAt ?? 0;
+    if (ra === rb) continue;
+    const m = (ra > rb ? a : b).marks?.[c];
+    if (m) marks[c] = m;
+    else delete marks[c];
+  }
   return {
     ...b,
     ...a,
@@ -128,11 +163,22 @@ export function mergeState(a: ProgressState, b: ProgressState): ProgressState {
     achievements: mergeTimes(a.achievements, b.achievements),
   };
 }
-const mergeData = (local: Data, remote: Data): Data => ({
-  ...local,
-  state: mergeState(local.state, remote.state),
-  drafts: { ...remote.drafts, ...local.drafts },
-});
+const mergeData = (local: Data, remote: Data): Data => {
+  const lr = local.state.resetAt ?? 0;
+  const rr = remote.state.resetAt ?? 0;
+  // черновики кода стираются вместе со всем прогрессом или с курсом
+  let drafts = lr > rr ? local.drafts : rr > lr ? remote.drafts : { ...remote.drafts, ...local.drafts };
+  if (lr === rr)
+    for (const c of new Set([...Object.keys(local.state.courses), ...Object.keys(remote.state.courses)])) {
+      const cl = local.state.courses[c]?.resetAt ?? 0;
+      const cr = remote.state.courses[c]?.resetAt ?? 0;
+      if (cl === cr) continue;
+      const keep = cl > cr ? local.drafts : remote.drafts;
+      const prefix = `dojo:draft:${c}:`;
+      drafts = Object.fromEntries(Object.entries(drafts).filter(([k]) => !k.startsWith(prefix) || k in keep));
+    }
+  return { ...local, state: mergeState(local.state, remote.state), drafts };
+};
 
 // ---------- синхронизация ----------
 let applying = false;
@@ -185,7 +231,7 @@ export async function syncNow() {
     if (merged !== local) {
       applying = true;
       try {
-        progress.importData(merged);
+        progress.importData(merged, true);
       } finally {
         applying = false;
       }
@@ -220,10 +266,19 @@ export function disconnect() {
 let timer: ReturnType<typeof setTimeout> | undefined;
 export function startAutoSync() {
   if (status.config) void syncNow();
+  const resetKey = () => {
+    const p = getProgress();
+    return JSON.stringify([p.resetAt, Object.values(p.courses).map((c) => [c.resetAt, c.resets])]);
+  };
+  let lastReset = resetKey();
   onProgress(() => {
     if (applying || !status.config) return;
     clearTimeout(timer);
-    timer = setTimeout(() => void syncNow(), 20_000);
+    // после сброса синхронизируемся сразу, чтобы старый прогресс не успел прийти из гиста
+    const r = resetKey();
+    const now = r !== lastReset;
+    lastReset = r;
+    timer = setTimeout(() => void syncNow(), now ? 0 : 20_000);
   });
   window.addEventListener('pagehide', () => {
     if (timer && status.config) {

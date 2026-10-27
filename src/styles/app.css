@@ -3794,3 +3794,9 @@ pre {
 .sync-form input { flex: 1 1 260px; font: inherit; font-family: var(--font-mono); font-size: 14px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; }
 .sync-error { margin: 12px 0 0; color: var(--bad); font-size: 14px; }
 .lab-check .md { font-size: 14.5px; }
+
+/* ---------- сброс ---------- */
+.reset-list { display: grid; gap: 6px; margin: 0 0 18px; }
+.reset-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.reset-row:last-child { border-bottom: 0; }
+.reset-course { justify-self: start; color: var(--text-2); }

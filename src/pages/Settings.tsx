@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { Accent, ACCENTS, prefsOf, progress, useProgress } from '../state/progress';
 import { I } from '../components/ui/icons';
 import { SyncPanel } from '../components/SyncPanel';
+import { manifest } from '../content';
+import { useSync } from '../state/sync';
 
 const ACCENT_NAMES: Record<Accent, string> = {
   mono: 'Строгий (цвет текста)',
@@ -33,6 +35,7 @@ export function SettingsPage() {
   const prefs = prefsOf(p);
   const file = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState('');
+  const syncOn = !!useSync().config;
 
   const download = () => {
     const blob = new Blob([progress.export()], { type: 'application/json' });
@@ -135,7 +138,28 @@ export function SettingsPage() {
         <SyncPanel />
         <section className="panel">
           <h2>Сброс</h2>
-          <p>Удалит весь прогресс, черновики кода и достижения в этом браузере.</p>
+          <p>Сброс курса удаляет его прогресс, отметки на роадмапе и черновики кода. Заметки и достижения остаются.</p>
+          <div className="reset-list">
+            {manifest.courses.map((c) => (
+              <div key={c.id} className="reset-row">
+                <span>{c.meta.title}</span>
+                <button
+                  className="btn ghost small"
+                  onClick={() => {
+                    if (confirm(`Сбросить прогресс курса «${c.meta.title}»? Это не отменить.`)) {
+                      progress.resetCourse(c.id);
+                      setMsg(`Прогресс курса «${c.meta.title}» сброшен.`);
+                    }
+                  }}
+                >
+                  <I.reset /> Сбросить курс
+                </button>
+              </div>
+            ))}
+          </div>
+          <p>Стереть всё: весь прогресс, черновики кода, заметки и достижения.{' '}
+            {syncOn ? 'Сброс уйдёт и в гист — на других устройствах прогресс тоже сотрётся.' : ''}
+          </p>
           <button
             className="btn danger"
             onClick={() => {
@@ -147,6 +171,11 @@ export function SettingsPage() {
           >
             <I.reset /> Стереть весь прогресс
           </button>
+          {msg.includes('сброшен') || msg.includes('стёрт') ? (
+            <p style={{ marginTop: 12, marginBottom: 0 }} role="status">
+              {msg}
+            </p>
+          ) : null}
         </section>
       </div>
     </main>

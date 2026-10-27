@@ -7,7 +7,7 @@ import { autoSides, linkedLessons } from './Roadmap';
 import { courseAchievements } from '../state/achievements';
 import { notesList } from '../state/notes';
 import { AchBadge } from '../components/Activity';
-import { courseStatus, lessonStatus, moduleStatus, nextLesson, ProgressState, streak, useProgress } from '../state/progress';
+import { courseStatus, lessonStatus, moduleStatus, nextLesson, progress, ProgressState, streak, useProgress } from '../state/progress';
 import { CourseProgress } from '../components/Belt';
 import { Markdown } from '../components/Markdown';
 import { I } from '../components/ui/icons';
@@ -202,6 +202,12 @@ export function CoursePage() {
               ))}
             </div>
           </div>
+          <button
+            className="btn ghost small reset-course"
+            onClick={() => confirm(`Сбросить прогресс курса «${c.meta.title}»? Пропадут решения, отметки на роадмапе и черновики кода курса. Заметки останутся.`) && progress.resetCourse(c.id)}
+          >
+            <I.reset /> Сбросить прогресс курса
+          </button>
         </aside>
       </div>
     </main>
