@@ -1,7 +1,19 @@
 // Лёгкое описание всех курсов, которое генерируется при сборке (см. tools/vite-plugin-dojo.ts)
 // и импортируется как `virtual:dojo-manifest`. Тексты уроков сюда не попадают.
 import { buildCourses, parseLesson, StepKind } from './parse';
-import type { CourseMeta, LessonMeta, ModuleMeta, Roadmap } from './schema';
+import type { CourseMeta, LessonMeta, ModuleMeta, Roadmap, RoadmapNode } from './schema';
+
+/** Размеры узла роадмапа по умолчанию (зависят от типа). */
+export const NODE_SIZE: Record<RoadmapNode['kind'], { w: number; h: number }> = {
+  topic: { w: 220, h: 48 },
+  sub: { w: 200, h: 40 },
+  checkpoint: { w: 260, h: 48 },
+  label: { w: 240, h: 40 },
+  title: { w: 320, h: 56 },
+  note: { w: 280, h: 90 },
+};
+export const edgeEnds = (e: Roadmap['edges'][number]): [string, string] => (Array.isArray(e) ? e : [e.from, e.to]);
+export const nodeBox = (n: RoadmapNode) => ({ x: n.x, y: n.y, w: n.w ?? NODE_SIZE[n.kind].w, h: n.h ?? NODE_SIZE[n.kind].h });
 
 export interface LessonInfo {
   id: string;
@@ -85,8 +97,19 @@ export function buildManifest(files: Record<string, string>): Manifest {
       if (n.section && !c.roadmap.sections.some((s) => s.id === n.section))
         errors.push(`courses/${c.id}/roadmap.yaml: узел "${n.id}" — нет секции "${n.section}"`);
     }
-    for (const [a, b] of c.roadmap.edges)
-      if (!ids.has(a) || !ids.has(b)) errors.push(`courses/${c.id}/roadmap.yaml: ребро ${a} → ${b} ссылается на несуществующий узел`);
+    for (const e of c.roadmap.edges) {
+      const [a, b] = Array.isArray(e) ? e : [e.from, e.to];
+      if (!ids.has(a) || !ids.has(b)) errors.push(`courses/${c.id}/roadmap.yaml: связь ${a} → ${b} ссылается на несуществующий узел`);
+    }
+    // узлы не должны налезать друг на друга (нейронки расставляют координаты руками)
+    const boxes = c.roadmap.nodes.filter((n) => n.kind !== 'label').map((n) => ({ n, ...nodeBox(n) }));
+    for (let i = 0; i < boxes.length; i++)
+      for (let j = i + 1; j < boxes.length; j++) {
+        const A = boxes[i];
+        const B = boxes[j];
+        if (A.x < B.x + B.w && B.x < A.x + A.w && A.y < B.y + B.h && B.y < A.y + A.h)
+          errors.push(`courses/${c.id}/roadmap.yaml: узлы «${A.n.id}» и «${B.n.id}» перекрываются — раздвинь координаты`);
+      }
   }
   return { courses, errors };
 }

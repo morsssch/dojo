@@ -35,22 +35,45 @@ export const LessonMeta = z.object({
 });
 export type LessonMeta = z.infer<typeof LessonMeta>;
 
+const Side = z.enum(['top', 'right', 'bottom', 'left']);
+export const RoadmapNode = z.object({
+  id: z.string(),
+  title: z.string(),
+  // topic — ключевая тема на основной линии; sub — подтема сбоку; checkpoint — проект/контрольная точка;
+  // label — просто текст на холсте; title — крупный заголовок раздела; note — плашка-пояснение
+  kind: z.enum(['topic', 'sub', 'checkpoint', 'label', 'title', 'note']).default('topic'),
+  section: z.string().optional(),
+  x: z.number(),
+  y: z.number(),
+  w: z.number().optional(),
+  h: z.number().optional(),
+  // подробности — показываются в боковой панели по клику
+  description: md.optional(),
+  resources: z.array(z.object({ title: z.string(), url: z.string(), kind: z.enum(['article', 'video', 'docs', 'course', 'tool', 'book']).default('article') })).default([]),
+  // "module" или "module/lesson"
+  links: z.array(z.string()).default([]),
+  optional: z.boolean().optional(),
+}).strict();
+export type RoadmapNode = z.infer<typeof RoadmapNode>;
+
+const RoadmapEdge = z.union([
+  z.tuple([z.string(), z.string()]),
+  z.object({
+    from: z.string(),
+    to: z.string(),
+    fromSide: Side.optional(),
+    toSide: Side.optional(),
+    style: z.enum(['solid', 'dashed', 'dotted']).optional(),
+    // точки излома [x, y] — линия идёт через них под прямыми углами
+    via: z.array(z.tuple([z.number(), z.number()])).optional(),
+  }),
+]);
+export type RoadmapEdge = z.infer<typeof RoadmapEdge>;
+
 export const RoadmapSchema = z.object({
   sections: z.array(z.object({ id: z.string(), title: z.string(), color: z.string().optional() })).default([]),
-  nodes: z.array(
-    z.object({
-      id: z.string(),
-      title: z.string(),
-      section: z.string().optional(),
-      x: z.number(),
-      y: z.number(),
-      description: md.optional(),
-      // "module" или "module/lesson"
-      links: z.array(z.string()).default([]),
-      optional: z.boolean().optional(),
-    }),
-  ),
-  edges: z.array(z.tuple([z.string(), z.string()])).default([]),
+  nodes: z.array(RoadmapNode),
+  edges: z.array(RoadmapEdge).default([]),
 });
 export type Roadmap = z.infer<typeof RoadmapSchema>;
 
@@ -75,7 +98,7 @@ export const QuizBlock = z.object({
   pairs: z.array(z.object({ left: md, right: md })).optional(),
   explain: md.optional(),
   hints: z.array(md).optional(),
-});
+}).strict();
 export type QuizBlock = z.infer<typeof QuizBlock>;
 
 /** Ссылки на уроки, которые нужно знать: "module/lesson" или "module". */
@@ -114,7 +137,7 @@ export const TaskBlock = z.object({
   forbid: z.array(CodeRule).optional(),
   needs: Needs,
   explain: md.optional(),
-});
+}).strict();
 export type TaskBlock = z.infer<typeof TaskBlock>;
 
 export const GitCheck = z.union([
@@ -147,7 +170,7 @@ export const GitBlock = z.object({
   // Свободная песочница без целей — блок не требуется для прохождения.
   sandbox: z.boolean().optional(),
   needs: Needs,
-});
+}).strict();
 export type GitBlock = z.infer<typeof GitBlock>;
 
 export const AnimBlock = z.object({
@@ -181,7 +204,7 @@ export const AnimBlock = z.object({
       hide: z.array(z.string()).optional(),
     }),
   ),
-});
+}).strict();
 export type AnimBlock = z.infer<typeof AnimBlock>;
 
 export const ProjectBlock = z.object({
@@ -192,7 +215,7 @@ export const ProjectBlock = z.object({
   checklist: z.array(md).min(1),
   hints: z.array(md).optional(),
   needs: Needs,
-});
+}).strict();
 export type ProjectBlock = z.infer<typeof ProjectBlock>;
 
 /** Карточки «как это могут спросить»: вопрос → показать ответ → «знаю / повторить». Не обязательный блок. */
@@ -200,7 +223,7 @@ export const CardsBlock = z.object({
   id: z.string().optional(),
   title: z.string().optional(),
   items: z.array(z.object({ q: md, a: md })).min(1),
-});
+}).strict();
 export type CardsBlock = z.infer<typeof CardsBlock>;
 
 /** Письменные ответы: ученик пишет текстом, потом копирует всё одним промптом на проверку ИИ-ментору. */
@@ -211,7 +234,7 @@ export const WrittenBlock = z.object({
   questions: z.array(z.object({ q: md, rows: z.number().optional() })).min(1),
   // кем должен быть проверяющий и на что смотреть — попадёт в начало скопированного текста
   reviewer: z.string().optional(),
-});
+}).strict();
 export type WrittenBlock = z.infer<typeof WrittenBlock>;
 
 export const PlaygroundBlock = z.object({

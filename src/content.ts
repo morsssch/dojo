@@ -39,6 +39,8 @@ export const lessonHref = (courseId: string, key: string, step?: number) => `/c/
 export interface LessonCtxValue {
   courseId: string;
   lessonKey: string;
+  /** перейти к следующему шагу/уроку (кнопка «Дальше» в полноэкранном режиме) */
+  next?: { label: string; go: () => void };
 }
 export const LessonCtx = createContext<LessonCtxValue>({ courseId: '', lessonKey: '' });
 export const useLessonCtx = () => useContext(LessonCtx);

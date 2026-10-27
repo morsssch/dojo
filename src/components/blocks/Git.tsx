@@ -11,6 +11,7 @@ import { I, KindIcon } from '../ui/icons';
 import { BlockError, Hints } from './common';
 import { Needs } from './Needs';
 import { Workspace } from '../Workspace';
+import { NextButton } from './Task';
 
 export function GitWorkbench({ shell, onCommand, greeting, layout = 'inline' }: { shell: Shell; onCommand?: (cmd: string, ok: boolean) => void; greeting?: string; layout?: 'inline' | 'full' }) {
   const [graph, setGraph] = useState<G>({ commits: [], refs: [], head: {}, repo: false });
@@ -100,7 +101,7 @@ export function GitWorkbench({ shell, onCommand, greeting, layout = 'inline' }: 
 }
 
 export function GitTask({ data, id }: { data: GB; id: string }) {
-  const { courseId, lessonKey } = useLessonCtx();
+  const { courseId, lessonKey, next } = useLessonCtx();
   const p = useProgress();
   const solved = !!p.courses[courseId]?.solved[lessonKey]?.[id];
   const [shell, setShell] = useState<Shell | null>(null);
@@ -239,6 +240,7 @@ export function GitTask({ data, id }: { data: GB; id: string }) {
             <>
               {status}
               {tools}
+              {solved && next && <NextButton next={next} close={() => setFull(false)} />}
             </>
           }
           onClose={() => setFull(false)}

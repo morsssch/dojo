@@ -72,7 +72,7 @@ export function SqlTable({ t }: { t: SqlResult }) {
 type RunOut = { stdout: string; stderr: string; error?: string; table?: SqlResult; ms: number };
 
 export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
-  const { courseId, lessonKey } = useLessonCtx();
+  const { courseId, lessonKey, next } = useLessonCtx();
   const p = useProgress();
   const draftKey = `${courseId}:${lessonKey}#${id}`;
   const solved = !!p.courses[courseId]?.solved[lessonKey]?.[id];
@@ -217,7 +217,16 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
           actions={
             <>
               {toolButtons}
-              {runButtons}
+              {solved && next ? (
+                <>
+                  <button className="btn" onClick={check} disabled={!!busy}>
+                    <I.check /> Проверить
+                  </button>
+                  <NextButton next={next} close={() => setFull(false)} />
+                </>
+              ) : (
+                runButtons
+              )}
             </>
           }
           onClose={() => setFull(false)}
@@ -276,6 +285,20 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
       {results}
       {(task.hints?.length && !solved) || (solved && task.explain) ? <div className="task-after">{after}</div> : null}
     </div>
+  );
+}
+
+export function NextButton({ next, close }: { next: { label: string; go: () => void }; close: () => void }) {
+  return (
+    <button
+      className="btn primary"
+      onClick={() => {
+        close();
+        next.go();
+      }}
+    >
+      {next.label} <I.chevron />
+    </button>
   );
 }
 

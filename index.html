@@ -12,8 +12,13 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <script>
       try {
-        var t = JSON.parse(localStorage.getItem('dojo:progress:v1') || '{}').theme;
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        var st = JSON.parse(localStorage.getItem('dojo:progress:v1') || '{}');
+        var pr = st.prefs || { theme: st.theme };
+        var d = document.documentElement.dataset;
+        if (pr.theme === 'light' || pr.theme === 'dark' || pr.theme === 'sepia') d.theme = pr.theme;
+        if (pr.font) d.font = pr.font;
+        if (pr.size) d.size = pr.size;
+        if (pr.accent) d.accent = pr.accent;
       } catch (e) {}
     </script>
   </head>

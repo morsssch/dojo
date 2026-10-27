@@ -53,7 +53,13 @@ export function LessonPage() {
   const moduleKnown = module.lessons.every((l) => l.meta.draft || lessonStatus(p, c.id, l).done);
 
   return (
-    <LessonCtx.Provider value={{ courseId: c.id, lessonKey: key }}>
+    <LessonCtx.Provider
+      value={{
+        courseId: c.id,
+        lessonKey: key,
+        next: !lesson ? undefined : !isLast ? { label: 'Следующий шаг', go: () => go(step + 1) } : next ? { label: 'Следующий урок', go: () => nav(lessonHref(c.id, next.l.key)) } : undefined,
+      }}
+    >
       <div className={`lesson-layout${collapsed ? ' collapsed' : ''}`}>
         <nav className="toc" aria-label="Уроки курса">
           <div className="toc-head">

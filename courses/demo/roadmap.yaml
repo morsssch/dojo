@@ -1,72 +1,63 @@
+# Пример роадмапа: основная линия по центру (x=400), подтемы слева (x=60) и справа (x=760).
 sections:
-  - id: content
-    title: Контент
-    color: '#5b9df5'
-  - id: practice
-    title: Практика
-    color: '#f3b33d'
-  - id: check
-    title: Проверка
-    color: '#4fb477'
+  - { id: content, title: Контент, color: '#4f7fd9' }
+  - { id: practice, title: Практика, color: '#2f9e63' }
+  - { id: check, title: Проверка, color: '#191919' }
 nodes:
-  - id: theory
-    title: Теория и выноски
+  - { id: title, kind: title, title: Витрина Dojo, x: 400, y: 0, w: 300 }
+  - id: content
+    title: Контент урока
     section: content
-    x: 0
-    y: 0
-    description: Markdown, выноски, «под капотом», mermaid, запускаемые примеры.
+    x: 400
+    y: 110
+    w: 260
+    description: Как выглядит теория — шаги, выноски, «под капотом», запускаемые примеры и схемы.
     links: [content/theory]
-  - id: anim
-    title: Анимированные схемы
+    resources:
+      - { title: Гайд для авторов (docs/AUTHORING.md), url: 'https://github.com/morsssch/dojo/blob/main/docs/AUTHORING.md', kind: docs }
+  - { id: theory, kind: sub, title: Выноски и примеры, section: content, x: 60, y: 90, w: 240, links: [content/theory] }
+  - { id: anim, kind: sub, title: Анимированные схемы, section: content, x: 60, y: 142, w: 240, links: [content/anim] }
+  - id: quizzes
+    title: Вопросы и карточки
     section: content
-    x: 280
-    y: 0
-    links: [content/anim]
-  - id: quiz
-    title: Квизы и карточки
-    section: content
-    x: 140
-    y: 130
+    x: 400
+    y: 250
+    w: 260
+    description: Шесть видов квизов, карточки «как это могут спросить» и письменные ответы на проверку ИИ.
     links: [content/quizzes, content/review]
-  - id: go
-    title: Задачи на Go
+  - { id: q6, kind: sub, title: Шесть видов квизов, section: content, x: 760, y: 230, w: 240, links: [content/quizzes] }
+  - { id: cards, kind: sub, title: Карточки и письменные ответы, section: content, x: 760, y: 282, w: 240, links: [content/review] }
+  - id: practice
+    title: Практика в браузере
     section: practice
-    x: 0
-    y: 270
-    links: [practice/go]
-  - id: sql
-    title: SQL на Postgres
-    section: practice
-    x: 280
-    y: 270
-    links: [practice/sql]
-  - id: git
-    title: Git-терминал
-    section: practice
-    x: 560
-    y: 270
-    links: [practice/git]
-  - id: other
-    title: JS, Python и проекты
-    section: practice
-    x: 560
-    y: 130
-    optional: true
-    links: [practice/other]
+    x: 400
+    y: 420
+    w: 260
+    description: Задачи с автопроверкой — Go (включая HTTP-хендлеры), SQL на настоящем Postgres, git-терминал, JS и Python.
+    links: [practice]
+  - { id: go, kind: sub, title: Задачи на Go, section: practice, x: 60, y: 374, w: 240, links: [practice/go] }
+  - { id: sql, kind: sub, title: SQL и схема БД, section: practice, x: 60, y: 426, w: 240, links: [practice/sql] }
+  - { id: git, kind: sub, title: Git-терминал, section: practice, x: 760, y: 374, w: 240, links: [practice/git] }
+  - { id: other, kind: sub, title: 'JS, Python и проекты', section: practice, x: 760, y: 426, w: 240, optional: true, links: [practice/other] }
+  - { id: hint, kind: label, title: 'Пунктир — подтемы, сплошная — основной путь', x: 60, y: 520, w: 300 }
   - id: checkpoint
+    kind: checkpoint
     title: Проверь себя
     section: check
-    x: 280
-    y: 410
-    description: Чекпоинт — если решить 80% вопросов, модуль можно отметить как пройденный.
+    x: 400
+    y: 580
+    w: 260
+    description: Чекпоинт — если решить достаточно вопросов, модуль можно отметить как пройденный.
     links: [checkpoint]
 edges:
-  - [theory, quiz]
-  - [anim, quiz]
-  - [quiz, go]
-  - [quiz, sql]
-  - [quiz, git]
-  - [quiz, other]
-  - [go, checkpoint]
-  - [sql, checkpoint]
-  - [git, checkpoint]
+  - { from: content, to: quizzes, fromSide: bottom, toSide: top }
+  - { from: quizzes, to: practice, fromSide: bottom, toSide: top }
+  - { from: practice, to: checkpoint, fromSide: bottom, toSide: top }
+  - { from: content, to: theory, fromSide: left, toSide: right }
+  - { from: content, to: anim, fromSide: left, toSide: right }
+  - { from: quizzes, to: q6, fromSide: right, toSide: left }
+  - { from: quizzes, to: cards, fromSide: right, toSide: left }
+  - { from: practice, to: go, fromSide: left, toSide: right }
+  - { from: practice, to: sql, fromSide: left, toSide: right }
+  - { from: practice, to: git, fromSide: right, toSide: left }
+  - { from: practice, to: other, fromSide: right, toSide: left }

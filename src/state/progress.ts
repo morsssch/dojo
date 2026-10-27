@@ -15,9 +15,23 @@ export interface ProgressState {
   courses: Record<string, CourseProgress>;
   activity: Record<string, number>; // YYYY-MM-DD -> сколько действий
   roadmap: Record<string, Record<string, { x: number; y: number }>>; // позиции узлов, которые подвинул ученик
+  marks?: Record<string, Record<string, RoadmapMark>>; // курс → узел роадмапа → отметка ученика
   achievements: Record<string, number>; // id -> когда получено
+  /** устарело: перенесено в prefs.theme */
   theme?: 'light' | 'dark' | 'system';
+  prefs?: Prefs;
 }
+
+export type RoadmapMark = 'learning' | 'done' | 'skip';
+
+export interface Prefs {
+  theme: 'system' | 'light' | 'dark' | 'sepia';
+  font: 'plex' | 'golos' | 'serif' | 'system';
+  size: 's' | 'm' | 'l' | 'xl';
+  accent: 'mono' | 'blue' | 'green' | 'violet' | 'orange';
+}
+export const DEFAULT_PREFS: Prefs = { theme: 'system', font: 'plex', size: 'm', accent: 'mono' };
+export const prefsOf = (p: ProgressState): Prefs => ({ ...DEFAULT_PREFS, ...(p.theme ? { theme: p.theme } : {}), ...(p.prefs ?? {}) });
 
 const KEY = 'dojo:progress:v1';
 const DRAFT_PREFIX = 'dojo:draft:';
@@ -131,6 +145,12 @@ export const progress = {
   setRoadmapPos(courseId: string, node: string, pos: { x: number; y: number }) {
     commit({ ...state, roadmap: { ...state.roadmap, [courseId]: { ...(state.roadmap[courseId] ?? {}), [node]: pos } } });
   },
+  setMark(courseId: string, node: string, mark: RoadmapMark | null) {
+    const cur = { ...(state.marks?.[courseId] ?? {}) };
+    if (mark) cur[node] = mark;
+    else delete cur[node];
+    commit({ ...state, marks: { ...(state.marks ?? {}), [courseId]: cur } });
+  },
   resetRoadmap(courseId: string) {
     const r = { ...state.roadmap };
     delete r[courseId];
@@ -144,8 +164,11 @@ export const progress = {
     commit({ ...state, achievements: a });
     return fresh;
   },
-  setTheme(theme: ProgressState['theme']) {
-    commit({ ...state, theme });
+  setTheme(theme: Prefs['theme']) {
+    this.setPrefs({ theme });
+  },
+  setPrefs(patch: Partial<Prefs>) {
+    commit({ ...state, theme: undefined, prefs: { ...prefsOf(state), ...patch } });
   },
   resetAll() {
     for (const k of Object.keys(localStorage)) if (k.startsWith(DRAFT_PREFIX)) localStorage.removeItem(k);

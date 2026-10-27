@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { findCourse, lessonHref } from '../content';
-import type { CourseInfo } from '../core/manifest';
-import { ACHIEVEMENTS } from '../state/achievements';
+import { edgeEnds, nodeBox, type CourseInfo } from '../core/manifest';
+import { linkedLessons } from './Roadmap';
+import { courseAchievements, GLOBAL } from '../state/achievements';
+import { AchBadge, Heatmap } from '../components/Activity';
 import { courseStatus, lessonStatus, moduleStatus, nextLesson, ProgressState, streak, useProgress } from '../state/progress';
 import { CourseProgress } from '../components/Belt';
 import { Markdown } from '../components/Markdown';
@@ -16,53 +18,35 @@ export function LessonDot({ pct, done }: { pct: number; done: boolean }) {
   );
 }
 
-function Heatmap({ p }: { p: ProgressState }) {
-  const days: { key: string; n: number }[] = [];
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - (18 * 7 - 1) - ((d.getDay() + 6) % 7) + 6);
-  for (let i = 0; i < 18 * 7; i++) {
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    days.push({ key, n: p.activity[key] ?? 0 });
-    d.setDate(d.getDate() + 1);
-  }
-  return (
-    <div className="heat" aria-label="Активность за последние 18 недель">
-      {days.map((x) => (
-        <i key={x.key} className={x.n >= 12 ? 'l3' : x.n >= 5 ? 'l2' : x.n > 0 ? 'l1' : ''} title={`${x.key}: ${x.n}`} />
-      ))}
-    </div>
-  );
-}
-
 function RoadmapTeaser({ c, p }: { c: CourseInfo; p: ProgressState }) {
   const rm = c.roadmap!;
-  const xs = rm.nodes.map((n) => n.x);
-  const ys = rm.nodes.map((n) => n.y);
-  const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs) + 200, Math.min(...ys), Math.max(...ys) + 60];
-  const lessonsDone = (links: string[]) => {
-    const ls = links.flatMap((l) => {
-      const [m, lid] = l.split('/');
-      const mod = c.modules.find((x) => x.id === m);
-      return mod ? mod.lessons.filter((x) => !x.meta.draft && (!lid || x.id === lid)) : [];
-    });
+  const nodes = rm.nodes.filter((n) => n.kind !== 'label' && n.kind !== 'note' && n.kind !== 'title').map((n) => ({ n, ...nodeBox(n) }));
+  if (!nodes.length) return null;
+  const minX = Math.min(...nodes.map((b) => b.x));
+  const minY = Math.min(...nodes.map((b) => b.y));
+  const maxX = Math.max(...nodes.map((b) => b.x + b.w));
+  const maxY = Math.max(...nodes.map((b) => b.y + b.h));
+  const pos = new Map(nodes.map((b) => [b.n.id, b]));
+  const done = (links: string[]) => {
+    const ls = linkedLessons(c, links).filter((x) => !x.meta.draft);
     return ls.length ? ls.filter((l) => lessonStatus(p, c.id, l).done).length / ls.length : 0;
   };
-  const pos = new Map(rm.nodes.map((n) => [n.id, n]));
   return (
     <Link to={`/c/${c.id}/roadmap`} className="panel roadmap-teaser">
       <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
         <I.map /> Роадмап курса
       </h3>
       <svg className="teaser-map" viewBox={`${minX - 20} ${minY - 20} ${maxX - minX + 40} ${maxY - minY + 40}`} aria-hidden>
-        {rm.edges.map(([a, b], i) => {
+        {rm.edges.map((e, i) => {
+          const [a, b] = edgeEnds(e);
           const A = pos.get(a);
           const B = pos.get(b);
-          return A && B ? <line key={i} x1={A.x + 100} y1={A.y + 30} x2={B.x + 100} y2={B.y + 30} stroke="var(--line-2)" strokeWidth={6} /> : null;
+          return A && B ? <line key={i} x1={A.x + A.w / 2} y1={A.y + A.h / 2} x2={B.x + B.w / 2} y2={B.y + B.h / 2} stroke="var(--line-2)" strokeWidth={6} /> : null;
         })}
-        {rm.nodes.map((n) => {
-          const k = lessonsDone(n.links);
-          return <rect key={n.id} x={n.x} y={n.y} width={200} height={60} rx={14} fill={k >= 1 ? 'var(--ok)' : k > 0 ? 'var(--accent)' : 'var(--surface-2)'} stroke="var(--line-2)" strokeWidth={4} />;
+        {nodes.map(({ n, x, y, w, h }) => {
+          const k = p.marks?.[c.id]?.[n.id] === 'done' ? 1 : done(n.links);
+          const fill = n.kind === 'checkpoint' ? 'var(--text)' : k >= 1 ? 'var(--ok)' : k > 0 ? 'var(--accent)' : 'var(--surface-2)';
+          return <rect key={n.id} x={x} y={y} width={w} height={h} rx={10} fill={fill} stroke="var(--line-2)" strokeWidth={4} />;
         })}
       </svg>
     </Link>
@@ -187,19 +171,18 @@ export function CoursePage() {
             <Heatmap p={p} />
           </div>
           <div className="panel">
-            <h3>
-              Достижения {Object.keys(p.achievements).length}/{ACHIEVEMENTS.length}
+            <h3 className="row-between">
+              Достижения
+              <Link to="/achievements" className="btn ghost small">
+                Все
+              </Link>
             </h3>
             <div className="ach-grid">
-              {ACHIEVEMENTS.map((a) => {
-                const Ic = I[a.icon];
-                const got = !!p.achievements[a.id];
-                return (
-                  <span key={a.id} className={`ach${got ? ' got' : ''}`} title={`${a.title}: ${a.text}${got ? '' : ' (ещё не получено)'}`} aria-label={`${a.title}${got ? ', получено' : ''}`}>
-                    <Ic width={20} height={20} />
-                  </span>
-                );
-              })}
+              {[...courseAchievements(c), ...GLOBAL].map((a) => (
+                <span key={a.id} title={`${a.title}: ${a.text}${p.achievements[a.id] ? '' : ` (${a.progress(p).join(' из ')})`}`}>
+                  <AchBadge a={a} got={!!p.achievements[a.id]} />
+                </span>
+              ))}
             </div>
           </div>
         </aside>

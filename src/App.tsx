@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { HashRouter, Link, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { findCourse, manifest } from './content';
-import { ACHIEVEMENTS, evaluateAchievements } from './state/achievements';
-import { progress, streak, useProgress } from './state/progress';
+import { allAchievements, evaluateAchievements } from './state/achievements';
+import { AchBadge, StreakButton } from './components/Activity';
+import { AchievementsPage } from './pages/Achievements';
+import { prefsOf, progress, useProgress } from './state/progress';
+import { applyPrefs, isDarkNow } from './state/prefs';
 import { I } from './components/ui/icons';
 import { Home } from './pages/Home';
 import { CoursePage } from './pages/Course';
@@ -23,11 +26,9 @@ export function Logo() {
 
 function ThemeToggle() {
   const p = useProgress();
-  const dark = p.theme === 'dark' || (p.theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  useEffect(() => {
-    if (p.theme === 'light' || p.theme === 'dark') document.documentElement.dataset.theme = p.theme;
-    else delete document.documentElement.dataset.theme;
-  }, [p.theme]);
+  const prefs = prefsOf(p);
+  const dark = isDarkNow(prefs);
+  useEffect(() => applyPrefs(prefs), [prefs.theme, prefs.font, prefs.size, prefs.accent]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <button className="icon-btn" onClick={() => progress.setTheme(dark ? 'light' : 'dark')} aria-label={dark ? 'Светлая тема' : 'Тёмная тема'} title={dark ? 'Светлая тема' : 'Тёмная тема'}>
       {dark ? <I.sun /> : <I.moon />}
@@ -40,7 +41,6 @@ function Topbar() {
   const loc = useLocation();
   const m = loc.pathname.match(/^\/c\/([^/]+)/);
   const course = findCourse(m?.[1]);
-  const s = streak(p);
   return (
     <header className="topbar">
       <Link to="/" className="logo" aria-label="Dojo — на главную">
@@ -62,9 +62,7 @@ function Topbar() {
       <Link className="btn ghost small" to="/sandbox" title="Песочница: Go, SQL, Git">
         <I.sandbox /> <span className="hide-sm">Песочница</span>
       </Link>
-      <span className={`streak-chip${s.current ? ' hot' : ''}`} title={`Серия: ${s.current} дн. подряд, рекорд — ${s.best}`}>
-        <I.flame width={15} height={15} /> {s.current}
-      </span>
+      <StreakButton />
       <ThemeToggle />
       <Link className="icon-btn" to="/settings" aria-label="Настройки и прогресс" title="Настройки и прогресс">
         <I.settings />
@@ -86,13 +84,11 @@ function Toasts() {
   return (
     <div className="toasts" aria-live="polite">
       {toasts.map((id) => {
-        const a = ACHIEVEMENTS.find((x) => x.id === id)!;
-        const Ic = I[a.icon];
+        const a = allAchievements(manifest).find((x) => x.id === id);
+        if (!a) return null;
         return (
           <div key={id} className="toast">
-            <span className="ach got" aria-hidden>
-              <Ic width={20} height={20} />
-            </span>
+            <AchBadge a={a} got />
             <div>
               <b>{a.title}</b>
               <span>{a.text}</span>
@@ -138,6 +134,7 @@ export function App() {
         <Route path="/c/:course/:module/:lesson/:step" element={<LessonPage />} />
         <Route path="/sandbox" element={<SandboxPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/achievements" element={<AchievementsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toasts />

@@ -1,9 +1,29 @@
 import { useRef, useState } from 'react';
-import { progress, useProgress } from '../state/progress';
+import { Prefs, prefsOf, progress, useProgress } from '../state/progress';
 import { I } from '../components/ui/icons';
 
+const ACCENTS: [Prefs['accent'], string, string][] = [
+  ['mono', 'Строгий', 'var(--text)'],
+  ['blue', 'Синий', 'var(--acc-blue)'],
+  ['green', 'Зелёный', 'var(--acc-green)'],
+  ['violet', 'Фиолетовый', 'var(--acc-violet)'],
+  ['orange', 'Оранжевый', 'var(--acc-orange)'],
+];
+
+function Seg<T extends string>({ value, options, onChange }: { value: T; options: [T, string][]; onChange: (v: T) => void }) {
+  return (
+    <div className="seg" role="radiogroup">
+      {options.map(([v, l]) => (
+        <button key={v} role="radio" aria-checked={value === v} className={value === v ? 'on' : ''} onClick={() => onChange(v)}>
+          {l}
+        </button>
+      ))}
+    </div>
+  );
+}
 export function SettingsPage() {
   const p = useProgress();
+  const prefs = prefsOf(p);
   const file = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState('');
 
@@ -24,20 +44,37 @@ export function SettingsPage() {
       </h1>
       <div className="settings">
         <section className="panel">
-          <h2>Тема</h2>
-          <p>По умолчанию — как в системе.</p>
-          <div className="seg" role="radiogroup" aria-label="Тема">
-            {(
-              [
-                ['system', 'Как в системе'],
-                ['light', 'Светлая'],
-                ['dark', 'Тёмная'],
-              ] as const
-            ).map(([v, l]) => (
-              <button key={v} role="radio" aria-checked={(p.theme ?? 'system') === v} className={(p.theme ?? 'system') === v ? 'on' : ''} onClick={() => progress.setTheme(v)}>
-                {l}
-              </button>
-            ))}
+          <h2>Оформление</h2>
+          <p>Настройки сохраняются в этом браузере и попадают в файл прогресса.</p>
+          <div className="pref-grid">
+            <span className="pref-label">Тема</span>
+            <Seg value={prefs.theme} onChange={(theme) => progress.setPrefs({ theme })} options={[['system', 'Как в системе'], ['light', 'Светлая'], ['dark', 'Тёмная'], ['sepia', 'Защита зрения']]} />
+            <span className="pref-label">Шрифт</span>
+            <Seg value={prefs.font} onChange={(font) => progress.setPrefs({ font })} options={[['plex', 'IBM Plex'], ['golos', 'Golos'], ['serif', 'С засечками для чтения'], ['system', 'Системный']]} />
+            <span className="pref-label">Размер текста</span>
+            <Seg value={prefs.size} onChange={(size) => progress.setPrefs({ size })} options={[['s', 'Меньше'], ['m', 'Обычный'], ['l', 'Крупнее'], ['xl', 'Крупный']]} />
+            <span className="pref-label">Акцент</span>
+            <div className="swatches" role="radiogroup" aria-label="Акцентный цвет">
+              {ACCENTS.map(([v, label, color]) => (
+                <button key={v} role="radio" aria-checked={prefs.accent === v} className={`swatch${prefs.accent === v ? ' on' : ''}`} onClick={() => progress.setPrefs({ accent: v })} title={label}>
+                  <i style={{ background: color }} />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="pref-preview">
+            <div className="md">
+              <p>
+                Так выглядит текст урока. В Go слайс — это <code>указатель + len + cap</code>, поэтому <b>append</b> иногда копирует массив.
+              </p>
+            </div>
+            <div className="row-btns">
+              <button className="btn primary small">Проверить</button>
+              <div className="bar" style={{ width: 160, alignSelf: 'center' }}>
+                <i style={{ width: '60%' }} />
+              </div>
+            </div>
           </div>
         </section>
         <section className="panel">
