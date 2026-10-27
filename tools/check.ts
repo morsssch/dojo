@@ -11,8 +11,9 @@ import { execFileSync } from 'node:child_process';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { buildManifest } from '../src/core/manifest';
-import { parseLesson } from '../src/core/parse';
-import type { QuizBlock, TaskBlock, GitBlock } from '../src/core/schema';
+import { Lesson, parseLesson } from '../src/core/parse';
+import type { QuizBlock, TaskBlock, GitBlock, LabBlock } from '../src/core/schema';
+import { assembleLab, assembleStage, findLab, labAsTask, labParts, labStages } from '../src/core/lab';
 import { checkCode, ExecResult, Executors, SqlExecResult } from '../src/core/runners/check';
 import { bootShell, evalGoals } from '../src/core/git/checks';
 import { readCourseFiles } from './vite-plugin-dojo';
@@ -157,7 +158,19 @@ function checkQuiz(q: QuizBlock, where: string) {
   if (q.kind === 'match' && new Set(q.pairs?.map((p) => p.right)).size !== q.pairs?.length) errors.push(`${where}: в match правые части должны быть разными`);
 }
 
-async function checkTask(t: TaskBlock, where: string) {
+async function checkTask(t: TaskBlock, where: string, lesson?: Lesson, id?: string) {
+  // этап лабы: проверяется вся программа — предыдущие этапы эталонные, следующие — заглушки
+  let run = (code: string) => code;
+  if (t.lab) {
+    const lab = findLab(lesson, t.lab);
+    if (!lab) errors.push(`${where}: lab: "${t.lab}" — в этом уроке нет блока lab с таким id`);
+    else if (!t.part || !labParts(lab).includes(t.part)) errors.push(`${where}: part: "${t.part ?? ''}" — в шаблоне лабы «${lab.id}» нет вставки {{${t.part ?? '?'}}}`);
+    else if (lab.lang !== t.lang) errors.push(`${where}: язык этапа (${t.lang}) не совпадает с языком лабы (${lab.lang})`);
+    else {
+      const stages = labStages(lesson, lab.id);
+      run = (code) => assembleStage(lab, stages, id!, code, (s) => s.task.solution);
+    }
+  } else if (t.part) errors.push(`${where}: part без lab`);
   if (t.lang !== 'sql' && !t.tests?.length && !t.harness) warnings.push(`${where}: нет tests и harness — задача засчитается за любой код без ошибок`);
   if (t.lang === 'sql' && !t.setup) warnings.push(`${where}: SQL-задача без setup`);
   for (const r of [...(t.require ?? []), ...(t.forbid ?? [])]) {
@@ -169,15 +182,37 @@ async function checkTask(t: TaskBlock, where: string) {
     }
   }
   if (FAST) return;
-  const r = await checkCode(t, t.solution, executors);
+  const r = await checkCode(t, t.solution, executors, run(t.solution));
   if (r.error === '__skip__') return;
   checked++;
   if (!r.ok) {
     const failed = r.cases.filter((c) => !c.ok).map((c) => `${c.name}${c.message ? ` (${c.message.replace(/\x1f/g, '; ')})` : ''}${c.got !== undefined ? ` получено «${c.got.trim()}», ожидалось «${c.expected?.trim()}»` : ''}`);
     errors.push(`${where}: ЭТАЛОННОЕ РЕШЕНИЕ НЕ ПРОХОДИТ ПРОВЕРКУ\n    ${r.error ?? ''}${failed.join('\n    ')}`);
   }
-  const s = await checkCode(t, t.starter, executors);
+  const s = await checkCode(t, t.starter, executors, run(t.starter));
   if (s.ok && t.starter.trim()) warnings.push(`${where}: стартовый код уже проходит все проверки`);
+}
+
+async function checkLab(lab: LabBlock, where: string, lesson: Lesson) {
+  const stages = labStages(lesson, lab.id);
+  if (!stages.length) errors.push(`${where}: у лабы нет этапов — добавь задачи task с lab: ${lab.id} и part: <имя вставки>`);
+  const seen = new Set<string>();
+  for (const s of stages) {
+    if (seen.has(s.part)) errors.push(`${where}: вставку {{${s.part}}} заполняют два этапа`);
+    seen.add(s.part);
+  }
+  for (const part of labParts(lab)) if (!seen.has(part) && lab.stubs[part] === undefined) errors.push(`${where}: вставка {{${part}}} без этапа и без заглушки в stubs`);
+  for (const k of Object.keys(lab.stubs)) if (!labParts(lab).includes(k)) warnings.push(`${where}: заглушка «${k}» не используется в шаблоне`);
+  if (!lab.harness && !lab.tests?.length) warnings.push(`${where}: нет harness и tests — собранная программа засчитается, если просто запустится`);
+  if (FAST) return;
+  const full = assembleLab(lab, Object.fromEntries(stages.map((s) => [s.part, s.task.solution])));
+  const r = await checkCode(labAsTask(lab), full, executors);
+  if (r.error === '__skip__') return;
+  checked++;
+  if (!r.ok) errors.push(`${where}: ПРОГРАММА ИЗ ЭТАЛОННЫХ ЭТАПОВ НЕ ПРОХОДИТ ПРОВЕРКУ\n    ${r.error ?? ''}${r.cases.filter((c) => !c.ok).map((c) => `${c.name}${c.message ? ` (${c.message})` : ''}${c.got !== undefined ? ` получено «${c.got.trim()}», ожидалось «${c.expected?.trim()}»` : ''}`).join('\n    ')}`);
+  const stubbed = assembleLab(lab, {});
+  const st = await checkCode(labAsTask(lab), stubbed, executors);
+  if (st.ok) warnings.push(`${where}: программа из одних заглушек уже проходит проверку`);
 }
 
 async function checkGit(g: GitBlock, where: string) {
@@ -218,7 +253,8 @@ async function main() {
             if (s.kind !== 'block' || !s.data) continue;
             const where = `${l.file} › «${step.title}» › ${s.type}#${s.id}`;
             if (s.type === 'quiz') checkQuiz(s.data, where);
-            if (s.type === 'task') await checkTask(s.data, where);
+            if (s.type === 'task') await checkTask(s.data, where, lesson, s.id);
+            if (s.type === 'lab') await checkLab(s.data, where, lesson);
             if (s.type === 'git') await checkGit(s.data, where);
           }
       }

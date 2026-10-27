@@ -14,6 +14,21 @@ export const CourseMeta = z.object({
   belts: z.array(z.object({ at: z.number().min(0).max(1), name: z.string(), color: z.string() })).optional(),
   draft: z.boolean().optional(),
   order: z.number().optional(),
+  // Варианты (например, лабы по вариантам): ученик выбирает свой, блоки ```variant показываются только ему.
+  variants: z
+    .object({
+      label: z.string().optional(), // как называть выбор: «Вариант», «Стек», «Язык»…
+      options: z.array(z.object({ id: z.string(), title: z.string(), description: z.string().optional() }).strict()).min(2),
+    })
+    .strict()
+    .optional(),
+  // Разминка: задачи с Codewars, открываются ссылкой. after — модуль, после которого задача «открывается».
+  codewars: z
+    .object({
+      lang: z.string(),
+      katas: z.array(z.object({ slug: z.string(), title: z.string(), rank: z.string().optional(), after: z.string().optional() }).strict()),
+    })
+    .optional(),
 });
 export type CourseMeta = z.infer<typeof CourseMeta>;
 
@@ -140,6 +155,9 @@ export const TaskBlock = z.object({
   forbid: z.array(CodeRule).optional(),
   needs: Needs,
   explain: md.optional(),
+  // этап лабы: id блока lab в этом же уроке и имя вставки {{part}} в его шаблоне
+  lab: z.string().optional(),
+  part: z.string().optional(),
 }).strict();
 export type TaskBlock = z.infer<typeof TaskBlock>;
 
@@ -221,6 +239,22 @@ export const ProjectBlock = z.object({
 }).strict();
 export type ProjectBlock = z.infer<typeof ProjectBlock>;
 
+/** Лаба по этапам: шаблон программы с вставками {{part}}; этапы — задачи task с lab/part в этом же уроке. */
+export const LabBlock = z.object({
+  id: z.string(),
+  title: z.string(),
+  lang: z.enum(['go', 'js', 'python']),
+  intro: md.optional(),
+  template: z.string(),
+  // заглушки для ещё не сделанных этапов: код, который компилируется, но ничего не умеет
+  stubs: z.record(z.string()).default({}),
+  // проверка всей собранной программы
+  harness: z.string().optional(),
+  tests: z.array(IoTest).optional(),
+  checklist: z.array(md).optional(),
+}).strict();
+export type LabBlock = z.infer<typeof LabBlock>;
+
 /** Карточки «как это могут спросить»: вопрос → показать ответ → «знаю / повторить». Не обязательный блок. */
 export const CardsBlock = z.object({
   id: z.string().optional(),
@@ -256,5 +290,6 @@ export const BLOCK_SCHEMAS = {
   project: ProjectBlock,
   cards: CardsBlock,
   written: WrittenBlock,
+  lab: LabBlock,
 } as const;
 export type BlockType = keyof typeof BLOCK_SCHEMAS;

@@ -8,6 +8,7 @@ export interface CourseProgress {
   attempts: Record<string, number>; // `${lessonKey}#${blockId}` -> попыток
   known: Record<string, number>; // lessonKey -> «уже знаю» (через чекпоинт или роадмап)
   last?: { lesson: string; step: number; at: number };
+  variant?: string; // выбранный вариант курса (course.yaml → variants)
 }
 
 export interface ProgressState {
@@ -17,6 +18,7 @@ export interface ProgressState {
   roadmap: Record<string, Record<string, { x: number; y: number }>>; // позиции узлов, которые подвинул ученик
   marks?: Record<string, Record<string, RoadmapMark>>; // курс → узел роадмапа → отметка ученика
   notes?: Record<string, Record<string, { text: string; at: number }>>; // курс → "lesson#step" → заметка
+  katas?: Record<string, number>; // slug задачи Codewars → когда отмечена решённой
   achievements: Record<string, number>; // id -> когда получено
   /** устарело: перенесено в prefs.theme */
   theme?: 'light' | 'dark' | 'system';
@@ -61,7 +63,8 @@ function load(): ProgressState {
 let state: ProgressState = load();
 const listeners = new Set<() => void>();
 
-function commit(next: ProgressState) {
+function commit(next: ProgressState, activity = false) {
+  if (activity) next = { ...next, activity: { ...next.activity, [today()]: (next.activity[today()] ?? 0) + 1 } };
   state = next;
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
@@ -72,6 +75,11 @@ function commit(next: ProgressState) {
 }
 
 export const getProgress = () => state;
+/** Подписка на любые изменения прогресса (автосинхронизация). */
+export const onProgress = (l: () => void) => {
+  listeners.add(l);
+  return () => listeners.delete(l);
+};
 export function useProgress(): ProgressState {
   return useSyncExternalStore(
     (l) => {
@@ -134,6 +142,9 @@ export const progress = {
     );
     return n;
   },
+  setVariant(courseId: string, variant: string) {
+    update(courseId, (c) => ({ ...c, variant }));
+  },
   setKnown(courseId: string, lessons: string[], known: boolean) {
     update(courseId, (c) => {
       for (const l of lessons) {
@@ -155,11 +166,17 @@ export const progress = {
   setRoadmapPos(courseId: string, node: string, pos: { x: number; y: number }) {
     commit({ ...state, roadmap: { ...state.roadmap, [courseId]: { ...(state.roadmap[courseId] ?? {}), [node]: pos } } });
   },
+  setKata(slug: string, solved: boolean) {
+    const k = { ...(state.katas ?? {}) };
+    if (solved) k[slug] = Date.now();
+    else delete k[slug];
+    commit({ ...state, katas: k }, true);
+  },
   setNote(courseId: string, lesson: string, step: number, text: string) {
     const cur = { ...(state.notes?.[courseId] ?? {}) };
     const k = `${lesson}#${step}`;
-    if (text.trim()) cur[k] = { text, at: Date.now() };
-    else delete cur[k];
+    // пустая заметка остаётся записью с отметкой времени — так удаление побеждает при синхронизации
+    if (text.trim() || cur[k]) cur[k] = { text: text.trim() ? text : '', at: Date.now() };
     commit({ ...state, notes: { ...(state.notes ?? {}), [courseId]: cur } });
   },
   setMark(courseId: string, node: string, mark: RoadmapMark | null) {
@@ -192,16 +209,21 @@ export const progress = {
     commit(empty());
   },
   export(): string {
+    return JSON.stringify(this.exportData(), null, 2);
+  },
+  exportData() {
     const drafts: Record<string, string> = {};
     try {
       for (const k of Object.keys(localStorage)) if (k.startsWith(DRAFT_PREFIX)) drafts[k] = localStorage.getItem(k) ?? '';
     } catch {
       /* ignore */
     }
-    return JSON.stringify({ app: 'dojo', exportedAt: new Date().toISOString(), state, drafts }, null, 2);
+    return { app: 'dojo' as const, exportedAt: new Date().toISOString(), state, drafts };
   },
   import(text: string) {
-    const data = JSON.parse(text);
+    this.importData(JSON.parse(text));
+  },
+  importData(data: { app?: string; state?: ProgressState; drafts?: Record<string, string> }) {
     if (data?.app !== 'dojo' || !data.state) throw new Error('Это не файл прогресса Dojo');
     for (const [k, v] of Object.entries(data.drafts ?? {})) {
       try {
@@ -252,8 +274,16 @@ export interface LessonStatus {
   pct: number; // 0..1
 }
 
-export function lessonStatus(p: ProgressState, courseId: string, l: LessonInfo): LessonStatus {
+/** Обязательные блоки урока для выбранного варианта курса (блоки чужих вариантов не считаются). */
+export function requiredFor(p: ProgressState, courseId: string, l: LessonInfo) {
+  if (!l.variants) return l.required;
+  const v = course(p, courseId).variant ?? l.variants.fallback;
+  return l.required.filter((id) => !l.variants!.of[id] || l.variants!.of[id].includes(v));
+}
+
+export function lessonStatus(p: ProgressState, courseId: string, l0: LessonInfo): LessonStatus {
   const c = course(p, courseId);
+  const l = { ...l0, required: requiredFor(p, courseId, l0) };
   const visited = (c.visited[l.key] ?? []).filter((i) => i < l.steps.length).length;
   const solvedMap = c.solved[l.key] ?? {};
   const solved = l.required.filter((id) => solvedMap[id]).length;

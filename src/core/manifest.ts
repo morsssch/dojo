@@ -23,6 +23,8 @@ export interface LessonInfo {
   meta: LessonMeta;
   steps: { title: string; kind: StepKind }[];
   required: string[];
+  /** обязательные блоки внутри ```variant: id → варианты; fallback — вариант, пока ученик не выбрал свой */
+  variants?: { of: Record<string, string[]>; fallback: string };
 }
 export interface ModuleInfo {
   id: string;
@@ -54,6 +56,12 @@ export function buildManifest(files: Record<string, string>): Manifest {
         lessons: m.lessons.map((l) => {
           const parsed = parseLesson(files[l.file], l.file);
           errors.push(...parsed.errors);
+          const of = Object.assign({}, ...parsed.steps.map((s) => s.variantOf)) as Record<string, string[]>;
+          const opts = c.meta.variants?.options.map((o) => o.id) ?? [];
+          const used = new Set(parsed.steps.flatMap((s) => s.segments.flatMap((g) => g.variants ?? [])));
+          for (const v of used)
+            if (!opts.includes(v))
+              errors.push(`${l.file}: вариант «${v}» не объявлен в course.yaml → variants.options${opts.length ? ` (есть: ${opts.join(', ')})` : ''}`);
           return {
             id: l.id,
             key: l.key,
@@ -61,6 +69,7 @@ export function buildManifest(files: Record<string, string>): Manifest {
             meta: l.meta,
             steps: parsed.steps.map((s) => ({ title: s.title, kind: s.kind })),
             required: parsed.steps.flatMap((s) => s.required),
+            ...(Object.keys(of).length && opts.length ? { variants: { of, fallback: opts[0] } } : {}),
           };
         }),
       })),

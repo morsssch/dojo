@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { findCourse, findLesson, LessonCtx, lessonHref, loadLesson, neighbours } from '../content';
 import type { Lesson } from '../core/parse';
-import { lessonStatus, progress, useProgress } from '../state/progress';
+import { lessonStatus, progress, requiredFor, useProgress } from '../state/progress';
 import { Segments } from '../components/Segments';
+import { VariantPicker } from '../components/Variant';
 import { I, KIND_LABEL, KindIcon } from '../components/ui/icons';
 import { LessonDot } from './Course';
 import { NotesPanel, QuoteToNote } from '../components/Notes';
@@ -53,7 +54,10 @@ export function LessonPage() {
 
   // чекпоинт: если решено достаточно — предлагаем отметить модуль как изученный
   const pass = info.meta.pass ?? 0.8;
-  const checkpointPassed = info.meta.checkpoint && info.required.length > 0 && info.required.filter((id) => solvedMap[id]).length / info.required.length >= pass;
+  const req = requiredFor(p, c.id, info);
+  const checkpointPassed = info.meta.checkpoint && req.length > 0 && req.filter((id) => solvedMap[id]).length / req.length >= pass;
+  const variant = c.meta.variants ? (p.courses[c.id]?.variant ?? c.meta.variants.options[0].id) : undefined;
+  const hasVariants = !!c.meta.variants && !!cur?.segments.some((g) => g.variants);
   const moduleKnown = module.lessons.every((l) => l.meta.draft || lessonStatus(p, c.id, l).done);
 
   return (
@@ -61,6 +65,7 @@ export function LessonPage() {
       value={{
         courseId: c.id,
         lessonKey: key,
+        lesson: lesson ?? undefined,
         next: !lesson ? undefined : !isLast ? { label: 'Следующий шаг', go: () => go(step + 1) } : next ? { label: 'Следующий урок', go: () => nav(lessonHref(c.id, next.l.key)) } : undefined,
       }}
     >
@@ -144,7 +149,8 @@ export function LessonPage() {
           {cur && (
             <article className="step" key={`${key}-${step}`}>
               <h2 className="step-title">{cur.title}</h2>
-              <Segments segments={cur.segments} />
+              {hasVariants && !p.courses[c.id]?.variant && <VariantPicker course={c} />}
+              <Segments segments={cur.segments.filter((g) => !g.variants || (variant && g.variants.includes(variant)))} />
             </article>
           )}
 
@@ -200,7 +206,7 @@ export function LessonPage() {
               )}
               {!isLast ? (
                 <button className="btn primary" onClick={() => go(step + 1)}>
-                  {cur && cur.required.some((id) => !solvedMap[id]) ? 'Пропустить пока' : 'Дальше'} <I.chevron />
+                  {cur && cur.required.some((id) => !solvedMap[id] && req.includes(id)) ? 'Пропустить пока' : 'Дальше'} <I.chevron />
                 </button>
               ) : next ? (
                 <Link className="btn primary" to={lessonHref(c.id, next.l.key)}>

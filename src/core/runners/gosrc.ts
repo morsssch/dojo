@@ -26,6 +26,33 @@ function splitGo(src: string): GoFile {
   return { imports, body: s };
 }
 
+/**
+ * Убирает верхнеуровневую func main() из кода ученика, заменяя её пустыми строками (номера строк не сдвигаются).
+ * Нужна, когда своя main есть у харнесса: этап лабы проверяется внутри целой программы, где main уже написана.
+ */
+export function dropGoMain(src: string): string {
+  const m = /^func\s+main\s*\(\s*\)\s*\{/m.exec(src);
+  if (!m) return src;
+  let depth = 0;
+  let i = m.index + m[0].length - 1;
+  for (; i < src.length; i++) {
+    const ch = src[i];
+    if (ch === '/' && src[i + 1] === '/') i = src.indexOf('\n', i) < 0 ? src.length : src.indexOf('\n', i) - 1;
+    else if (ch === '/' && src[i + 1] === '*') {
+      i = src.indexOf('*/', i + 2);
+      if (i >= 0) i++;
+    }
+    else if (ch === '"' || ch === "'") {
+      for (i++; i < src.length && src[i] !== ch; i++) if (src[i] === '\\') i++;
+    } else if (ch === '`') i = src.indexOf('`', i + 1);
+    else if (ch === '{') depth++;
+    else if (ch === '}' && --depth === 0) break;
+    if (i < 0) return src;
+  }
+  const cut = src.slice(m.index, i + 1);
+  return src.slice(0, m.index) + cut.replace(/[^\n]/g, '') + src.slice(i + 1);
+}
+
 /** Сколько строк в начале склеенного файла занимает служебная шапка — чтобы сдвигать номера строк в ошибках. */
 export function mergeGo(user: string, extras: string[] = []): { code: string; userOffset: number; userLines: number } {
   const u = splitGo(user);

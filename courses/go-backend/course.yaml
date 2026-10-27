@@ -9,3 +9,30 @@ description: |
   а поверх него — продукт, как на настоящем хакатоне.
 
   Курс в процессе наполнения: модули с пометкой «скоро» ещё пишутся.
+codewars:
+  lang: go
+  katas:
+    - { slug: multiply, title: 'Multiply', rank: 8 kyu, after: go-basics }
+    - { slug: even-or-odd, title: 'Even or Odd', rank: 8 kyu, after: go-basics }
+    - { slug: sum-of-positive, title: 'Sum of positive', rank: 8 kyu, after: go-basics }
+    - { slug: reversed-strings, title: 'Reversed Strings', rank: 8 kyu, after: go-data }
+    - { slug: highest-and-lowest, title: 'Highest and Lowest', rank: 7 kyu, after: go-data }
+    - { slug: vowel-count, title: 'Vowel Count', rank: 7 kyu, after: go-data }
+    - { slug: disemvowel-trolls, title: 'Disemvowel Trolls', rank: 7 kyu, after: go-data }
+    - { slug: find-the-odd-int, title: 'Find the odd int', rank: 6 kyu, after: go-data }
+    - { slug: stop-gninnips-my-sdrow, title: 'Stop gninnipS My sdroW!', rank: 6 kyu, after: go-data }
+    - { slug: duplicate-encoder, title: 'Duplicate Encoder', rank: 6 kyu, after: go-data }
+    - { slug: array-dot-diff, title: 'Array.diff', rank: 6 kyu, after: go-data }
+    - { slug: counting-duplicates, title: 'Counting Duplicates', rank: 6 kyu, after: go-data }
+    - { slug: your-order-please, title: 'Your order, please', rank: 6 kyu, after: go-data }
+    - { slug: split-strings, title: 'Split Strings', rank: 6 kyu, after: go-data }
+    - { slug: mexican-wave, title: 'Mexican Wave', rank: 6 kyu, after: go-data }
+    - { slug: find-the-missing-letter, title: 'Find the missing letter', rank: 6 kyu, after: go-data }
+    - { slug: convert-string-to-camel-case, title: 'Convert string to camel case', rank: 6 kyu, after: go-data }
+    - { slug: bit-counting, title: 'Bit Counting', rank: 6 kyu, after: go-basics }
+    - { slug: persistent-bugger, title: 'Persistent Bugger.', rank: 6 kyu, after: go-basics }
+    - { slug: sum-of-digits-slash-digital-root, title: 'Sum of Digits / Digital Root', rank: 6 kyu, after: go-basics }
+    - { slug: create-phone-number, title: 'Create Phone Number', rank: 6 kyu, after: go-data }
+    - { slug: take-a-ten-minutes-walk, title: 'Take a Ten Minutes Walk', rank: 6 kyu, after: go-data }
+    - { slug: valid-braces, title: 'Valid Braces', rank: 6 kyu, after: go-data }
+    - { slug: moving-zeros-to-the-end, title: 'Moving Zeros To The End', rank: 5 kyu, after: go-data }

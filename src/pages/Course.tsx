@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { VariantSelect } from '../components/Variant';
 import { Link, useParams } from 'react-router-dom';
 import { findCourse, lessonHref } from '../content';
 import { edgeEnds, nodeBox, type CourseInfo } from '../core/manifest';
@@ -180,6 +181,11 @@ export function CoursePage() {
 
         <aside className="side">
         <div className="only-desktop">{continuePanel}</div>
+          {c.meta.variants && (
+            <div className="panel">
+              <VariantSelect course={c} />
+            </div>
+          )}
           {c.roadmap && <RoadmapTeaser c={c} p={p} />}
           <Link to={`/c/${c.id}/notes`} className="panel side-link">
             <I.note /> Мои заметки

@@ -64,12 +64,13 @@ export const I = {
   mountain: P(['M3 20l6-11 4 6 3-4 5 9z', 'M9 9l1.6 2.8']),
   package: P(['M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z', 'M3 7.5l9 4.5 9-4.5', 'M12 12v9']),
   half: P(['M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19z', 'M12 2.5v19']),
+  layers: P(['M12 3l9 5-9 5-9-5z', 'M3 13l9 5 9-5', 'M3 17.5l9 5 9-5']),
   belt: P(['M2 10h20v4H2z', 'M10 14l-2 7', 'M14 14l2 7', 'M10 9h4v6h-4z']),
 };
 
 /** Иконка вида шага/блока */
 export function KindIcon({ kind, ...p }: { kind: string } & SVGProps<SVGSVGElement>) {
-  const map: Record<string, keyof typeof I> = { theory: 'book', quiz: 'quiz', task: 'code', git: 'branch', anim: 'film', project: 'hammer', cards: 'cards', written: 'pen' };
+  const map: Record<string, keyof typeof I> = { theory: 'book', quiz: 'quiz', task: 'code', git: 'branch', anim: 'film', project: 'hammer', cards: 'cards', written: 'pen', lab: 'layers' };
   const C = I[map[kind] ?? 'book'];
   return <C {...p} />;
 }
@@ -83,4 +84,5 @@ export const KIND_LABEL: Record<string, string> = {
   project: 'Проект',
   cards: 'Карточки',
   written: 'Письменный ответ',
+  lab: 'Лаба',
 };

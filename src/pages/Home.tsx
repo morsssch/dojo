@@ -6,6 +6,7 @@ import { AchBadge, Heatmap, plural, WeekRow } from '../components/Activity';
 import { BeltBadge } from '../components/Belt';
 import { I } from '../components/ui/icons';
 import { RoadmapMini } from './Course';
+import { Warmup } from '../components/Warmup';
 
 export function Home() {
   const p = useProgress();
@@ -28,132 +29,148 @@ export function Home() {
 
   return (
     <main className="page home">
-      <section className="home-top">
-        <div className="home-hero">
-          <h1>{lastCourse ? 'С возвращением' : 'Додзё для кода'}</h1>
-          <p>
-            {lastCourse
-              ? s.current
-                ? `Серия — ${s.current} ${plural(s.current, 'день', 'дня', 'дней')}. Одно задание сегодня — и она продлится.`
-                : 'Начни серию заново: одно решённое задание в день — и она растёт.'
-              : 'Теория маленькими порциями, вопрос после каждого куска и задачи прямо в браузере: Go, SQL на настоящем Postgres и git с терминалом.'}
-          </p>
-        </div>
-        {cont && contNext && (
-          <Link to={lessonHref(cont.id, contNext.lesson.key, contNext.step)} className="panel home-continue">
-            <span className="muted">Продолжить: {cont.meta.title}</span>
-            <b>{contNext.lesson.meta.title}</b>
-            <span className="btn primary small" style={{ justifySelf: 'start' }}>
-              <I.play width={14} height={14} /> Продолжить
-            </span>
-          </Link>
-        )}
+      <section className="home-hero">
+        <h1>{lastCourse ? 'С возвращением' : 'Додзё'}</h1>
+        <p>
+          {lastCourse
+            ? s.current
+              ? `Серия — ${s.current} ${plural(s.current, 'день', 'дня', 'дней')}. Одно задание сегодня — и она продлится.`
+              : 'Начни серию заново: одно решённое задание в день — и она растёт.'
+            : 'Место, где изучают любую IT-тему: теория маленькими порциями, вопрос после каждого куска и практика прямо в браузере — код, SQL, git, схемы и роадмапы.'}
+        </p>
       </section>
+      <div className="home-grid">
+        <div className="home-main">
 
-      {manifest.errors.length > 0 && import.meta.env.DEV && (
-        <details className="errors" open>
-          <summary>Ошибки в контенте ({manifest.errors.length}) — видно только в режиме разработки</summary>
-          {manifest.errors.join('\n')}
-        </details>
-      )}
+          {manifest.errors.length > 0 && import.meta.env.DEV && (
+            <details className="errors" open>
+              <summary>Ошибки в контенте ({manifest.errors.length}) — видно только в режиме разработки</summary>
+              {manifest.errors.join('\n')}
+            </details>
+          )}
 
-      <h2 className="sec-title">Курсы</h2>
-      <div className="course-grid">
-        {courses.map((c) => {
-          const st = courseStatus(p, c);
-          const pct = Math.round(st.pct * 100);
-          const { current } = beltFor(c, st.pct);
-          return (
-            <Link key={c.id} to={`/c/${c.id}`} className="panel course-card">
-              <div className="cc-art">{c.roadmap ? <RoadmapMini c={c} p={p} crop /> : null}</div>
-              <div className="cc-body">
-                <div className="cc-meta">
-                  <span className="tag">{pct ? 'в процессе' : 'не начат'}</span>
-                  <span className="muted">
-                    {c.modules.length} {plural(c.modules.length, 'модуль', 'модуля', 'модулей')}, {st.total} {plural(st.total, 'урок', 'урока', 'уроков')}
-                  </span>
-                </div>
-                <h3>{c.meta.title}</h3>
-                {c.meta.subtitle && <p>{c.meta.subtitle}</p>}
-                <div className="cc-prog">
-                  <span className="bar">
-                    <i style={{ width: `${pct}%` }} />
-                  </span>
-                  <span className="cc-pct">{pct}%</span>
-                  <span className="belt-chip" title={current.name}>
-                    <BeltBadge color={current.color} size={26} />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-        {!courses.length && <div className="empty panel">Курсов пока нет. Добавь папку в courses/ — см. docs/AUTHORING.md.</div>}
-      </div>
-
-      <div className="home-cols">
-        <section className="panel home-activity">
-          <div className="row-between">
-            <h2 className="sec-title" style={{ margin: 0 }}>
-              Активность
-            </h2>
-            <span className="muted" style={{ fontSize: 13.5 }}>
-              рекорд — {s.best}, всего дней — {s.days}
+          <div className="section-head">
+            <h2>Курсы</h2>
+            <span className="muted" style={{ fontSize: 14 }}>
+              {courses.length} {plural(courses.length, 'курс', 'курса', 'курсов')}
             </span>
           </div>
-          <div className="act-top">
+          <div className="course-list">
+            {courses.map((c) => {
+              const st = courseStatus(p, c);
+              const pct = Math.round(st.pct * 100);
+              const { current } = beltFor(c, st.pct);
+              return (
+                <Link key={c.id} to={`/c/${c.id}`} className="panel course-card">
+                  <div className="cc-art">{c.roadmap ? <RoadmapMini c={c} p={p} crop /> : null}</div>
+                  <div className="cc-body">
+                    <div className="cc-meta">
+                      <span className="tag">{pct ? 'в процессе' : 'не начат'}</span>
+                      <span className="muted">
+                        {c.modules.length} {plural(c.modules.length, 'модуль', 'модуля', 'модулей')}, {st.total} {plural(st.total, 'урок', 'урока', 'уроков')}
+                      </span>
+                    </div>
+                    <h3>{c.meta.title}</h3>
+                    {c.meta.subtitle && <p>{c.meta.subtitle}</p>}
+                    <div className="cc-prog">
+                      <span className="bar">
+                        <i style={{ width: `${pct}%` }} />
+                      </span>
+                      <span className="cc-pct">{pct}%</span>
+                      <span className="belt-chip" title={current.name}>
+                        <BeltBadge color={current.color} size={26} />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+            {!courses.length && <div className="empty panel">Курсов пока нет. Добавь папку в courses/ — см. docs/AUTHORING.md.</div>}
+          </div>
+        </div>
+
+        <aside className="side home-side">
+          <div className="section-head">
+            <h2>Сегодня</h2>
+          </div>
+          {cont && contNext ? (
+            <Link to={lessonHref(cont.id, contNext.lesson.key, contNext.step)} className="panel continue home-continue">
+              <span className="label">Продолжить: {cont.meta.title}</span>
+              <span className="title">{contNext.lesson.meta.title}</span>
+              <span className="btn primary">
+                <I.play width={15} height={15} /> Продолжить
+              </span>
+            </Link>
+          ) : (
+            courses[0] && (
+              <Link to={`/c/${courses[0].id}`} className="panel continue home-continue">
+                <span className="label">С чего начать</span>
+                <span className="title">{courses[0].meta.title}</span>
+                <span className="btn primary">
+                  <I.play width={15} height={15} /> Открыть курс
+                </span>
+              </Link>
+            )
+          )}
+
+          <Warmup />
+
+          <section className="panel">
+            <h3 className="row-between">
+              Активность
+              <span className="muted" style={{ fontWeight: 400, fontSize: 13 }}>
+                рекорд {s.best}
+              </span>
+            </h3>
             <div className="act-streak">
-              <I.flame width={26} height={26} />
+              <I.flame width={22} height={22} />
               <b>{s.current}</b>
               <span className="muted">{plural(s.current, 'день', 'дня', 'дней')} подряд</span>
             </div>
             <WeekRow p={p} />
-          </div>
-          <Heatmap p={p} weeks={26} />
-        </section>
-
-        <section className="panel home-ach">
-          <div className="row-between">
-            <h2 className="sec-title" style={{ margin: 0 }}>
-              Достижения
-            </h2>
-            <Link to="/achievements" className="btn ghost small">
-              {got.length} из {achs.length}
-            </Link>
-          </div>
-          {got.length > 0 && (
-            <div className="ach-recent">
-              {got.slice(0, 6).map((a) => (
-                <span key={a.id} title={`${a.title}: ${a.text}`}>
-                  <AchBadge a={a} got />
-                </span>
-              ))}
+            <div style={{ marginTop: 14 }}>
+              <Heatmap p={p} />
             </div>
-          )}
-          <div className="ws-section-title" style={{ marginTop: 14 }}>
-            Ближе всего
-          </div>
-          {close.map(({ a }) => {
-            const [cur, max] = a.progress(p);
-            return (
-              <div key={a.id} className="ach-close">
-                <AchBadge a={a} got={false} size={18} />
-                <div>
-                  <b>{a.title}</b>
-                  <span className="muted">{a.text}</span>
-                  <span className="ach-prog">
-                    <span className="bar">
-                      <i style={{ width: `${(cur / max) * 100}%` }} />
-                    </span>
-                    <span className="muted">
-                      {cur} / {max}
-                    </span>
+          </section>
+
+          <section className="panel">
+            <h3 className="row-between">
+              Достижения
+              <Link to="/achievements" className="btn ghost small">
+                {got.length} из {achs.length}
+              </Link>
+            </h3>
+            {got.length > 0 && (
+              <div className="ach-recent">
+                {got.slice(0, 6).map((a) => (
+                  <span key={a.id} title={`${a.title}: ${a.text}`}>
+                    <AchBadge a={a} got />
                   </span>
-                </div>
+                ))}
               </div>
-            );
-          })}
-        </section>
+            )}
+            {close.slice(0, got.length ? 2 : 3).map(({ a }) => {
+              const [cur, max] = a.progress(p);
+              return (
+                <div key={a.id} className="ach-close">
+                  <AchBadge a={a} got={false} size={18} />
+                  <div>
+                    <b>{a.title}</b>
+                    <span className="muted">{a.text}</span>
+                    <span className="ach-prog">
+                      <span className="bar">
+                        <i style={{ width: `${(cur / max) * 100}%` }} />
+                      </span>
+                      <span className="muted">
+                        {cur} / {max}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+        </aside>
       </div>
     </main>
   );

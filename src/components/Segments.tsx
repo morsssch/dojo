@@ -11,6 +11,7 @@ import { Quiz } from './blocks/Quiz';
 import { Task } from './blocks/Task';
 import { Cards } from './blocks/Cards';
 import { Written } from './blocks/Written';
+import { Lab } from './blocks/Lab';
 
 export function Segments({ segments }: { segments: Segment[] }) {
   return (
@@ -35,6 +36,8 @@ export function Segments({ segments }: { segments: Segment[] }) {
             return <Cards key={s.id} id={s.id} data={s.data} />;
           case 'written':
             return <Written key={s.id} id={s.id} data={s.data} />;
+          case 'lab':
+            return <Lab key={s.id} id={s.id} data={s.data} />;
         }
       })}
     </>

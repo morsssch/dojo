@@ -1,16 +1,7 @@
 // Парсер файлов курса. Не зависит от браузера: используется и сайтом, и tools/check.ts.
 import yaml from 'js-yaml';
 import { z } from 'zod';
-import {
-  BLOCK_SCHEMAS,
-  BlockType,
-  CourseMeta,
-  LessonMeta,
-  ModuleMeta,
-  PlaygroundBlock,
-  Roadmap,
-  RoadmapSchema,
-} from './schema';
+import { BLOCK_SCHEMAS, BlockType, CourseMeta, LessonMeta, ModuleMeta, PlaygroundBlock, Roadmap, RoadmapSchema } from './schema';
 
 // ---------- Структура курса ----------
 
@@ -68,7 +59,13 @@ export function buildCourses(files: Record<string, string>): CourseRef[] {
     if (!m) continue;
     const errors: string[] = [];
     const meta = parseYaml(files[p], CourseMeta, p, errors) ?? { title: m[1] };
-    courses.set(m[1], { id: m[1], dir: p.replace(/\/course\.yaml$/, ''), meta, modules: [], errors });
+    courses.set(m[1], {
+      id: m[1],
+      dir: p.replace(/\/course\.yaml$/, ''),
+      meta,
+      modules: [],
+      errors,
+    });
   }
   for (const c of courses.values()) {
     const rp = `${c.dir}/roadmap.yaml`;
@@ -113,13 +110,23 @@ export function splitFrontmatter(text: string, where: string, errors: string[]):
 
 // ---------- Урок ----------
 
-export type Segment =
+/** variants — сегмент из блока ```variant: показывается только ученикам этих вариантов. */
+export type Segment = (
   | { kind: 'md'; text: string }
-  | { kind: 'block'; type: BlockType; id: string; data: any; required: boolean; error?: string; raw: string }
+  | {
+      kind: 'block';
+      type: BlockType;
+      id: string;
+      data: any;
+      required: boolean;
+      error?: string;
+      raw: string;
+    }
   | { kind: 'mermaid'; code: string }
-  | { kind: 'playground'; data: PlaygroundBlock };
+  | { kind: 'playground'; data: PlaygroundBlock }
+) & { variants?: string[] };
 
-export type StepKind = 'theory' | 'quiz' | 'task' | 'git' | 'project' | 'anim' | 'cards' | 'written';
+export type StepKind = 'theory' | 'quiz' | 'task' | 'git' | 'project' | 'anim' | 'cards' | 'written' | 'lab';
 
 export interface Step {
   index: number;
@@ -127,6 +134,7 @@ export interface Step {
   kind: StepKind;
   segments: Segment[];
   required: string[]; // id блоков, которые нужно решить
+  variantOf: Record<string, string[]>; // id обязательного блока → варианты, которым он нужен (если блок внутри ```variant)
 }
 
 export interface Lesson {
@@ -173,67 +181,98 @@ export function parseLesson(text: string, where = 'lesson'): Lesson {
   const steps: Step[] = rawSteps.map((rs, si) => {
     const segments: Segment[] = [];
     const required: string[] = [];
-    let buf: string[] = [];
-    const flush = () => {
-      const t = buf.join('\n');
-      if (t.trim()) segments.push({ kind: 'md', text: t });
-      buf = [];
-    };
-    for (let i = 0; i < rs.lines.length; i++) {
-      const line = rs.lines[i];
-      const f = line.match(/^(`{3,}|~{3,})\s*([\w-]+)?\s*(.*)$/);
-      if (!f) {
-        buf.push(line);
-        continue;
-      }
-      const marker = f[1];
-      const info = (f[2] ?? '').toLowerCase();
-      const rest = f[3].trim().toLowerCase();
-      // ищем закрывающий забор
-      let j = i + 1;
-      const content: string[] = [];
-      while (j < rs.lines.length && !(rs.lines[j].trim().startsWith(marker) && rs.lines[j].trim().replace(/[`~]/g, '') === '')) {
-        content.push(rs.lines[j]);
-        j++;
-      }
-      const code = content.join('\n');
-      const isBlock = (BLOCK_TYPES as string[]).includes(info);
-      const isRun = RUN_LANGS[info] && rest.split(/\s+/).includes('run');
-      if (!isBlock && !isRun && info !== 'mermaid') {
-        buf.push(...rs.lines.slice(i, j + 1));
+    const variantOf: Record<string, string[]> = {};
+    const scan = (lines: string[], variants?: string[]) => {
+      let buf: string[] = [];
+      const flush = () => {
+        const t = buf.join('\n');
+        if (t.trim()) segments.push({ kind: 'md', text: t, variants });
+        buf = [];
+      };
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const f = line.match(/^(`{3,}|~{3,})\s*([\w-]+)?\s*(.*)$/);
+        if (!f) {
+          buf.push(line);
+          continue;
+        }
+        const marker = f[1];
+        const info = (f[2] ?? '').toLowerCase();
+        const rest = f[3].trim().toLowerCase();
+        // ищем закрывающий забор
+        let j = i + 1;
+        const content: string[] = [];
+        while (j < lines.length && !(lines[j].trim().startsWith(marker) && lines[j].trim().replace(/[`~]/g, '') === '')) {
+          content.push(lines[j]);
+          j++;
+        }
+        const code = content.join('\n');
+        if (info === 'variant') {
+          // ````variant a b — внутри обычное содержимое шага (текст, блоки); внешний забор длиннее внутренних
+          flush();
+          const ids = f[3]
+            .trim()
+            .split(/[\s,]+/)
+            .filter(Boolean);
+          if (!ids.length) errors.push(`${where} › шаг ${si + 1} «${rs.title}» › variant: не указаны варианты (\`\`\`\`variant v1 v2)`);
+          if (variants) errors.push(`${where} › шаг ${si + 1} «${rs.title}» › variant внутри variant не поддерживается`);
+          scan(content, ids);
+          i = j;
+          continue;
+        }
+        const isBlock = (BLOCK_TYPES as string[]).includes(info);
+        const isRun = RUN_LANGS[info] && rest.split(/\s+/).includes('run');
+        if (!isBlock && !isRun && info !== 'mermaid') {
+          buf.push(...lines.slice(i, j + 1));
+          i = j;
+          continue;
+        }
+        flush();
+        if (info === 'mermaid') segments.push({ kind: 'mermaid', code, variants });
+        else if (isRun) {
+          const lang = RUN_LANGS[info];
+          let setup: string | undefined;
+          let visible = code;
+          const cut = code.split(/\n?^--\s*\^\s*setup.*$\n?/m);
+          if (lang === 'sql' && cut.length === 2) [setup, visible] = cut;
+          segments.push({
+            kind: 'playground',
+            data: { lang, code: visible, setup },
+            variants,
+          });
+        } else {
+          const type = info as BlockType;
+          const where2 = `${where} › шаг ${si + 1} «${rs.title}» › ${type}`;
+          const errs: string[] = [];
+          const data = parseYaml(code, BLOCK_SCHEMAS[type] as z.ZodType<any>, where2, errs);
+          const n = segments.filter((s) => s.kind === 'block').length;
+          const id = (data?.id as string | undefined) ?? `s${si + 1}-${type}${n + 1}`;
+          if (seen.has(id)) errs.push(`${where2}: повторяется id "${id}"`);
+          seen.add(id);
+          const isRequired = type !== 'anim' && type !== 'cards' && !(type === 'git' && data?.sandbox);
+          if (isRequired) required.push(id);
+          if (isRequired && variants) variantOf[id] = variants;
+          errors.push(...errs);
+          segments.push({
+            kind: 'block',
+            type,
+            id,
+            data,
+            required: isRequired,
+            error: errs.join('\n') || undefined,
+            raw: code,
+            variants,
+          });
+        }
         i = j;
-        continue;
       }
       flush();
-      if (info === 'mermaid') segments.push({ kind: 'mermaid', code });
-      else if (isRun) {
-        const lang = RUN_LANGS[info];
-        let setup: string | undefined;
-        let visible = code;
-        const cut = code.split(/\n?^--\s*\^\s*setup.*$\n?/m);
-        if (lang === 'sql' && cut.length === 2) [setup, visible] = cut;
-        segments.push({ kind: 'playground', data: { lang, code: visible, setup } });
-      } else {
-        const type = info as BlockType;
-        const where2 = `${where} › шаг ${si + 1} «${rs.title}» › ${type}`;
-        const errs: string[] = [];
-        const data = parseYaml(code, BLOCK_SCHEMAS[type] as z.ZodType<any>, where2, errs);
-        const n = segments.filter((s) => s.kind === 'block').length;
-        const id = (data?.id as string | undefined) ?? `s${si + 1}-${type}${n + 1}`;
-        if (seen.has(id)) errs.push(`${where2}: повторяется id "${id}"`);
-        seen.add(id);
-        const isRequired = type !== 'anim' && type !== 'cards' && !(type === 'git' && data?.sandbox);
-        if (isRequired) required.push(id);
-        errors.push(...errs);
-        segments.push({ kind: 'block', type, id, data, required: isRequired, error: errs.join('\n') || undefined, raw: code });
-      }
-      i = j;
-    }
-    flush();
+    };
+    scan(rs.lines);
     const firstReq = segments.find((s) => s.kind === 'block' && s.required) as Extract<Segment, { kind: 'block' }> | undefined;
     const firstOpt = segments.find((s) => s.kind === 'block' && (s.type === 'anim' || s.type === 'cards')) as Extract<Segment, { kind: 'block' }> | undefined;
     const kind: StepKind = firstReq ? (firstReq.type as StepKind) : firstOpt ? (firstOpt.type as StepKind) : 'theory';
-    return { index: si, title: rs.title, kind, segments, required };
+    return { index: si, title: rs.title, kind, segments, required, variantOf };
   });
   return { meta, steps, errors };
 }

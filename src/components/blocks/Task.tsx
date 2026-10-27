@@ -7,6 +7,7 @@ import type { DbSchema } from '../../runtime/sqlSchema';
 import { DbView } from '../DbView';
 import { Workspace } from '../Workspace';
 import { drafts, progress, useProgress } from '../../state/progress';
+import { assembleStage, findLab, labStages } from '../../core/lab';
 import { CodeEditor } from '../CodeEditor';
 import { Markdown } from '../Markdown';
 import { I, KindIcon } from '../ui/icons';
@@ -72,7 +73,7 @@ export function SqlTable({ t }: { t: SqlResult }) {
 type RunOut = { stdout: string; stderr: string; error?: string; table?: SqlResult; ms: number };
 
 export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
-  const { courseId, lessonKey, next } = useLessonCtx();
+  const { courseId, lessonKey, next, lesson } = useLessonCtx();
   const p = useProgress();
   const draftKey = `${courseId}:${lessonKey}#${id}`;
   const solved = !!p.courses[courseId]?.solved[lessonKey]?.[id];
@@ -91,6 +92,13 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
     if (task.lang === 'sql') preloadSql();
   }, [task.lang]);
 
+  // этап лабы: исполняется вся программа — предыдущие этапы из черновиков, следующие — заглушки
+  const lab = task.lab ? findLab(lesson, task.lab) : undefined;
+  const stages = lab ? labStages(lesson, lab.id) : [];
+  const stageNo = stages.findIndex((s) => s.id === id);
+  const program = (src: string) =>
+    lab && task.lang !== 'sql' ? assembleStage(lab, stages, id, src, (s) => drafts.get(`${courseId}:${lessonKey}#${s.id}`) ?? undefined) : src;
+
   const change = (v: string) => {
     setCode(v);
     drafts.set(draftKey, v);
@@ -104,7 +112,7 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
         const r = await browserExecutors.sql(task.setup ?? '', [code]);
         setOut({ stdout: '', stderr: '', error: r.error, table: r.results.at(-1), ms: r.ms });
       } else {
-        const { files, fixError } = prepare(task.lang, code);
+        const { files, fixError } = prepare(task.lang, program(code));
         const stdin = task.tests?.find((t) => !t.hidden)?.stdin ?? '';
         const r = await browserExecutors.code(task.lang, files, stdin);
         setOut({ stdout: r.stdout, stderr: r.stderr, error: r.timeout ? TIMEOUT_MSG : r.error && fixError(r.error), ms: r.ms });
@@ -118,7 +126,7 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
     setBusy('check');
     setOut(null);
     try {
-      const r = await checkCode(task, code, browserExecutors);
+      const r = await checkCode(task, code, browserExecutors, program(code));
       setRes(r);
       progress.attempt(courseId, lessonKey, id);
       if (r.ok) progress.solve(courseId, lessonKey, id);
@@ -168,6 +176,11 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
   const tags = (
     <>
       <span className="tag">{LANG_LABEL[task.lang]}</span>
+      {lab && stageNo >= 0 && (
+        <span className="tag" title={`Лаба «${lab.title}»`}>
+          этап {stageNo + 1} из {stages.length}
+        </span>
+      )}
       {solved && <span className="tag ok">решено</span>}
     </>
   );
@@ -185,6 +198,12 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
   );
   const after = (
     <>
+      {lab && (
+        <details className="lab-whole">
+          <summary>Программа целиком: так этот этап встаёт в лабу «{lab.title}»</summary>
+          <CodeEditor value={program(code)} lang={task.lang} readOnly minLines={4} />
+        </details>
+      )}
       {!solved && task.hints?.length ? <Hints hints={task.hints} attempts={attempts} /> : null}
       {solved && task.explain && (
         <div className="explain">
@@ -346,7 +365,7 @@ export function RunOutput({ out, lang = '' }: { out: RunOut; lang?: string }) {
   );
 }
 
-function CheckOutput({ res, lang }: { res: CheckResult; lang: string }) {
+export function CheckOutput({ res, lang }: { res: CheckResult; lang: string }) {
   const passed = res.cases.filter((c) => c.ok).length;
   return (
     <div aria-live="polite">

@@ -2,7 +2,7 @@
 // (браузер — воркеры и wasm, `npm run check` — node).
 import type { CodeRule, TaskBlock } from '../schema';
 import { stripComments } from './explain';
-import { fixGoErrorLines, GO_HARNESS_PRELUDE, GO_PRELUDE_IMPORTS, mergeGo } from './gosrc';
+import { dropGoMain, fixGoErrorLines, GO_HARNESS_PRELUDE, GO_PRELUDE_IMPORTS, mergeGo } from './gosrc';
 
 export type Lang = 'go' | 'js' | 'python' | 'sql';
 
@@ -65,6 +65,8 @@ const norm = (s: string) =>
 export function prepare(lang: Exclude<Lang, 'sql'>, user: string, harness?: string) {
   if (lang === 'go') {
     const extras = harness ? [GO_PRELUDE_IMPORTS + GO_HARNESS_PRELUDE, harness] : [];
+    // у харнесса своя main — main ученика (или собранной лабы) не мешает
+    if (harness && /^func\s+main\s*\(/m.test(harness)) user = dropGoMain(user);
     const m = mergeGo(user, extras);
     return { files: [m.code], fixError: (e: string) => fixGoErrorLines(e, m.userOffset, m.userLines) };
   }
@@ -96,8 +98,9 @@ export function checkRules(task: TaskBlock, code: string): CaseResult[] {
   return out;
 }
 
-export async function checkCode(task: TaskBlock, code: string, ex: Executors): Promise<CheckResult> {
-  const r = await checkCodeInner(task, code, ex);
+/** `run` — что исполнять, если отличается от кода ученика (этап лабы: собранная программа). Правила require/forbid — по коду ученика. */
+export async function checkCode(task: TaskBlock, code: string, ex: Executors, run = code): Promise<CheckResult> {
+  const r = await checkCodeInner(task, run, ex);
   const rules = checkRules(task, code);
   if (!rules.length) return r;
   return { ...r, ok: false, cases: [...r.cases, ...rules.map((x) => ({ ...x, message: 'требование к коду' }))] };

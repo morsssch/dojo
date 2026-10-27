@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Accent, ACCENTS, prefsOf, progress, useProgress } from '../state/progress';
 import { I } from '../components/ui/icons';
+import { SyncPanel } from '../components/SyncPanel';
 
 const ACCENT_NAMES: Record<Accent, string> = {
   mono: 'Строгий (цвет текста)',
@@ -99,7 +100,7 @@ export function SettingsPage() {
         </section>
         <section className="panel">
           <h2>Прогресс</h2>
-          <p>Прогресс хранится только в этом браузере. Чтобы перенести его на другое устройство, скачай файл и загрузи его там.</p>
+          <p>Прогресс хранится в этом браузере и работает без входа. Перенести его можно файлом или синхронизацией через GitHub ниже.</p>
           <div className="row-btns">
             <button className="btn primary" onClick={download}>
               <I.download /> Скачать прогресс
@@ -131,6 +132,7 @@ export function SettingsPage() {
             </p>
           )}
         </section>
+        <SyncPanel />
         <section className="panel">
           <h2>Сброс</h2>
           <p>Удалит весь прогресс, черновики кода и достижения в этом браузере.</p>

@@ -41,6 +41,8 @@ export interface LessonCtxValue {
   lessonKey: string;
   /** перейти к следующему шагу/уроку (кнопка «Дальше» в полноэкранном режиме) */
   next?: { label: string; go: () => void };
+  /** разобранный урок: нужен блокам, которые смотрят на соседей (этапы лабы) */
+  lesson?: Lesson;
 }
 export const LessonCtx = createContext<LessonCtxValue>({ courseId: '', lessonKey: '' });
 export const useLessonCtx = () => useContext(LessonCtx);
