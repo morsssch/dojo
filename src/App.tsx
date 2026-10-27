@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { HashRouter, Link, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { findCourse, manifest } from './content';
 import { allAchievements, evaluateAchievements } from './state/achievements';
 import { AchBadge, StreakButton } from './components/Activity';
 import { AchievementsPage } from './pages/Achievements';
+import { NotesPage } from './pages/Notes';
+import { SearchPalette, useSearchHotkey } from './components/Search';
 import { prefsOf, progress, useProgress } from './state/progress';
 import { applyPrefs, isDarkNow } from './state/prefs';
 import { I } from './components/ui/icons';
@@ -28,7 +30,7 @@ function ThemeToggle() {
   const p = useProgress();
   const prefs = prefsOf(p);
   const dark = isDarkNow(prefs);
-  useEffect(() => applyPrefs(prefs), [prefs.theme, prefs.font, prefs.size, prefs.accent]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => applyPrefs(prefs), [prefs.theme, prefs.eyeCare, prefs.font, prefs.size, prefs.accent]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <button className="icon-btn" onClick={() => progress.setTheme(dark ? 'light' : 'dark')} aria-label={dark ? 'Светлая тема' : 'Тёмная тема'} title={dark ? 'Светлая тема' : 'Тёмная тема'}>
       {dark ? <I.sun /> : <I.moon />}
@@ -37,12 +39,15 @@ function ThemeToggle() {
 }
 
 function Topbar() {
-  const p = useProgress();
+  const [searching, setSearching] = useState(false);
+  const openSearch = useCallback(() => setSearching(true), []);
+  useSearchHotkey(openSearch);
   const loc = useLocation();
   const m = loc.pathname.match(/^\/c\/([^/]+)/);
   const course = findCourse(m?.[1]);
   return (
     <header className="topbar">
+      {searching && <SearchPalette onClose={() => setSearching(false)} />}
       <Link to="/" className="logo" aria-label="Dojo — на главную">
         <Logo />
         <span>Dojo</span>
@@ -54,6 +59,10 @@ function Topbar() {
         </nav>
       )}
       <span className="spacer" />
+      <button className="btn ghost small search-btn" onClick={openSearch} title="Поиск (Ctrl/⌘+K)">
+        <I.search /> <span className="hide-sm">Поиск</span>
+        <kbd className="hide-sm">⌘K</kbd>
+      </button>
       {course?.roadmap && (
         <Link className="btn ghost small" to={`/c/${course.id}/roadmap`} title="Роадмап курса">
           <I.map /> <span className="hide-sm">Роадмап</span>
@@ -130,6 +139,7 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/c/:course" element={<CoursePage />} />
         <Route path="/c/:course/roadmap" element={<RoadmapPage />} />
+        <Route path="/c/:course/notes" element={<NotesPage />} />
         <Route path="/c/:course/:module/:lesson" element={<LessonPage />} />
         <Route path="/c/:course/:module/:lesson/:step" element={<LessonPage />} />
         <Route path="/sandbox" element={<SandboxPage />} />

@@ -1,0 +1,246 @@
+# План роадмапа: только смысл. Координаты считает: npm run roadmap:layout -- go-backend
+layout: snake
+title: Go Backend с нуля
+sections:
+  - { id: basics, title: "Основа", color: '#6b7280' }
+  - { id: go, title: "Язык Go", color: '#2f9e63' }
+  - { id: team, title: "Команда", color: '#b9549a' }
+  - { id: web, title: "Веб и API", color: '#4f7fd9' }
+  - { id: data, title: "Данные", color: '#2c9aa6' }
+  - { id: arch, title: "Архитектура", color: '#7d62cf' }
+  - { id: infra, title: "Инфраструктура", color: '#c9772f' }
+  - { id: project, title: "Проекты", color: '#191919' }
+topics:
+  - id: start
+    title: "Старт и окружение"
+    section: basics
+    links: [start]
+    description: "Ставим Go и редактор, учимся жить в терминале. Без этого дальше никак: сервера, Docker и git — всё через консоль."
+    resources:
+      - { title: "Установка Go", url: "https://go.dev/doc/install", kind: docs }
+    subs:
+      - { id: setup, title: "Go, VS Code, hello world", links: [start/setup] }
+      - { id: terminal, title: "Терминал без страха", links: [start/terminal] }
+  - id: go-basics
+    title: "Основы Go"
+    section: go
+    links: [go-basics]
+    description: "Переменные, типы, условия, циклы и функции. Здесь же — как Go превращает текст в один бинарник и почему это удобно для деплоя."
+    resources:
+      - { title: "A Tour of Go — интерактивный тур", url: "https://go.dev/tour/", kind: docs }
+      - { title: "Go by Example", url: "https://gobyexample.com/", kind: article }
+    subs:
+      - { id: program, title: "Из чего состоит программа", links: [go-basics/program] }
+      - { id: vars, title: "Переменные и типы", links: [go-basics/variables] }
+      - { id: flow, title: "Условия и циклы", links: [go-basics/control-flow] }
+      - { id: funcs, title: "Функции и замыкания", links: [go-basics/functions] }
+    checkpoint: { id: cp-basics, title: "Проверь себя: основы", links: [go-basics/checkpoint] }
+  - id: go-data
+    title: "Слайсы, мапы, структуры"
+    section: go
+    links: [go-data]
+    description: "Как устроены коллекции в Go. Слайсы иногда удивляют — разберём, что лежит в памяти, и тогда сюрпризов не будет."
+    resources:
+      - { title: "Go Slices: usage and internals", url: "https://go.dev/blog/slices-intro", kind: article }
+      - { title: "Go by Example", url: "https://gobyexample.com/", kind: article }
+    subs:
+      - { id: slices, title: "Массивы и слайсы", links: [go-data/arrays-slices] }
+      - { id: maps, title: "Мапы", links: [go-data/maps] }
+      - { id: strings, title: "Строки, байты, руны", links: [go-data/strings] }
+      - { id: structs, title: "Структуры и JSON", links: [go-data/structs] }
+    checkpoint: { id: cp-data, title: "Проверь себя: данные", links: [go-data/checkpoint] }
+  - id: go-oop
+    title: "ООП по-гошному"
+    section: go
+    links: [go-oop]
+    description: "В Go нет классов и наследования, зато есть методы, интерфейсы и встраивание. Это то, на чём держится архитектура любого сервиса."
+    resources:
+      - { title: "Effective Go", url: "https://go.dev/doc/effective_go", kind: docs }
+      - { title: "Интерфейсы — Go by Example", url: "https://gobyexample.com/interfaces", kind: article }
+    subs:
+      - { id: ptr, title: "Методы и указатели", links: [go-oop/methods-pointers] }
+      - { id: ifaces, title: "Интерфейсы", links: [go-oop/interfaces] }
+      - { id: embed, title: "Композиция", links: [go-oop/composition] }
+      - { id: generics, title: "Дженерики", links: [go-oop/generics] }
+    checkpoint: { id: cp-oop, title: "Проверь себя: ООП", links: [go-oop/checkpoint] }
+  - id: errors
+    title: "Ошибки, пакеты, go test"
+    section: go
+    links: [go-errors-packages]
+    description: "Ошибки в Go — обычные значения, а не исключения. Плюс структура проекта из пакетов и первые тесты."
+    resources:
+      - { title: "Error handling and Go", url: "https://go.dev/blog/error-handling-and-go", kind: article }
+      - { title: "Пакет testing", url: "https://pkg.go.dev/testing", kind: docs }
+    subs:
+      - { id: err, title: "Ошибки как значения", links: [go-errors-packages/errors] }
+      - { id: pkgs, title: "Пакеты и модули", links: [go-errors-packages/packages] }
+      - { id: panic, title: "panic и recover", links: [go-errors-packages/panic] }
+      - { id: tests, title: "Первые тесты", links: [go-errors-packages/testing-intro] }
+  - id: git
+    title: "Git и командная работа"
+    section: team
+    links: [git]
+    description: "Ветки, конфликты, push/pull и pull request. Чтобы на хакатоне никто не терял чужой код в 4 утра."
+    resources:
+      - { title: "Learn Git Branching (рус.)", url: "https://learngitbranching.js.org/?locale=ru_RU", kind: tool }
+      - { title: "Pro Git на русском", url: "https://git-scm.com/book/ru/v2", kind: book }
+    subs:
+      - { id: commits, title: "Коммиты и история", links: [git/commits] }
+      - { id: branches, title: "Ветки", links: [git/branches] }
+      - { id: conflicts, title: "Конфликты", links: [git/conflicts] }
+      - { id: remote, title: "Remote, push, pull", links: [git/remote] }
+      - { id: pr, title: "PR и ревью", links: [git/team-flow] }
+  - id: concurrency
+    title: "Конкурентность"
+    section: go
+    links: [concurrency]
+    description: "Горутины, каналы, select, mutex и context — главная суперсила Go. Нужна для WebSocket, фоновых задач и параллельных запросов."
+    resources:
+      - { title: "Go Concurrency Patterns: Pipelines", url: "https://go.dev/blog/pipelines", kind: article }
+      - { title: "Go by Example", url: "https://gobyexample.com/", kind: article }
+    group: "Горутины и синхронизация"
+    subs:
+      - { id: goroutines, title: "Горутины", links: [concurrency/goroutines] }
+      - { id: channels, title: "Каналы", links: [concurrency/channels] }
+      - { id: go-select, title: "select и таймауты", links: [concurrency/select] }
+      - { id: mutex, title: "Mutex и гонки", links: [concurrency/sync] }
+      - { id: ctx, title: "context", links: [concurrency/context] }
+      - { id: patterns, title: "Worker pool, errgroup", links: [concurrency/patterns] }
+  - id: web
+    title: "HTTP и сервер на Go"
+    section: web
+    links: [web]
+    description: "Как работает веб, что такое REST и JSON, и как написать сервер на net/http с middleware. Это и есть бэкенд для фронта."
+    resources:
+      - { title: "Обзор протокола HTTP — MDN", url: "https://developer.mozilla.org/ru/docs/Web/HTTP/Overview", kind: docs }
+      - { title: "Пакет net/http", url: "https://pkg.go.dev/net/http", kind: docs }
+    group: "HTTP-сервер"
+    subs:
+      - { id: how-web, title: "Как работает веб", links: [web/how-web-works] }
+      - { id: http, title: "Протокол HTTP", links: [web/http] }
+      - { id: rest, title: "REST и JSON", links: [web/rest-json] }
+      - { id: nethttp, title: "Сервер на net/http", links: [web/net-http] }
+      - { id: mw, title: "Middleware и CORS", links: [web/middleware] }
+      - { id: valid, title: "Валидация и ошибки", links: [web/validation] }
+    label: "Отсюда начинается собственно бэкенд"
+  - id: sql
+    title: "SQL и PostgreSQL"
+    section: data
+    links: [sql]
+    description: "Таблицы, связи, JOIN, агрегаты, индексы и транзакции. Хорошая схема БД экономит часы на хакатоне."
+    resources:
+      - { title: "Учебник PostgreSQL", url: "https://www.postgresql.org/docs/current/tutorial.html", kind: docs }
+      - { title: "SQLBolt — интерактивные уроки", url: "https://sqlbolt.com/", kind: tool }
+    group: "SQL на практике"
+    subs:
+      - { id: select, title: "SELECT и фильтры", links: [sql/select] }
+      - { id: joins, title: "JOIN", links: [sql/joins] }
+      - { id: agg, title: "Агрегаты", links: [sql/aggregates] }
+      - { id: modify, title: "INSERT / UPDATE / DELETE", links: [sql/modify] }
+      - { id: ddl, title: "Схема и ограничения", links: [sql/ddl] }
+      - { id: indexes, title: "Индексы и EXPLAIN", links: [sql/indexes] }
+      - { id: tx, title: "Транзакции", links: [sql/transactions] }
+  - id: go-pg
+    title: "Go + Postgres"
+    section: data
+    links: [go-postgres]
+    description: "Подключаем базу к сервису: пул соединений pgx, миграции, типобезопасный SQL через sqlc и слой репозитория."
+    resources:
+      - { title: "pgx", url: "https://github.com/jackc/pgx", kind: docs }
+      - { title: "sqlc", url: "https://docs.sqlc.dev/", kind: docs }
+      - { title: "goose", url: "https://pressly.github.io/goose/", kind: docs }
+    group: "Слой данных"
+    subs:
+      - { id: docker-pg, title: "Postgres в Docker", links: [go-postgres/docker-postgres] }
+      - { id: pgx, title: "pgx", links: [go-postgres/pgx] }
+      - { id: migr, title: "Миграции", links: [go-postgres/migrations] }
+      - { id: sqlc, title: "sqlc", links: [go-postgres/sqlc] }
+      - { id: repo, title: "Репозиторий", links: [go-postgres/repository] }
+  - id: arch
+    title: "Архитектура сервиса"
+    section: arch
+    links: [architecture]
+    description: "Слои handler → service → repository, конфиг, логи, graceful shutdown. Чтобы код не превращался в один main.go на 2000 строк."
+    resources:
+      - { title: "Standard Go Project Layout (с оговорками)", url: "https://github.com/golang-standards/project-layout", kind: article }
+    subs:
+      - { id: layout, title: "Структура проекта", links: [architecture/layout] }
+      - { id: config, title: "Конфиг и секреты", links: [architecture/config] }
+      - { id: slog, title: "Логирование slog", links: [architecture/logging] }
+      - { id: di, title: "Зависимости и shutdown", links: [architecture/di] }
+  - id: auth
+    title: "Авторизация"
+    section: web
+    links: [auth]
+    description: "Регистрация, хэши паролей, JWT, роли. Есть почти в каждом хакатон-проекте."
+    resources:
+      - { title: "Введение в JWT", url: "https://jwt.io/introduction", kind: article }
+      - { title: "OWASP: хранение паролей", url: "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html", kind: docs }
+    subs:
+      - { id: bcrypt, title: "Пароли и bcrypt", links: [auth/passwords] }
+      - { id: jwt, title: "JWT", links: [auth/jwt] }
+      - { id: roles, title: "Auth-middleware и роли", links: [auth/auth-middleware] }
+  - id: starter
+    title: "Хакатон-стартер"
+    section: project
+    links: [starter]
+    description: "Свой шаблон бэкенда, который форкается за 5 минут на старте хакатона: CRUD, документация API, файлы, WebSocket, Telegram, LLM, админка."
+    resources:
+      - { title: "Telegram Bot API", url: "https://core.telegram.org/bots/api", kind: docs }
+      - { title: "MinIO (S3)", url: "https://min.io/docs/minio/linux/index.html", kind: docs }
+    group: "Фичи стартера"
+    subs:
+      - { id: crud, title: "CRUD от и до", links: [starter/crud] }
+      - { id: openapi, title: "OpenAPI / Swagger", links: [starter/openapi] }
+      - { id: files, title: "Файлы и S3", links: [starter/files] }
+      - { id: ws, title: "WebSocket", links: [starter/websocket] }
+      - { id: tg, title: "Telegram-бот и Mini App", links: [starter/telegram] }
+      - { id: llm, title: "Интеграция с LLM", links: [starter/llm] }
+      - { id: admin, title: "Админка за час", links: [starter/admin] }
+    label: "Шаблон, который форкается на старте хакатона"
+  - id: docker
+    title: "Docker и деплой"
+    section: infra
+    links: [docker-deploy]
+    description: "Dockerfile, compose, CI/CD и VPS с nginx — чтобы на защите всё работало не только на ноутбуке."
+    resources:
+      - { title: "Docker: Get started", url: "https://docs.docker.com/get-started/", kind: docs }
+    subs:
+      - { id: docker-in, title: "Docker изнутри", links: [docker-deploy/docker] }
+      - { id: dockerfile, title: "Dockerfile для Go", links: [docker-deploy/dockerfile] }
+      - { id: compose, title: "docker compose", links: [docker-deploy/compose] }
+      - { id: ci, title: "CI/CD на GitHub Actions", links: [docker-deploy/ci] }
+      - { id: vps, title: "VPS и nginx", links: [docker-deploy/deploy] }
+  - id: testing
+    title: "Тестирование"
+    section: arch
+    links: [testing]
+    description: "Табличные тесты, моки и интеграционные тесты с настоящей базой."
+    resources:
+      - { title: "Testcontainers для Go", url: "https://testcontainers.com/guides/getting-started-with-testcontainers-for-go/", kind: article }
+    subs:
+      - { id: table, title: "Табличные тесты", links: [testing/table-tests] }
+      - { id: mocks, title: "Моки и фейки", links: [testing/mocks] }
+      - { id: integr, title: "Интеграционные тесты", links: [testing/integration] }
+      - { id: httptests, title: "Тесты HTTP", links: [testing/http-tests] }
+  - id: extras
+    title: "Продвинутое: кэш, очереди, мониторинг"
+    section: infra
+    description: "Необязательные темы, которые делают сервис взрослым. Брать по необходимости — например, когда на хакатоне нужен rate limit или фоновая обработка."
+    optional: true
+    resources:
+      - { title: "Redis", url: "https://redis.io/docs/latest/", kind: docs }
+      - { title: "Apache Kafka — введение", url: "https://kafka.apache.org/intro", kind: docs }
+      - { title: "Prometheus", url: "https://prometheus.io/docs/introduction/overview/", kind: docs }
+    group: "По желанию"
+    subs:
+      - { id: redis, title: "Redis и кэш", links: [redis] }
+      - { id: rate, title: "Rate limiting", links: [redis/rate-limit] }
+      - { id: queues, title: "Очереди (Kafka)", links: [queues] }
+      - { id: obs, title: "Метрики и трейсы", links: [observability] }
+    label: "Можно отложить до первого хакатона"
+  - id: capstone
+    title: "Финальный проект"
+    section: project
+    links: [capstone]
+    description: "Продукт поверх стартера, от идеи до деплоя — генеральная репетиция хакатона."

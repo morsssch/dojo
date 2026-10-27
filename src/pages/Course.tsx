@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { findCourse, lessonHref } from '../content';
 import { edgeEnds, nodeBox, type CourseInfo } from '../core/manifest';
-import { linkedLessons } from './Roadmap';
-import { courseAchievements, GLOBAL } from '../state/achievements';
-import { AchBadge, Heatmap } from '../components/Activity';
+import { autoSides, linkedLessons } from './Roadmap';
+import { courseAchievements } from '../state/achievements';
+import { notesList } from '../state/notes';
+import { AchBadge } from '../components/Activity';
 import { courseStatus, lessonStatus, moduleStatus, nextLesson, ProgressState, streak, useProgress } from '../state/progress';
 import { CourseProgress } from '../components/Belt';
 import { Markdown } from '../components/Markdown';
@@ -18,9 +19,9 @@ export function LessonDot({ pct, done }: { pct: number; done: boolean }) {
   );
 }
 
-function RoadmapTeaser({ c, p }: { c: CourseInfo; p: ProgressState }) {
+export function RoadmapMini({ c, p, crop }: { c: CourseInfo; p: ProgressState; crop?: boolean }) {
   const rm = c.roadmap!;
-  const nodes = rm.nodes.filter((n) => n.kind !== 'label' && n.kind !== 'note' && n.kind !== 'title').map((n) => ({ n, ...nodeBox(n) }));
+  const nodes = rm.nodes.filter((n) => n.kind !== 'label' && n.kind !== 'note' && n.kind !== 'title' && n.kind !== 'group').map((n) => ({ n, ...nodeBox(n) }));
   if (!nodes.length) return null;
   const minX = Math.min(...nodes.map((b) => b.x));
   const minY = Math.min(...nodes.map((b) => b.y));
@@ -32,16 +33,28 @@ function RoadmapTeaser({ c, p }: { c: CourseInfo; p: ProgressState }) {
     return ls.length ? ls.filter((l) => lessonStatus(p, c.id, l).done).length / ls.length : 0;
   };
   return (
-    <Link to={`/c/${c.id}/roadmap`} className="panel roadmap-teaser">
-      <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <I.map /> Роадмап курса
-      </h3>
-      <svg className="teaser-map" viewBox={`${minX - 20} ${minY - 20} ${maxX - minX + 40} ${maxY - minY + 40}`} aria-hidden>
+      <svg className="teaser-map" preserveAspectRatio={crop ? 'xMidYMin slice' : undefined} viewBox={`${minX - 20} ${minY - 20} ${maxX - minX + 40} ${maxY - minY + 40}`} aria-hidden>
         {rm.edges.map((e, i) => {
           const [a, b] = edgeEnds(e);
           const A = pos.get(a);
           const B = pos.get(b);
-          return A && B ? <line key={i} x1={A.x + A.w / 2} y1={A.y + A.h / 2} x2={B.x + B.w / 2} y2={B.y + B.h / 2} stroke="var(--line-2)" strokeWidth={6} /> : null;
+          if (!A || !B) return null;
+          const o: { fromSide?: string; toSide?: string; curve?: boolean } = Array.isArray(e) ? {} : e;
+          const [fs, ts] = autoSides(A, B);
+          const pt = (r: typeof A, side: string) =>
+            side === 'top' ? [r.x + r.w / 2, r.y] : side === 'bottom' ? [r.x + r.w / 2, r.y + r.h] : side === 'left' ? [r.x, r.y + r.h / 2] : [r.x + r.w, r.y + r.h / 2];
+          const fside = o.fromSide ?? fs;
+          const tside = o.toSide ?? ts;
+          const [x1, y1] = pt(A, fside);
+          const [x2, y2] = pt(B, tside);
+          const vertical = fside === 'top' || fside === 'bottom';
+          const d =
+            o.curve
+              ? `M${x1},${y1} C${x1},${(y1 + y2) / 2} ${x2},${(y1 + y2) / 2} ${x2},${y2}`
+              : vertical
+                ? `M${x1},${y1} V${(y1 + y2) / 2} H${x2} V${y2}`
+                : `M${x1},${y1} H${(x1 + x2) / 2} V${y2} H${x2}`;
+          return <path key={i} d={d} fill="none" stroke="var(--line-2)" strokeWidth={5} />;
         })}
         {nodes.map(({ n, x, y, w, h }) => {
           const k = p.marks?.[c.id]?.[n.id] === 'done' ? 1 : done(n.links);
@@ -49,6 +62,16 @@ function RoadmapTeaser({ c, p }: { c: CourseInfo; p: ProgressState }) {
           return <rect key={n.id} x={x} y={y} width={w} height={h} rx={10} fill={fill} stroke="var(--line-2)" strokeWidth={4} />;
         })}
       </svg>
+  );
+}
+
+function RoadmapTeaser({ c, p }: { c: CourseInfo; p: ProgressState }) {
+  return (
+    <Link to={`/c/${c.id}/roadmap`} className="panel roadmap-teaser">
+      <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <I.map /> Роадмап курса
+      </h3>
+      <RoadmapMini c={c} p={p} />
     </Link>
   );
 }
@@ -75,8 +98,10 @@ export function CoursePage() {
               </>
             ) : (
               <>
-                <span className="title">Курс пройден целиком</span>
-                <span className="label">Можно перепроходить уроки или заглянуть в песочницу.</span>
+                <span className="title">{st.drafts ? 'Все готовые уроки пройдены' : 'Курс пройден целиком'}</span>
+                <span className="label">
+                  {st.drafts ? `Ещё ${st.drafts} уроков пишутся — они появятся здесь. Пока можно повторить пройденное.` : 'Можно перепроходить уроки или заглянуть в песочницу.'}
+                </span>
               </>
             )}
           </div>
@@ -121,7 +146,7 @@ export function CoursePage() {
                       {m.meta.description && <span className="module-desc" style={{ display: 'block' }}>{m.meta.description}</span>}
                     </span>
                     <span className="module-prog">
-                      {ms.total ? `${ms.done}/${ms.total}` : `${m.lessons.length} ур.`}
+                      {ms.ready ? `${ms.done}/${ms.total}` : `${m.lessons.length} ур.`}
                       <span className={`bar${ms.complete ? ' ok' : ''}`}>
                         <i style={{ width: `${ms.pct * 100}%` }} />
                       </span>
@@ -156,29 +181,19 @@ export function CoursePage() {
         <aside className="side">
         <div className="only-desktop">{continuePanel}</div>
           {c.roadmap && <RoadmapTeaser c={c} p={p} />}
-          <div className="panel">
-            <h3>Регулярность</h3>
-            <div className="stats">
-              <div className="stat">
-                <b>{s.current}</b>
-                <span>дней подряд</span>
-              </div>
-              <div className="stat">
-                <b>{s.best}</b>
-                <span>рекорд серии</span>
-              </div>
-            </div>
-            <Heatmap p={p} />
-          </div>
+          <Link to={`/c/${c.id}/notes`} className="panel side-link">
+            <I.note /> Мои заметки
+            <span className="muted">{notesList(p, c.id).length}</span>
+          </Link>
           <div className="panel">
             <h3 className="row-between">
-              Достижения
+              Достижения курса
               <Link to="/achievements" className="btn ghost small">
                 Все
               </Link>
             </h3>
             <div className="ach-grid">
-              {[...courseAchievements(c), ...GLOBAL].map((a) => (
+              {courseAchievements(c).map((a) => (
                 <span key={a.id} title={`${a.title}: ${a.text}${p.achievements[a.id] ? '' : ` (${a.progress(p).join(' из ')})`}`}>
                   <AchBadge a={a} got={!!p.achievements[a.id]} />
                 </span>

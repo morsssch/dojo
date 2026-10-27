@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { findCourse, findLesson, LessonCtx, lessonHref, loadLesson, neighbours } from '../content';
 import type { Lesson } from '../core/parse';
@@ -6,6 +6,8 @@ import { lessonStatus, progress, useProgress } from '../state/progress';
 import { Segments } from '../components/Segments';
 import { I, KIND_LABEL, KindIcon } from '../components/ui/icons';
 import { LessonDot } from './Course';
+import { NotesPanel, QuoteToNote } from '../components/Notes';
+import { noteOf } from '../state/notes';
 
 export function LessonPage() {
   const { course: cid, module: mid, lesson: lid, step: stepParam } = useParams();
@@ -17,6 +19,8 @@ export function LessonPage() {
   const [err, setErr] = useState('');
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 900);
   const step = Math.max(0, Number(stepParam ?? 1) - 1);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!found) return;
@@ -91,10 +95,15 @@ export function LessonPage() {
             <I.sidebar />
           </button>
         )}
-        <main className="lesson-main">
+        <main className={`lesson-main${notesOpen ? ' with-notes' : ''}`} ref={mainRef}>
           <div className="lesson-head">
-            <div className="kicker">
-              Модуль {modIndex + 1}. {module.meta.title}
+            <div className="kicker row-between">
+              <span>
+                Модуль {modIndex + 1}. {module.meta.title}
+              </span>
+              <button className={`btn ghost small note-toggle${noteOf(p, c.id, key, step) ? ' has' : ''}`} onClick={() => setNotesOpen((o) => !o)} aria-expanded={notesOpen}>
+                <I.note width={15} height={15} /> Заметка
+              </button>
             </div>
             <h1>{info.meta.title}</h1>
             {lesson && (
@@ -217,6 +226,15 @@ export function LessonPage() {
             </div>
           )}
         </main>
+        {notesOpen && cur && <NotesPanel course={c.id} lesson={key} step={step} stepTitle={cur.title} onClose={() => setNotesOpen(false)} />}
+        <QuoteToNote
+          container={mainRef.current}
+          onQuote={(t) => {
+            const prev = noteOf(p, c.id, key, step);
+            progress.setNote(c.id, key, step, `${prev ? prev.trimEnd() + '\n\n' : ''}${t.split('\n').map((l) => '> ' + l).join('\n')}\n\n`);
+            setNotesOpen(true);
+          }}
+        />
       </div>
     </LessonCtx.Provider>
   );

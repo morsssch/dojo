@@ -1,931 +1,1187 @@
-# Роадмап курса. Координаты расставлены вручную по сетке (см. docs/AUTHORING.md, раздел «Роадмап»).
-# Основная линия x=470 (ширина 260), подтемы слева x=90 и справа x=830 (ширина 270), шаг подтем 52px.
+# СГЕНЕРИРОВАНО из roadmap.plan.yaml командой: npm run roadmap:layout -- go-backend
+# Можно править руками, но повторная генерация перезапишет файл.
 sections:
-  - { id: basics, title: "Основа", color: '#6b7280' }
-  - { id: go, title: "Язык Go", color: '#2f9e63' }
-  - { id: team, title: "Команда", color: '#b9549a' }
-  - { id: web, title: "Веб и API", color: '#4f7fd9' }
-  - { id: data, title: "Данные", color: '#2c9aa6' }
-  - { id: arch, title: "Архитектура", color: '#7d62cf' }
-  - { id: infra, title: "Инфраструктура", color: '#c9772f' }
-  - { id: project, title: "Проекты", color: '#191919' }
+  - id: basics
+    title: Основа
+    color: '#6b7280'
+  - id: go
+    title: Язык Go
+    color: '#2f9e63'
+  - id: team
+    title: Команда
+    color: '#b9549a'
+  - id: web
+    title: Веб и API
+    color: '#4f7fd9'
+  - id: data
+    title: Данные
+    color: '#2c9aa6'
+  - id: arch
+    title: Архитектура
+    color: '#7d62cf'
+  - id: infra
+    title: Инфраструктура
+    color: '#c9772f'
+  - id: project
+    title: Проекты
+    color: '#191919'
 nodes:
-  - id: title
-    kind: "title"
-    title: "Go Backend с нуля"
-    x: 460
-    y: 0
+  - id: roadmap-title
+    kind: title
+    title: Go Backend с нуля
+    x: 280
+    'y': 0
     w: 340
   - id: start
-    kind: "topic"
-    title: "Старт и окружение"
-    section: "basics"
-    x: 470
-    y: 141
+    kind: topic
+    title: Старт и окружение
+    section: basics
+    x: 0
+    'y': 80
     w: 260
-    description: "Ставим Go и редактор, учимся жить в терминале. Без этого дальше никак: сервера, Docker и git — всё через консоль."
+    h: 52
+    description: 'Ставим Go и редактор, учимся жить в терминале. Без этого дальше никак: сервера, Docker и git — всё через консоль.'
     links: [start]
-    resources:
-      - { title: "Установка Go", url: "https://go.dev/doc/install", kind: docs }
+    resources: [{title: Установка Go, url: https://go.dev/doc/install, kind: docs}]
+  - id: start-box
+    kind: group
+    title: ''
+    x: 0
+    'y': 154
+    w: 260
+    h: 104
   - id: setup
-    kind: "sub"
-    title: "Go, VS Code, hello world"
-    section: "basics"
-    x: 90
-    y: 145
-    w: 270
+    kind: sub
+    title: Go, VS Code, hello world
+    section: basics
+    x: 12
+    'y': 166
+    w: 236
+    h: 36
     links: [start/setup]
   - id: terminal
-    kind: "sub"
-    title: "Терминал без страха"
-    section: "basics"
-    x: 830
-    y: 145
-    w: 270
+    kind: sub
+    title: Терминал без страха
+    section: basics
+    x: 12
+    'y': 210
+    w: 236
+    h: 36
     links: [start/terminal]
   - id: go-basics
-    kind: "topic"
-    title: "Основы Go"
-    section: "go"
-    x: 470
-    y: 326
+    kind: topic
+    title: Основы Go
+    section: go
+    x: 320
+    'y': 80
     w: 260
-    description: "Переменные, типы, условия, циклы и функции. Здесь же — как Go превращает текст в один бинарник и почему это удобно для деплоя."
+    h: 52
+    description: Переменные, типы, условия, циклы и функции. Здесь же — как Go превращает текст в один бинарник и почему это удобно для деплоя.
     links: [go-basics]
-    resources:
-      - { title: "A Tour of Go — интерактивный тур", url: "https://go.dev/tour/", kind: docs }
-      - { title: "Go by Example", url: "https://gobyexample.com/", kind: article }
+    resources: [{title: A Tour of Go — интерактивный тур, url: https://go.dev/tour/, kind: docs}, {title: Go by Example, url: https://gobyexample.com/, kind: article}]
+  - id: go-basics-box
+    kind: group
+    title: ''
+    x: 320
+    'y': 154
+    w: 260
+    h: 236
   - id: program
-    kind: "sub"
-    title: "Из чего состоит программа"
-    section: "go"
-    x: 90
-    y: 304
-    w: 270
+    kind: sub
+    title: Из чего состоит программа
+    section: go
+    x: 332
+    'y': 166
+    w: 236
+    h: 36
     links: [go-basics/program]
   - id: vars
-    kind: "sub"
-    title: "Переменные и типы"
-    section: "go"
-    x: 90
-    y: 356
-    w: 270
+    kind: sub
+    title: Переменные и типы
+    section: go
+    x: 332
+    'y': 210
+    w: 236
+    h: 36
     links: [go-basics/variables]
   - id: flow
-    kind: "sub"
-    title: "Условия и циклы"
-    section: "go"
-    x: 830
-    y: 278
-    w: 270
+    kind: sub
+    title: Условия и циклы
+    section: go
+    x: 332
+    'y': 254
+    w: 236
+    h: 36
     links: [go-basics/control-flow]
   - id: funcs
-    kind: "sub"
-    title: "Функции и замыкания"
-    section: "go"
-    x: 830
-    y: 330
-    w: 270
+    kind: sub
+    title: Функции и замыкания
+    section: go
+    x: 332
+    'y': 298
+    w: 236
+    h: 36
     links: [go-basics/functions]
   - id: cp-basics
-    kind: "checkpoint"
-    title: "Проверь себя: основы"
-    section: "go"
-    x: 830
-    y: 382
-    w: 270
+    kind: checkpoint
+    title: 'Проверь себя: основы'
+    x: 332
+    'y': 342
+    w: 236
+    h: 36
     links: [go-basics/checkpoint]
   - id: go-data
-    kind: "topic"
-    title: "Слайсы, мапы, структуры"
-    section: "go"
-    x: 470
-    y: 552
+    kind: topic
+    title: Слайсы, мапы, структуры
+    section: go
+    x: 640
+    'y': 80
     w: 260
-    description: "Как устроены коллекции в Go. Слайсы иногда удивляют — разберём, что лежит в памяти, и тогда сюрпризов не будет."
+    h: 52
+    description: Как устроены коллекции в Go. Слайсы иногда удивляют — разберём, что лежит в памяти, и тогда сюрпризов не будет.
     links: [go-data]
-    resources:
-      - { title: "Go Slices: usage and internals", url: "https://go.dev/blog/slices-intro", kind: article }
-      - { title: "Go by Example", url: "https://gobyexample.com/", kind: article }
+    resources: [{title: 'Go Slices: usage and internals', url: https://go.dev/blog/slices-intro, kind: article}, {title: Go by Example, url: https://gobyexample.com/, kind: article}]
+  - id: go-data-box
+    kind: group
+    title: ''
+    x: 640
+    'y': 154
+    w: 260
+    h: 236
   - id: slices
-    kind: "sub"
-    title: "Массивы и слайсы"
-    section: "go"
-    x: 90
-    y: 530
-    w: 270
+    kind: sub
+    title: Массивы и слайсы
+    section: go
+    x: 652
+    'y': 166
+    w: 236
+    h: 36
     links: [go-data/arrays-slices]
   - id: maps
-    kind: "sub"
-    title: "Мапы"
-    section: "go"
-    x: 90
-    y: 582
-    w: 270
+    kind: sub
+    title: Мапы
+    section: go
+    x: 652
+    'y': 210
+    w: 236
+    h: 36
     links: [go-data/maps]
   - id: strings
-    kind: "sub"
-    title: "Строки, байты, руны"
-    section: "go"
-    x: 830
-    y: 504
-    w: 270
+    kind: sub
+    title: Строки, байты, руны
+    section: go
+    x: 652
+    'y': 254
+    w: 236
+    h: 36
     links: [go-data/strings]
   - id: structs
-    kind: "sub"
-    title: "Структуры и JSON"
-    section: "go"
-    x: 830
-    y: 556
-    w: 270
+    kind: sub
+    title: Структуры и JSON
+    section: go
+    x: 652
+    'y': 298
+    w: 236
+    h: 36
     links: [go-data/structs]
   - id: cp-data
-    kind: "checkpoint"
-    title: "Проверь себя: данные"
-    section: "go"
-    x: 830
-    y: 608
-    w: 270
+    kind: checkpoint
+    title: 'Проверь себя: данные'
+    x: 652
+    'y': 342
+    w: 236
+    h: 36
     links: [go-data/checkpoint]
   - id: go-oop
-    kind: "topic"
-    title: "ООП по-гошному"
-    section: "go"
-    x: 470
-    y: 778
+    kind: topic
+    title: ООП по-гошному
+    section: go
+    x: 640
+    'y': 454
     w: 260
-    description: "В Go нет классов и наследования, зато есть методы, интерфейсы и встраивание. Это то, на чём держится архитектура любого сервиса."
+    h: 52
+    description: В Go нет классов и наследования, зато есть методы, интерфейсы и встраивание. Это то, на чём держится архитектура любого сервиса.
     links: [go-oop]
-    resources:
-      - { title: "Effective Go", url: "https://go.dev/doc/effective_go", kind: docs }
-      - { title: "Интерфейсы — Go by Example", url: "https://gobyexample.com/interfaces", kind: article }
+    resources: [{title: Effective Go, url: https://go.dev/doc/effective_go, kind: docs}, {title: Интерфейсы — Go by Example, url: https://gobyexample.com/interfaces, kind: article}]
+  - id: go-oop-box
+    kind: group
+    title: ''
+    x: 640
+    'y': 528
+    w: 260
+    h: 236
   - id: ptr
-    kind: "sub"
-    title: "Методы и указатели"
-    section: "go"
-    x: 90
-    y: 756
-    w: 270
+    kind: sub
+    title: Методы и указатели
+    section: go
+    x: 652
+    'y': 540
+    w: 236
+    h: 36
     links: [go-oop/methods-pointers]
   - id: ifaces
-    kind: "sub"
-    title: "Интерфейсы"
-    section: "go"
-    x: 90
-    y: 808
-    w: 270
+    kind: sub
+    title: Интерфейсы
+    section: go
+    x: 652
+    'y': 584
+    w: 236
+    h: 36
     links: [go-oop/interfaces]
   - id: embed
-    kind: "sub"
-    title: "Композиция"
-    section: "go"
-    x: 830
-    y: 730
-    w: 270
+    kind: sub
+    title: Композиция
+    section: go
+    x: 652
+    'y': 628
+    w: 236
+    h: 36
     links: [go-oop/composition]
   - id: generics
-    kind: "sub"
-    title: "Дженерики"
-    section: "go"
-    x: 830
-    y: 782
-    w: 270
+    kind: sub
+    title: Дженерики
+    section: go
+    x: 652
+    'y': 672
+    w: 236
+    h: 36
     links: [go-oop/generics]
   - id: cp-oop
-    kind: "checkpoint"
-    title: "Проверь себя: ООП"
-    section: "go"
-    x: 830
-    y: 834
-    w: 270
+    kind: checkpoint
+    title: 'Проверь себя: ООП'
+    x: 652
+    'y': 716
+    w: 236
+    h: 36
     links: [go-oop/checkpoint]
   - id: errors
-    kind: "topic"
-    title: "Ошибки, пакеты, go test"
-    section: "go"
-    x: 470
-    y: 978
+    kind: topic
+    title: Ошибки, пакеты, go test
+    section: go
+    x: 320
+    'y': 454
     w: 260
-    description: "Ошибки в Go — обычные значения, а не исключения. Плюс структура проекта из пакетов и первые тесты."
+    h: 52
+    description: Ошибки в Go — обычные значения, а не исключения. Плюс структура проекта из пакетов и первые тесты.
     links: [go-errors-packages]
-    resources:
-      - { title: "Error handling and Go", url: "https://go.dev/blog/error-handling-and-go", kind: article }
-      - { title: "Пакет testing", url: "https://pkg.go.dev/testing", kind: docs }
+    resources: [{title: Error handling and Go, url: https://go.dev/blog/error-handling-and-go, kind: article}, {title: Пакет testing, url: https://pkg.go.dev/testing, kind: docs}]
+  - id: errors-box
+    kind: group
+    title: ''
+    x: 320
+    'y': 528
+    w: 260
+    h: 192
   - id: err
-    kind: "sub"
-    title: "Ошибки как значения"
-    section: "go"
-    x: 90
-    y: 956
-    w: 270
+    kind: sub
+    title: Ошибки как значения
+    section: go
+    x: 332
+    'y': 540
+    w: 236
+    h: 36
     links: [go-errors-packages/errors]
   - id: pkgs
-    kind: "sub"
-    title: "Пакеты и модули"
-    section: "go"
-    x: 90
-    y: 1008
-    w: 270
+    kind: sub
+    title: Пакеты и модули
+    section: go
+    x: 332
+    'y': 584
+    w: 236
+    h: 36
     links: [go-errors-packages/packages]
   - id: panic
-    kind: "sub"
-    title: "panic и recover"
-    section: "go"
-    x: 830
-    y: 956
-    w: 270
+    kind: sub
+    title: panic и recover
+    section: go
+    x: 332
+    'y': 628
+    w: 236
+    h: 36
     links: [go-errors-packages/panic]
   - id: tests
-    kind: "sub"
-    title: "Первые тесты"
-    section: "go"
-    x: 830
-    y: 1008
-    w: 270
+    kind: sub
+    title: Первые тесты
+    section: go
+    x: 332
+    'y': 672
+    w: 236
+    h: 36
     links: [go-errors-packages/testing-intro]
   - id: git
-    kind: "topic"
-    title: "Git и командная работа"
-    section: "team"
-    x: 470
-    y: 1178
+    kind: topic
+    title: Git и командная работа
+    section: team
+    x: 0
+    'y': 454
     w: 260
-    description: "Ветки, конфликты, push/pull и pull request. Чтобы на хакатоне никто не терял чужой код в 4 утра."
+    h: 52
+    description: Ветки, конфликты, push/pull и pull request. Чтобы на хакатоне никто не терял чужой код в 4 утра.
     links: [git]
-    resources:
-      - { title: "Learn Git Branching (рус.)", url: "https://learngitbranching.js.org/?locale=ru_RU", kind: tool }
-      - { title: "Pro Git на русском", url: "https://git-scm.com/book/ru/v2", kind: book }
+    resources: [{title: Learn Git Branching (рус.), url: https://learngitbranching.js.org/?locale=ru_RU, kind: tool}, {title: Pro Git на русском, url: https://git-scm.com/book/ru/v2, kind: book}]
+  - id: git-box
+    kind: group
+    title: ''
+    x: 0
+    'y': 528
+    w: 260
+    h: 236
   - id: commits
-    kind: "sub"
-    title: "Коммиты и история"
-    section: "team"
-    x: 90
-    y: 1156
-    w: 270
+    kind: sub
+    title: Коммиты и история
+    section: team
+    x: 12
+    'y': 540
+    w: 236
+    h: 36
     links: [git/commits]
   - id: branches
-    kind: "sub"
-    title: "Ветки"
-    section: "team"
-    x: 90
-    y: 1208
-    w: 270
+    kind: sub
+    title: Ветки
+    section: team
+    x: 12
+    'y': 584
+    w: 236
+    h: 36
     links: [git/branches]
   - id: conflicts
-    kind: "sub"
-    title: "Конфликты"
-    section: "team"
-    x: 830
-    y: 1130
-    w: 270
+    kind: sub
+    title: Конфликты
+    section: team
+    x: 12
+    'y': 628
+    w: 236
+    h: 36
     links: [git/conflicts]
   - id: remote
-    kind: "sub"
-    title: "Remote, push, pull"
-    section: "team"
-    x: 830
-    y: 1182
-    w: 270
+    kind: sub
+    title: Remote, push, pull
+    section: team
+    x: 12
+    'y': 672
+    w: 236
+    h: 36
     links: [git/remote]
   - id: pr
-    kind: "sub"
-    title: "PR и ревью"
-    section: "team"
-    x: 830
-    y: 1234
-    w: 270
+    kind: sub
+    title: PR и ревью
+    section: team
+    x: 12
+    'y': 716
+    w: 236
+    h: 36
     links: [git/team-flow]
   - id: concurrency
-    kind: "topic"
-    title: "Конкурентность"
-    section: "go"
-    x: 470
-    y: 1404
+    kind: topic
+    title: Конкурентность
+    section: go
+    x: 0
+    'y': 828
     w: 260
-    description: "Горутины, каналы, select, mutex и context — главная суперсила Go. Нужна для WebSocket, фоновых задач и параллельных запросов."
+    h: 52
+    description: Горутины, каналы, select, mutex и context — главная суперсила Go. Нужна для WebSocket, фоновых задач и параллельных запросов.
     links: [concurrency]
-    resources:
-      - { title: "Go Concurrency Patterns: Pipelines", url: "https://go.dev/blog/pipelines", kind: article }
-      - { title: "Go by Example", url: "https://gobyexample.com/", kind: article }
+    resources: [{title: 'Go Concurrency Patterns: Pipelines', url: https://go.dev/blog/pipelines, kind: article}, {title: Go by Example, url: https://gobyexample.com/, kind: article}]
+  - id: concurrency-box
+    kind: group
+    title: Горутины и синхронизация
+    x: 0
+    'y': 902
+    w: 260
+    h: 310
   - id: goroutines
-    kind: "sub"
-    title: "Горутины"
-    section: "go"
-    x: 90
-    y: 1356
-    w: 270
+    kind: sub
+    title: Горутины
+    section: go
+    x: 12
+    'y': 944
+    w: 236
+    h: 36
     links: [concurrency/goroutines]
   - id: channels
-    kind: "sub"
-    title: "Каналы"
-    section: "go"
-    x: 90
-    y: 1408
-    w: 270
+    kind: sub
+    title: Каналы
+    section: go
+    x: 12
+    'y': 988
+    w: 236
+    h: 36
     links: [concurrency/channels]
-  - id: select
-    kind: "sub"
-    title: "select и таймауты"
-    section: "go"
-    x: 90
-    y: 1460
-    w: 270
+  - id: go-select
+    kind: sub
+    title: select и таймауты
+    section: go
+    x: 12
+    'y': 1032
+    w: 236
+    h: 36
     links: [concurrency/select]
   - id: mutex
-    kind: "sub"
-    title: "Mutex и гонки"
-    section: "go"
-    x: 830
-    y: 1356
-    w: 270
+    kind: sub
+    title: Mutex и гонки
+    section: go
+    x: 12
+    'y': 1076
+    w: 236
+    h: 36
     links: [concurrency/sync]
   - id: ctx
-    kind: "sub"
-    title: "context"
-    section: "go"
-    x: 830
-    y: 1408
-    w: 270
+    kind: sub
+    title: context
+    section: go
+    x: 12
+    'y': 1120
+    w: 236
+    h: 36
     links: [concurrency/context]
   - id: patterns
-    kind: "sub"
-    title: "Worker pool, errgroup"
-    section: "go"
-    x: 830
-    y: 1460
-    w: 270
+    kind: sub
+    title: Worker pool, errgroup
+    section: go
+    x: 12
+    'y': 1164
+    w: 236
+    h: 36
     links: [concurrency/patterns]
   - id: web
-    kind: "topic"
-    title: "HTTP и сервер на Go"
-    section: "web"
-    x: 470
-    y: 1630
+    kind: topic
+    title: HTTP и сервер на Go
+    section: web
+    x: 320
+    'y': 828
     w: 260
-    description: "Как работает веб, что такое REST и JSON, и как написать сервер на net/http с middleware. Это и есть бэкенд для фронта."
+    h: 52
+    description: Как работает веб, что такое REST и JSON, и как написать сервер на net/http с middleware. Это и есть бэкенд для фронта.
     links: [web]
-    resources:
-      - { title: "Обзор протокола HTTP — MDN", url: "https://developer.mozilla.org/ru/docs/Web/HTTP/Overview", kind: docs }
-      - { title: "Пакет net/http", url: "https://pkg.go.dev/net/http", kind: docs }
+    resources: [{title: Обзор протокола HTTP — MDN, url: https://developer.mozilla.org/ru/docs/Web/HTTP/Overview, kind: docs}, {title: Пакет net/http, url: https://pkg.go.dev/net/http, kind: docs}]
+  - id: web-box
+    kind: group
+    title: HTTP-сервер
+    x: 320
+    'y': 902
+    w: 260
+    h: 310
   - id: how-web
-    kind: "sub"
-    title: "Как работает веб"
-    section: "web"
-    x: 90
-    y: 1582
-    w: 270
+    kind: sub
+    title: Как работает веб
+    section: web
+    x: 332
+    'y': 944
+    w: 236
+    h: 36
     links: [web/how-web-works]
   - id: http
-    kind: "sub"
-    title: "Протокол HTTP"
-    section: "web"
-    x: 90
-    y: 1634
-    w: 270
+    kind: sub
+    title: Протокол HTTP
+    section: web
+    x: 332
+    'y': 988
+    w: 236
+    h: 36
     links: [web/http]
   - id: rest
-    kind: "sub"
-    title: "REST и JSON"
-    section: "web"
-    x: 90
-    y: 1686
-    w: 270
+    kind: sub
+    title: REST и JSON
+    section: web
+    x: 332
+    'y': 1032
+    w: 236
+    h: 36
     links: [web/rest-json]
   - id: nethttp
-    kind: "sub"
-    title: "Сервер на net/http"
-    section: "web"
-    x: 830
-    y: 1582
-    w: 270
+    kind: sub
+    title: Сервер на net/http
+    section: web
+    x: 332
+    'y': 1076
+    w: 236
+    h: 36
     links: [web/net-http]
   - id: mw
-    kind: "sub"
-    title: "Middleware и CORS"
-    section: "web"
-    x: 830
-    y: 1634
-    w: 270
+    kind: sub
+    title: Middleware и CORS
+    section: web
+    x: 332
+    'y': 1120
+    w: 236
+    h: 36
     links: [web/middleware]
   - id: valid
-    kind: "sub"
-    title: "Валидация и ошибки"
-    section: "web"
-    x: 830
-    y: 1686
-    w: 270
+    kind: sub
+    title: Валидация и ошибки
+    section: web
+    x: 332
+    'y': 1164
+    w: 236
+    h: 36
     links: [web/validation]
   - id: sql
-    kind: "topic"
-    title: "SQL и PostgreSQL"
-    section: "data"
-    x: 470
-    y: 1882
+    kind: topic
+    title: SQL и PostgreSQL
+    section: data
+    x: 640
+    'y': 828
     w: 260
-    description: "Таблицы, связи, JOIN, агрегаты, индексы и транзакции. Хорошая схема БД экономит часы на хакатоне."
+    h: 52
+    description: Таблицы, связи, JOIN, агрегаты, индексы и транзакции. Хорошая схема БД экономит часы на хакатоне.
     links: [sql]
-    resources:
-      - { title: "Учебник PostgreSQL", url: "https://www.postgresql.org/docs/current/tutorial.html", kind: docs }
-      - { title: "SQLBolt — интерактивные уроки", url: "https://sqlbolt.com/", kind: tool }
+    resources: [{title: Учебник PostgreSQL, url: https://www.postgresql.org/docs/current/tutorial.html, kind: docs}, {title: SQLBolt — интерактивные уроки, url: https://sqlbolt.com/, kind: tool}]
+  - id: sql-box
+    kind: group
+    title: SQL на практике
+    x: 640
+    'y': 902
+    w: 260
+    h: 354
   - id: select
-    kind: "sub"
-    title: "SELECT и фильтры"
-    section: "data"
-    x: 90
-    y: 1808
-    w: 270
+    kind: sub
+    title: SELECT и фильтры
+    section: data
+    x: 652
+    'y': 944
+    w: 236
+    h: 36
     links: [sql/select]
   - id: joins
-    kind: "sub"
-    title: "JOIN"
-    section: "data"
-    x: 90
-    y: 1860
-    w: 270
+    kind: sub
+    title: JOIN
+    section: data
+    x: 652
+    'y': 988
+    w: 236
+    h: 36
     links: [sql/joins]
   - id: agg
-    kind: "sub"
-    title: "Агрегаты"
-    section: "data"
-    x: 90
-    y: 1912
-    w: 270
+    kind: sub
+    title: Агрегаты
+    section: data
+    x: 652
+    'y': 1032
+    w: 236
+    h: 36
     links: [sql/aggregates]
   - id: modify
-    kind: "sub"
-    title: "INSERT / UPDATE / DELETE"
-    section: "data"
-    x: 90
-    y: 1964
-    w: 270
+    kind: sub
+    title: INSERT / UPDATE / DELETE
+    section: data
+    x: 652
+    'y': 1076
+    w: 236
+    h: 36
     links: [sql/modify]
   - id: ddl
-    kind: "sub"
-    title: "Схема и ограничения"
-    section: "data"
-    x: 830
-    y: 1834
-    w: 270
+    kind: sub
+    title: Схема и ограничения
+    section: data
+    x: 652
+    'y': 1120
+    w: 236
+    h: 36
     links: [sql/ddl]
   - id: indexes
-    kind: "sub"
-    title: "Индексы и EXPLAIN"
-    section: "data"
-    x: 830
-    y: 1886
-    w: 270
+    kind: sub
+    title: Индексы и EXPLAIN
+    section: data
+    x: 652
+    'y': 1164
+    w: 236
+    h: 36
     links: [sql/indexes]
   - id: tx
-    kind: "sub"
-    title: "Транзакции"
-    section: "data"
-    x: 830
-    y: 1938
-    w: 270
+    kind: sub
+    title: Транзакции
+    section: data
+    x: 652
+    'y': 1208
+    w: 236
+    h: 36
     links: [sql/transactions]
   - id: go-pg
-    kind: "topic"
-    title: "Go + Postgres"
-    section: "data"
-    x: 470
-    y: 2134
+    kind: topic
+    title: Go + Postgres
+    section: data
+    x: 640
+    'y': 1320
     w: 260
-    description: "Подключаем базу к сервису: пул соединений pgx, миграции, типобезопасный SQL через sqlc и слой репозитория."
+    h: 52
+    description: 'Подключаем базу к сервису: пул соединений pgx, миграции, типобезопасный SQL через sqlc и слой репозитория.'
     links: [go-postgres]
-    resources:
-      - { title: "pgx", url: "https://github.com/jackc/pgx", kind: docs }
-      - { title: "sqlc", url: "https://docs.sqlc.dev/", kind: docs }
-      - { title: "goose", url: "https://pressly.github.io/goose/", kind: docs }
+    resources: [{title: pgx, url: https://github.com/jackc/pgx, kind: docs}, {title: sqlc, url: https://docs.sqlc.dev/, kind: docs}, {title: goose, url: https://pressly.github.io/goose/, kind: docs}]
+  - id: go-pg-box
+    kind: group
+    title: Слой данных
+    x: 640
+    'y': 1394
+    w: 260
+    h: 266
   - id: docker-pg
-    kind: "sub"
-    title: "Postgres в Docker"
-    section: "data"
-    x: 90
-    y: 2112
-    w: 270
+    kind: sub
+    title: Postgres в Docker
+    section: data
+    x: 652
+    'y': 1436
+    w: 236
+    h: 36
     links: [go-postgres/docker-postgres]
   - id: pgx
-    kind: "sub"
-    title: "pgx"
-    section: "data"
-    x: 90
-    y: 2164
-    w: 270
+    kind: sub
+    title: pgx
+    section: data
+    x: 652
+    'y': 1480
+    w: 236
+    h: 36
     links: [go-postgres/pgx]
   - id: migr
-    kind: "sub"
-    title: "Миграции"
-    section: "data"
-    x: 830
-    y: 2086
-    w: 270
+    kind: sub
+    title: Миграции
+    section: data
+    x: 652
+    'y': 1524
+    w: 236
+    h: 36
     links: [go-postgres/migrations]
   - id: sqlc
-    kind: "sub"
-    title: "sqlc"
-    section: "data"
-    x: 830
-    y: 2138
-    w: 270
+    kind: sub
+    title: sqlc
+    section: data
+    x: 652
+    'y': 1568
+    w: 236
+    h: 36
     links: [go-postgres/sqlc]
   - id: repo
-    kind: "sub"
-    title: "Репозиторий"
-    section: "data"
-    x: 830
-    y: 2190
-    w: 270
+    kind: sub
+    title: Репозиторий
+    section: data
+    x: 652
+    'y': 1612
+    w: 236
+    h: 36
     links: [go-postgres/repository]
   - id: arch
-    kind: "topic"
-    title: "Архитектура сервиса"
-    section: "arch"
-    x: 470
-    y: 2334
+    kind: topic
+    title: Архитектура сервиса
+    section: arch
+    x: 320
+    'y': 1320
     w: 260
-    description: "Слои handler → service → repository, конфиг, логи, graceful shutdown. Чтобы код не превращался в один main.go на 2000 строк."
+    h: 52
+    description: Слои handler → service → repository, конфиг, логи, graceful shutdown. Чтобы код не превращался в один main.go на 2000 строк.
     links: [architecture]
-    resources:
-      - { title: "Standard Go Project Layout (с оговорками)", url: "https://github.com/golang-standards/project-layout", kind: article }
+    resources: [{title: Standard Go Project Layout (с оговорками), url: https://github.com/golang-standards/project-layout, kind: article}]
+  - id: arch-box
+    kind: group
+    title: ''
+    x: 320
+    'y': 1394
+    w: 260
+    h: 192
   - id: layout
-    kind: "sub"
-    title: "Структура проекта"
-    section: "arch"
-    x: 90
-    y: 2312
-    w: 270
+    kind: sub
+    title: Структура проекта
+    section: arch
+    x: 332
+    'y': 1406
+    w: 236
+    h: 36
     links: [architecture/layout]
   - id: config
-    kind: "sub"
-    title: "Конфиг и секреты"
-    section: "arch"
-    x: 90
-    y: 2364
-    w: 270
+    kind: sub
+    title: Конфиг и секреты
+    section: arch
+    x: 332
+    'y': 1450
+    w: 236
+    h: 36
     links: [architecture/config]
   - id: slog
-    kind: "sub"
-    title: "Логирование slog"
-    section: "arch"
-    x: 830
-    y: 2312
-    w: 270
+    kind: sub
+    title: Логирование slog
+    section: arch
+    x: 332
+    'y': 1494
+    w: 236
+    h: 36
     links: [architecture/logging]
   - id: di
-    kind: "sub"
-    title: "Зависимости и shutdown"
-    section: "arch"
-    x: 830
-    y: 2364
-    w: 270
+    kind: sub
+    title: Зависимости и shutdown
+    section: arch
+    x: 332
+    'y': 1538
+    w: 236
+    h: 36
     links: [architecture/di]
   - id: auth
-    kind: "topic"
-    title: "Авторизация"
-    section: "web"
-    x: 470
-    y: 2508
+    kind: topic
+    title: Авторизация
+    section: web
+    x: 0
+    'y': 1320
     w: 260
-    description: "Регистрация, хэши паролей, JWT, роли. Есть почти в каждом хакатон-проекте."
+    h: 52
+    description: Регистрация, хэши паролей, JWT, роли. Есть почти в каждом хакатон-проекте.
     links: [auth]
-    resources:
-      - { title: "Введение в JWT", url: "https://jwt.io/introduction", kind: article }
-      - { title: "OWASP: хранение паролей", url: "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html", kind: docs }
+    resources: [{title: Введение в JWT, url: https://jwt.io/introduction, kind: article}, {title: 'OWASP: хранение паролей', url: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html, kind: docs}]
+  - id: auth-box
+    kind: group
+    title: ''
+    x: 0
+    'y': 1394
+    w: 260
+    h: 148
   - id: bcrypt
-    kind: "sub"
-    title: "Пароли и bcrypt"
-    section: "web"
-    x: 90
-    y: 2512
-    w: 270
+    kind: sub
+    title: Пароли и bcrypt
+    section: web
+    x: 12
+    'y': 1406
+    w: 236
+    h: 36
     links: [auth/passwords]
   - id: jwt
-    kind: "sub"
-    title: "JWT"
-    section: "web"
-    x: 830
-    y: 2486
-    w: 270
+    kind: sub
+    title: JWT
+    section: web
+    x: 12
+    'y': 1450
+    w: 236
+    h: 36
     links: [auth/jwt]
   - id: roles
-    kind: "sub"
-    title: "Auth-middleware и роли"
-    section: "web"
-    x: 830
-    y: 2538
-    w: 270
+    kind: sub
+    title: Auth-middleware и роли
+    section: web
+    x: 12
+    'y': 1494
+    w: 236
+    h: 36
     links: [auth/auth-middleware]
   - id: starter
-    kind: "topic"
-    title: "Хакатон-стартер"
-    section: "project"
-    x: 470
-    y: 2734
+    kind: topic
+    title: Хакатон-стартер
+    section: project
+    x: 0
+    'y': 1724
     w: 260
-    description: "Свой шаблон бэкенда, который форкается за 5 минут на старте хакатона: CRUD, документация API, файлы, WebSocket, Telegram, LLM, админка."
+    h: 52
+    description: 'Свой шаблон бэкенда, который форкается за 5 минут на старте хакатона: CRUD, документация API, файлы, WebSocket, Telegram, LLM, админка.'
     links: [starter]
-    resources:
-      - { title: "Telegram Bot API", url: "https://core.telegram.org/bots/api", kind: docs }
-      - { title: "MinIO (S3)", url: "https://min.io/docs/minio/linux/index.html", kind: docs }
+    resources: [{title: Telegram Bot API, url: https://core.telegram.org/bots/api, kind: docs}, {title: MinIO (S3), url: https://min.io/docs/minio/linux/index.html, kind: docs}]
+  - id: starter-box
+    kind: group
+    title: Фичи стартера
+    x: 0
+    'y': 1798
+    w: 260
+    h: 354
   - id: crud
-    kind: "sub"
-    title: "CRUD от и до"
-    section: "project"
-    x: 90
-    y: 2660
-    w: 270
+    kind: sub
+    title: CRUD от и до
+    section: project
+    x: 12
+    'y': 1840
+    w: 236
+    h: 36
     links: [starter/crud]
   - id: openapi
-    kind: "sub"
-    title: "OpenAPI / Swagger"
-    section: "project"
-    x: 90
-    y: 2712
-    w: 270
+    kind: sub
+    title: OpenAPI / Swagger
+    section: project
+    x: 12
+    'y': 1884
+    w: 236
+    h: 36
     links: [starter/openapi]
   - id: files
-    kind: "sub"
-    title: "Файлы и S3"
-    section: "project"
-    x: 90
-    y: 2764
-    w: 270
+    kind: sub
+    title: Файлы и S3
+    section: project
+    x: 12
+    'y': 1928
+    w: 236
+    h: 36
     links: [starter/files]
   - id: ws
-    kind: "sub"
-    title: "WebSocket"
-    section: "project"
-    x: 90
-    y: 2816
-    w: 270
+    kind: sub
+    title: WebSocket
+    section: project
+    x: 12
+    'y': 1972
+    w: 236
+    h: 36
     links: [starter/websocket]
   - id: tg
-    kind: "sub"
-    title: "Telegram-бот и Mini App"
-    section: "project"
-    x: 830
-    y: 2686
-    w: 270
+    kind: sub
+    title: Telegram-бот и Mini App
+    section: project
+    x: 12
+    'y': 2016
+    w: 236
+    h: 36
     links: [starter/telegram]
   - id: llm
-    kind: "sub"
-    title: "Интеграция с LLM"
-    section: "project"
-    x: 830
-    y: 2738
-    w: 270
+    kind: sub
+    title: Интеграция с LLM
+    section: project
+    x: 12
+    'y': 2060
+    w: 236
+    h: 36
     links: [starter/llm]
   - id: admin
-    kind: "sub"
-    title: "Админка за час"
-    section: "project"
-    x: 830
-    y: 2790
-    w: 270
+    kind: sub
+    title: Админка за час
+    section: project
+    x: 12
+    'y': 2104
+    w: 236
+    h: 36
     links: [starter/admin]
   - id: docker
-    kind: "topic"
-    title: "Docker и деплой"
-    section: "infra"
-    x: 470
-    y: 2986
+    kind: topic
+    title: Docker и деплой
+    section: infra
+    x: 320
+    'y': 1724
     w: 260
-    description: "Dockerfile, compose, CI/CD и VPS с nginx — чтобы на защите всё работало не только на ноутбуке."
+    h: 52
+    description: Dockerfile, compose, CI/CD и VPS с nginx — чтобы на защите всё работало не только на ноутбуке.
     links: [docker-deploy]
-    resources:
-      - { title: "Docker: Get started", url: "https://docs.docker.com/get-started/", kind: docs }
+    resources: [{title: 'Docker: Get started', url: https://docs.docker.com/get-started/, kind: docs}]
+  - id: docker-box
+    kind: group
+    title: ''
+    x: 320
+    'y': 1798
+    w: 260
+    h: 236
   - id: docker-in
-    kind: "sub"
-    title: "Docker изнутри"
-    section: "infra"
-    x: 90
-    y: 2938
-    w: 270
+    kind: sub
+    title: Docker изнутри
+    section: infra
+    x: 332
+    'y': 1810
+    w: 236
+    h: 36
     links: [docker-deploy/docker]
   - id: dockerfile
-    kind: "sub"
-    title: "Dockerfile для Go"
-    section: "infra"
-    x: 90
-    y: 2990
-    w: 270
+    kind: sub
+    title: Dockerfile для Go
+    section: infra
+    x: 332
+    'y': 1854
+    w: 236
+    h: 36
     links: [docker-deploy/dockerfile]
   - id: compose
-    kind: "sub"
-    title: "docker compose"
-    section: "infra"
-    x: 90
-    y: 3042
-    w: 270
+    kind: sub
+    title: docker compose
+    section: infra
+    x: 332
+    'y': 1898
+    w: 236
+    h: 36
     links: [docker-deploy/compose]
   - id: ci
-    kind: "sub"
-    title: "CI/CD на GitHub Actions"
-    section: "infra"
-    x: 830
-    y: 2964
-    w: 270
+    kind: sub
+    title: CI/CD на GitHub Actions
+    section: infra
+    x: 332
+    'y': 1942
+    w: 236
+    h: 36
     links: [docker-deploy/ci]
   - id: vps
-    kind: "sub"
-    title: "VPS и nginx"
-    section: "infra"
-    x: 830
-    y: 3016
-    w: 270
+    kind: sub
+    title: VPS и nginx
+    section: infra
+    x: 332
+    'y': 1986
+    w: 236
+    h: 36
     links: [docker-deploy/deploy]
   - id: testing
-    kind: "topic"
-    title: "Тестирование"
-    section: "arch"
-    x: 470
-    y: 3186
+    kind: topic
+    title: Тестирование
+    section: arch
+    x: 640
+    'y': 1724
     w: 260
-    description: "Табличные тесты, моки и интеграционные тесты с настоящей базой."
+    h: 52
+    description: Табличные тесты, моки и интеграционные тесты с настоящей базой.
     links: [testing]
-    resources:
-      - { title: "Testcontainers для Go", url: "https://testcontainers.com/guides/getting-started-with-testcontainers-for-go/", kind: article }
+    resources: [{title: Testcontainers для Go, url: https://testcontainers.com/guides/getting-started-with-testcontainers-for-go/, kind: article}]
+  - id: testing-box
+    kind: group
+    title: ''
+    x: 640
+    'y': 1798
+    w: 260
+    h: 192
   - id: table
-    kind: "sub"
-    title: "Табличные тесты"
-    section: "arch"
-    x: 90
-    y: 3164
-    w: 270
+    kind: sub
+    title: Табличные тесты
+    section: arch
+    x: 652
+    'y': 1810
+    w: 236
+    h: 36
     links: [testing/table-tests]
   - id: mocks
-    kind: "sub"
-    title: "Моки и фейки"
-    section: "arch"
-    x: 90
-    y: 3216
-    w: 270
+    kind: sub
+    title: Моки и фейки
+    section: arch
+    x: 652
+    'y': 1854
+    w: 236
+    h: 36
     links: [testing/mocks]
   - id: integr
-    kind: "sub"
-    title: "Интеграционные тесты"
-    section: "arch"
-    x: 830
-    y: 3164
-    w: 270
+    kind: sub
+    title: Интеграционные тесты
+    section: arch
+    x: 652
+    'y': 1898
+    w: 236
+    h: 36
     links: [testing/integration]
   - id: httptests
-    kind: "sub"
-    title: "Тесты HTTP"
-    section: "arch"
-    x: 830
-    y: 3216
-    w: 270
+    kind: sub
+    title: Тесты HTTP
+    section: arch
+    x: 652
+    'y': 1942
+    w: 236
+    h: 36
     links: [testing/http-tests]
   - id: extras
-    kind: "topic"
-    title: "Продвинутое: кэш, очереди, мониторинг"
-    section: "infra"
-    x: 470
-    y: 3360
+    kind: topic
+    title: 'Продвинутое: кэш, очереди, мониторинг'
+    section: infra
+    x: 640
+    'y': 2216
     w: 260
+    h: 52
     optional: true
-    description: "Необязательные темы, которые делают сервис взрослым. Брать по необходимости — например, когда на хакатоне нужен rate limit или фоновая обработка."
-    resources:
-      - { title: "Redis", url: "https://redis.io/docs/latest/", kind: docs }
-      - { title: "Apache Kafka — введение", url: "https://kafka.apache.org/intro", kind: docs }
-      - { title: "Prometheus", url: "https://prometheus.io/docs/introduction/overview/", kind: docs }
+    description: Необязательные темы, которые делают сервис взрослым. Брать по необходимости — например, когда на хакатоне нужен rate limit или фоновая обработка.
+    resources: [{title: Redis, url: https://redis.io/docs/latest/, kind: docs}, {title: Apache Kafka — введение, url: https://kafka.apache.org/intro, kind: docs}, {title: Prometheus, url: https://prometheus.io/docs/introduction/overview/, kind: docs}]
+  - id: extras-box
+    kind: group
+    title: По желанию
+    x: 640
+    'y': 2290
+    w: 260
+    h: 222
   - id: redis
-    kind: "sub"
-    title: "Redis и кэш"
-    section: "infra"
-    x: 90
-    y: 3338
-    w: 270
+    kind: sub
+    title: Redis и кэш
+    section: infra
+    x: 652
+    'y': 2332
+    w: 236
+    h: 36
     optional: true
     links: [redis]
   - id: rate
-    kind: "sub"
-    title: "Rate limiting"
-    section: "infra"
-    x: 90
-    y: 3390
-    w: 270
+    kind: sub
+    title: Rate limiting
+    section: infra
+    x: 652
+    'y': 2376
+    w: 236
+    h: 36
     optional: true
     links: [redis/rate-limit]
   - id: queues
-    kind: "sub"
-    title: "Очереди (Kafka)"
-    section: "infra"
-    x: 830
-    y: 3338
-    w: 270
+    kind: sub
+    title: Очереди (Kafka)
+    section: infra
+    x: 652
+    'y': 2420
+    w: 236
+    h: 36
     optional: true
     links: [queues]
   - id: obs
-    kind: "sub"
-    title: "Метрики и трейсы"
-    section: "infra"
-    x: 830
-    y: 3390
-    w: 270
+    kind: sub
+    title: Метрики и трейсы
+    section: infra
+    x: 652
+    'y': 2464
+    w: 236
+    h: 36
     optional: true
     links: [observability]
   - id: capstone
-    kind: "checkpoint"
-    title: "Финальный проект"
-    section: "project"
-    x: 470
-    y: 3519
+    kind: topic
+    title: Финальный проект
+    section: project
+    x: 320
+    'y': 2216
     w: 260
-    description: "Продукт поверх стартера, от идеи до деплоя — генеральная репетиция хакатона."
+    h: 52
+    description: Продукт поверх стартера, от идеи до деплоя — генеральная репетиция хакатона.
     links: [capstone]
 edges:
-  - { from: start, to: setup, fromSide: left, toSide: right, style: dotted }
-  - { from: start, to: terminal, fromSide: right, toSide: left, style: dotted }
-  - { from: start, to: go-basics, fromSide: bottom, toSide: top, style: solid }
-  - { from: go-basics, to: program, fromSide: left, toSide: right, style: dotted }
-  - { from: go-basics, to: vars, fromSide: left, toSide: right, style: dotted }
-  - { from: go-basics, to: flow, fromSide: right, toSide: left, style: dotted }
-  - { from: go-basics, to: funcs, fromSide: right, toSide: left, style: dotted }
-  - { from: go-basics, to: cp-basics, fromSide: right, toSide: left, style: dotted }
-  - { from: go-basics, to: go-data, fromSide: bottom, toSide: top, style: solid }
-  - { from: go-data, to: slices, fromSide: left, toSide: right, style: dotted }
-  - { from: go-data, to: maps, fromSide: left, toSide: right, style: dotted }
-  - { from: go-data, to: strings, fromSide: right, toSide: left, style: dotted }
-  - { from: go-data, to: structs, fromSide: right, toSide: left, style: dotted }
-  - { from: go-data, to: cp-data, fromSide: right, toSide: left, style: dotted }
-  - { from: go-data, to: go-oop, fromSide: bottom, toSide: top, style: solid }
-  - { from: go-oop, to: ptr, fromSide: left, toSide: right, style: dotted }
-  - { from: go-oop, to: ifaces, fromSide: left, toSide: right, style: dotted }
-  - { from: go-oop, to: embed, fromSide: right, toSide: left, style: dotted }
-  - { from: go-oop, to: generics, fromSide: right, toSide: left, style: dotted }
-  - { from: go-oop, to: cp-oop, fromSide: right, toSide: left, style: dotted }
-  - { from: go-oop, to: errors, fromSide: bottom, toSide: top, style: solid }
-  - { from: errors, to: err, fromSide: left, toSide: right, style: dotted }
-  - { from: errors, to: pkgs, fromSide: left, toSide: right, style: dotted }
-  - { from: errors, to: panic, fromSide: right, toSide: left, style: dotted }
-  - { from: errors, to: tests, fromSide: right, toSide: left, style: dotted }
-  - { from: errors, to: git, fromSide: bottom, toSide: top, style: solid }
-  - { from: git, to: commits, fromSide: left, toSide: right, style: dotted }
-  - { from: git, to: branches, fromSide: left, toSide: right, style: dotted }
-  - { from: git, to: conflicts, fromSide: right, toSide: left, style: dotted }
-  - { from: git, to: remote, fromSide: right, toSide: left, style: dotted }
-  - { from: git, to: pr, fromSide: right, toSide: left, style: dotted }
-  - { from: git, to: concurrency, fromSide: bottom, toSide: top, style: solid }
-  - { from: concurrency, to: goroutines, fromSide: left, toSide: right, style: dotted }
-  - { from: concurrency, to: channels, fromSide: left, toSide: right, style: dotted }
-  - { from: concurrency, to: select, fromSide: left, toSide: right, style: dotted }
-  - { from: concurrency, to: mutex, fromSide: right, toSide: left, style: dotted }
-  - { from: concurrency, to: ctx, fromSide: right, toSide: left, style: dotted }
-  - { from: concurrency, to: patterns, fromSide: right, toSide: left, style: dotted }
-  - { from: concurrency, to: web, fromSide: bottom, toSide: top, style: solid }
-  - { from: web, to: how-web, fromSide: left, toSide: right, style: dotted }
-  - { from: web, to: http, fromSide: left, toSide: right, style: dotted }
-  - { from: web, to: rest, fromSide: left, toSide: right, style: dotted }
-  - { from: web, to: nethttp, fromSide: right, toSide: left, style: dotted }
-  - { from: web, to: mw, fromSide: right, toSide: left, style: dotted }
-  - { from: web, to: valid, fromSide: right, toSide: left, style: dotted }
-  - { from: web, to: sql, fromSide: bottom, toSide: top, style: solid }
-  - { from: sql, to: select, fromSide: left, toSide: right, style: dotted }
-  - { from: sql, to: joins, fromSide: left, toSide: right, style: dotted }
-  - { from: sql, to: agg, fromSide: left, toSide: right, style: dotted }
-  - { from: sql, to: modify, fromSide: left, toSide: right, style: dotted }
-  - { from: sql, to: ddl, fromSide: right, toSide: left, style: dotted }
-  - { from: sql, to: indexes, fromSide: right, toSide: left, style: dotted }
-  - { from: sql, to: tx, fromSide: right, toSide: left, style: dotted }
-  - { from: sql, to: go-pg, fromSide: bottom, toSide: top, style: solid }
-  - { from: go-pg, to: docker-pg, fromSide: left, toSide: right, style: dotted }
-  - { from: go-pg, to: pgx, fromSide: left, toSide: right, style: dotted }
-  - { from: go-pg, to: migr, fromSide: right, toSide: left, style: dotted }
-  - { from: go-pg, to: sqlc, fromSide: right, toSide: left, style: dotted }
-  - { from: go-pg, to: repo, fromSide: right, toSide: left, style: dotted }
-  - { from: go-pg, to: arch, fromSide: bottom, toSide: top, style: solid }
-  - { from: arch, to: layout, fromSide: left, toSide: right, style: dotted }
-  - { from: arch, to: config, fromSide: left, toSide: right, style: dotted }
-  - { from: arch, to: slog, fromSide: right, toSide: left, style: dotted }
-  - { from: arch, to: di, fromSide: right, toSide: left, style: dotted }
-  - { from: arch, to: auth, fromSide: bottom, toSide: top, style: solid }
-  - { from: auth, to: bcrypt, fromSide: left, toSide: right, style: dotted }
-  - { from: auth, to: jwt, fromSide: right, toSide: left, style: dotted }
-  - { from: auth, to: roles, fromSide: right, toSide: left, style: dotted }
-  - { from: auth, to: starter, fromSide: bottom, toSide: top, style: solid }
-  - { from: starter, to: crud, fromSide: left, toSide: right, style: dotted }
-  - { from: starter, to: openapi, fromSide: left, toSide: right, style: dotted }
-  - { from: starter, to: files, fromSide: left, toSide: right, style: dotted }
-  - { from: starter, to: ws, fromSide: left, toSide: right, style: dotted }
-  - { from: starter, to: tg, fromSide: right, toSide: left, style: dotted }
-  - { from: starter, to: llm, fromSide: right, toSide: left, style: dotted }
-  - { from: starter, to: admin, fromSide: right, toSide: left, style: dotted }
-  - { from: starter, to: docker, fromSide: bottom, toSide: top, style: solid }
-  - { from: docker, to: docker-in, fromSide: left, toSide: right, style: dotted }
-  - { from: docker, to: dockerfile, fromSide: left, toSide: right, style: dotted }
-  - { from: docker, to: compose, fromSide: left, toSide: right, style: dotted }
-  - { from: docker, to: ci, fromSide: right, toSide: left, style: dotted }
-  - { from: docker, to: vps, fromSide: right, toSide: left, style: dotted }
-  - { from: docker, to: testing, fromSide: bottom, toSide: top, style: solid }
-  - { from: testing, to: table, fromSide: left, toSide: right, style: dotted }
-  - { from: testing, to: mocks, fromSide: left, toSide: right, style: dotted }
-  - { from: testing, to: integr, fromSide: right, toSide: left, style: dotted }
-  - { from: testing, to: httptests, fromSide: right, toSide: left, style: dotted }
-  - { from: testing, to: extras, fromSide: bottom, toSide: top, style: solid }
-  - { from: extras, to: redis, fromSide: left, toSide: right, style: dotted }
-  - { from: extras, to: rate, fromSide: left, toSide: right, style: dotted }
-  - { from: extras, to: queues, fromSide: right, toSide: left, style: dotted }
-  - { from: extras, to: obs, fromSide: right, toSide: left, style: dotted }
-  - { from: extras, to: capstone, fromSide: bottom, toSide: top, style: solid }
+  - from: start
+    to: start-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: go-basics
+    to: go-basics-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: start
+    to: go-basics
+    fromSide: right
+    toSide: left
+    style: solid
+  - from: go-data
+    to: go-data-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: go-basics
+    to: go-data
+    fromSide: right
+    toSide: left
+    style: solid
+  - from: go-oop
+    to: go-oop-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: go-data
+    to: go-oop
+    fromSide: right
+    toSide: right
+    style: solid
+  - from: errors
+    to: errors-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: go-oop
+    to: errors
+    fromSide: left
+    toSide: right
+    style: solid
+  - from: git
+    to: git-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: errors
+    to: git
+    fromSide: left
+    toSide: right
+    style: solid
+  - from: concurrency
+    to: concurrency-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: git
+    to: concurrency
+    fromSide: left
+    toSide: left
+    style: solid
+  - from: web
+    to: web-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: concurrency
+    to: web
+    fromSide: right
+    toSide: left
+    style: solid
+  - from: sql
+    to: sql-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: web
+    to: sql
+    fromSide: right
+    toSide: left
+    style: solid
+  - from: go-pg
+    to: go-pg-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: sql
+    to: go-pg
+    fromSide: right
+    toSide: right
+    style: solid
+  - from: arch
+    to: arch-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: go-pg
+    to: arch
+    fromSide: left
+    toSide: right
+    style: solid
+  - from: auth
+    to: auth-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: arch
+    to: auth
+    fromSide: left
+    toSide: right
+    style: solid
+  - from: starter
+    to: starter-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: auth
+    to: starter
+    fromSide: left
+    toSide: left
+    style: solid
+  - from: docker
+    to: docker-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: starter
+    to: docker
+    fromSide: right
+    toSide: left
+    style: solid
+  - from: testing
+    to: testing-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: docker
+    to: testing
+    fromSide: right
+    toSide: left
+    style: solid
+  - from: extras
+    to: extras-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: testing
+    to: extras
+    fromSide: right
+    toSide: right
+    style: solid
+  - from: extras
+    to: capstone
+    fromSide: left
+    toSide: right
+    style: solid

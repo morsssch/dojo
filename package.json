@@ -8,7 +8,8 @@
     "build": "npm run check && tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "check": "tsx tools/check.ts",
-    "build:go-runtime": "bash runtimes/go/build.sh"
+    "build:go-runtime": "bash runtimes/go/build.sh",
+    "roadmap:layout": "tsx tools/roadmap-layout.ts"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

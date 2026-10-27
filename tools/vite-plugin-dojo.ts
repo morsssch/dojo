@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Plugin } from 'vite';
 import { buildManifest } from '../src/core/manifest';
+import { buildSearchIndex } from '../src/core/searchIndex';
 
 export function readCourseFiles(root: string): Record<string, string> {
   const out: Record<string, string> = {};
@@ -21,6 +22,8 @@ export function readCourseFiles(root: string): Record<string, string> {
 export default function dojo(): Plugin {
   const ID = 'virtual:dojo-manifest';
   const RID = '\0' + ID;
+  const SID = 'virtual:dojo-search';
+  const RSID = '\0' + SID;
   let root = process.cwd();
   return {
     name: 'dojo-manifest',
@@ -28,9 +31,10 @@ export default function dojo(): Plugin {
       root = c.root;
     },
     resolveId(id) {
-      return id === ID ? RID : undefined;
+      return id === ID ? RID : id === SID ? RSID : undefined;
     },
     load(id) {
+      if (id === RSID) return `export default ${JSON.stringify(buildSearchIndex(readCourseFiles(root)))};`;
       if (id !== RID) return;
       const m = buildManifest(readCourseFiles(root));
       if (m.errors.length) this.warn(`Ошибки в контенте курсов:\n  ${m.errors.join('\n  ')}`);
@@ -40,8 +44,10 @@ export default function dojo(): Plugin {
       server.watcher.add(path.join(root, 'courses'));
       const reload = (f: string) => {
         if (!f.includes(`${path.sep}courses${path.sep}`)) return;
-        const mod = server.moduleGraph.getModuleById(RID);
-        if (mod) server.moduleGraph.invalidateModule(mod);
+        for (const rid of [RID, RSID]) {
+          const mod = server.moduleGraph.getModuleById(rid);
+          if (mod) server.moduleGraph.invalidateModule(mod);
+        }
         server.ws.send({ type: 'full-reload' });
       };
       server.watcher.on('add', reload);

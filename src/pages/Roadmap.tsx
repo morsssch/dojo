@@ -9,6 +9,7 @@ import {
   Edge,
   EdgeProps,
   getSmoothStepPath,
+  getBezierPath,
   Handle,
   MiniMap,
   Node,
@@ -40,6 +41,8 @@ type RmData = {
   h: number;
 };
 
+export { autoSides };
+
 export function linkedLessons(c: CourseInfo, links: string[]): LessonInfo[] {
   const out: LessonInfo[] = [];
   for (const link of links) {
@@ -63,8 +66,7 @@ function nodeProgress(p: ProgressState, c: CourseInfo, n: RoadmapNode) {
 // ---------- узел ----------
 
 function RmNode({ data }: NodeProps<Node<RmData>>) {
-  const { node: n, w, h, mark, done } = data;
-  const status = done ? 'done' : mark === 'skip' ? 'skip' : mark === 'learning' || data.pct > 0 ? 'learning' : '';
+  const { node: n, w, h, done } = data;
   const handles = SIDES.map((s) => (
     <span key={s}>
       <Handle id={`s-${s}`} type="source" position={POS[s]} className="rm-handle" />
@@ -92,35 +94,37 @@ function RmNode({ data }: NodeProps<Node<RmData>>) {
         <Markdown text={n.description ?? n.title} />
       </div>
     );
+  if (n.kind === 'group')
+    return (
+      <div className={`rm-group${done ? ' done' : ''}`} style={{ width: w, height: h }}>
+        {handles}
+        <span className="rm-group-t">{n.title}</span>
+      </div>
+    );
   return (
     <div
-      className={`rm-node k-${n.kind}${status ? ` st-${status}` : ''}${data.selected ? ' selected' : ''}${n.optional ? ' optional' : ''}`}
-      style={{ width: w, minHeight: h, ['--sec' as string]: data.section?.color }}
+      className={`rm-node k-${n.kind}${done ? ' st-done' : ''}${data.selected ? ' selected' : ''}${n.optional ? ' optional' : ''}`}
+      style={{ width: w, height: h }}
       title={n.title}
     >
       {handles}
       <span className="rm-t">{n.title}</span>
-      {status === 'done' && <I.check className="rm-st" width={15} height={15} strokeWidth={3} />}
-      {status === 'learning' && <span className="rm-st dot" aria-label="в процессе" />}
-      {n.kind !== 'checkpoint' && data.pct > 0 && data.pct < 1 && (
-        <span className="rm-bar">
-          <i style={{ width: `${data.pct * 100}%` }} />
-        </span>
-      )}
+      {done && <I.check className="rm-st" width={14} height={14} strokeWidth={3} />}
     </div>
   );
 }
 
 // ---------- связь ----------
 
-type EdgeData = { via?: [number, number][]; style: 'solid' | 'dashed' | 'dotted'; done: boolean };
+type EdgeData = { via?: [number, number][]; style: 'solid' | 'dashed' | 'dotted'; done: boolean; curve?: boolean };
 
 function RouteEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps<Edge<EdgeData>>) {
   let path: string;
   if (data?.via?.length) {
     const pts: [number, number][] = [[sourceX, sourceY], ...data.via, [targetX, targetY]];
     path = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x},${y}`).join(' ');
-  } else [path] = getSmoothStepPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, borderRadius: 12, offset: 24 });
+  } else if (data?.curve) [path] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, curvature: 0.35 });
+  else [path] = getSmoothStepPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, borderRadius: 0, offset: 22 });
   const dash = data?.style === 'dotted' ? '2 6' : data?.style === 'dashed' ? '8 6' : undefined;
   return (
     <BaseEdge
@@ -165,7 +169,8 @@ export function RoadmapPage() {
         id: n.id,
         type: 'rm',
         position: saved[n.id] ?? { x: n.x, y: n.y },
-        draggable: n.kind !== 'label' && n.kind !== 'title' && n.kind !== 'note',
+        draggable: n.kind !== 'label' && n.kind !== 'title' && n.kind !== 'note' && n.kind !== 'group',
+        zIndex: n.kind === 'group' ? -1 : 0,
         selectable: false,
         data: { node: n, section: sec, pct: np.pct, done: np.done, mark: p.marks?.[c.id]?.[n.id], selected: sel === n.id, w: box.w, h: box.h },
       };
@@ -187,7 +192,7 @@ export function RoadmapPage() {
       if (!A || !B) return [];
       const obj: Exclude<RoadmapEdge, [string, string]> | Partial<Exclude<RoadmapEdge, [string, string]>> = Array.isArray(e) ? {} : e;
       const [fs, ts] = autoSides(nodeBox(A), nodeBox(B));
-      const sub = A.kind === 'sub' || B.kind === 'sub' || A.kind === 'checkpoint' || B.kind === 'checkpoint';
+      const sub = A.kind === 'sub' || B.kind === 'sub' || A.kind === 'checkpoint' || B.kind === 'checkpoint' || A.kind === 'group' || B.kind === 'group';
       return [
         {
           id: `e${i}`,
@@ -196,7 +201,7 @@ export function RoadmapPage() {
           sourceHandle: `s-${obj.fromSide ?? fs}`,
           targetHandle: `t-${obj.toSide ?? ts}`,
           type: 'route',
-          data: { via: obj.via, style: obj.style ?? (sub ? 'dotted' : 'solid'), done: nodeProgress(p, c, A).done && nodeProgress(p, c, B).done },
+          data: { via: obj.via, curve: obj.curve, style: obj.style ?? (sub ? 'dotted' : 'solid'), done: nodeProgress(p, c, A).done && nodeProgress(p, c, B).done },
         },
       ];
     });
@@ -220,7 +225,7 @@ export function RoadmapPage() {
         onNodeDragStop={(_, n) => progress.setRoadmapPos(c.id, n.id, n.position)}
         onNodeClick={(_, n) => {
           const k = (n.data as RmData).node.kind;
-          if (k !== 'label' && k !== 'title' && k !== 'note') setSel(n.id);
+          if (k !== 'label' && k !== 'title' && k !== 'note' && (k !== 'group' || (n.data as RmData).node.description || (n.data as RmData).node.links.length)) setSel(n.id);
         }}
         onPaneClick={() => setSel(null)}
         onInit={(inst) => {
@@ -248,7 +253,7 @@ export function RoadmapPage() {
         <MiniMap pannable zoomable bgColor="var(--surface)" maskColor="rgba(128, 128, 128, 0.16)" nodeColor={(n) => ((n.data as RmData).done ? 'var(--ok)' : (n.data as RmData).node.kind === 'checkpoint' ? 'var(--text)' : 'var(--line-2)')} />
       </ReactFlow>
 
-      <details className="panel rm-legend" open={window.innerWidth > 900}>
+      <details className="panel rm-legend">
         <summary>
           <span>Пройдено {Math.round(st.pct * 100)}%</span>
           <span className="muted" style={{ fontWeight: 400, fontSize: 13 }}>

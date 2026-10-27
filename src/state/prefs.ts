@@ -13,6 +13,8 @@ export function applyPrefs(p: Prefs) {
   el.dataset.font = p.font;
   el.dataset.size = p.size;
   el.dataset.accent = p.accent;
+  if (p.eyeCare) el.dataset.eyecare = '';
+  else delete el.dataset.eyecare;
   const url = FONT_URLS[p.font];
   if (url && !document.querySelector(`link[data-font="${p.font}"]`)) {
     const link = document.createElement('link');

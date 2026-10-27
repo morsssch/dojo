@@ -15,7 +15,9 @@
         var st = JSON.parse(localStorage.getItem('dojo:progress:v1') || '{}');
         var pr = st.prefs || { theme: st.theme };
         var d = document.documentElement.dataset;
-        if (pr.theme === 'light' || pr.theme === 'dark' || pr.theme === 'sepia') d.theme = pr.theme;
+        if (pr.theme === 'light' || pr.theme === 'dark') d.theme = pr.theme;
+        if (pr.theme === 'sepia') { d.theme = 'light'; d.eyecare = ''; }
+        if (pr.eyeCare) d.eyecare = '';
         if (pr.font) d.font = pr.font;
         if (pr.size) d.size = pr.size;
         if (pr.accent) d.accent = pr.accent;

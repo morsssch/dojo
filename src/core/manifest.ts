@@ -11,6 +11,7 @@ export const NODE_SIZE: Record<RoadmapNode['kind'], { w: number; h: number }> = 
   label: { w: 240, h: 40 },
   title: { w: 320, h: 56 },
   note: { w: 280, h: 90 },
+  group: { w: 300, h: 160 },
 };
 export const edgeEnds = (e: Roadmap['edges'][number]): [string, string] => (Array.isArray(e) ? e : [e.from, e.to]);
 export const nodeBox = (n: RoadmapNode) => ({ x: n.x, y: n.y, w: n.w ?? NODE_SIZE[n.kind].w, h: n.h ?? NODE_SIZE[n.kind].h });
@@ -87,6 +88,13 @@ export function buildManifest(files: Record<string, string>): Manifest {
   for (const c of courses) {
     if (!c.roadmap) continue;
     const ids = new Set(c.roadmap.nodes.map((n) => n.id));
+    if (ids.size !== c.roadmap.nodes.length) {
+      const seen = new Set<string>();
+      for (const n of c.roadmap.nodes) {
+        if (seen.has(n.id)) errors.push(`courses/${c.id}/roadmap.yaml: повторяется id узла «${n.id}»`);
+        seen.add(n.id);
+      }
+    }
     for (const n of c.roadmap.nodes) {
       for (const link of n.links) {
         const [mid, lid] = link.split('/');
@@ -102,7 +110,7 @@ export function buildManifest(files: Record<string, string>): Manifest {
       if (!ids.has(a) || !ids.has(b)) errors.push(`courses/${c.id}/roadmap.yaml: связь ${a} → ${b} ссылается на несуществующий узел`);
     }
     // узлы не должны налезать друг на друга (нейронки расставляют координаты руками)
-    const boxes = c.roadmap.nodes.filter((n) => n.kind !== 'label').map((n) => ({ n, ...nodeBox(n) }));
+    const boxes = c.roadmap.nodes.filter((n) => n.kind !== 'label' && n.kind !== 'group').map((n) => ({ n, ...nodeBox(n) }));
     for (let i = 0; i < boxes.length; i++)
       for (let j = i + 1; j < boxes.length; j++) {
         const A = boxes[i];

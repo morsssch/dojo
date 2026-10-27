@@ -43,7 +43,7 @@ export function CourseProgress({ course, p, compact }: { course: CourseInfo; p: 
         <div className="cprog-row">
           <span className="cprog-pct">{pct}%</span>
           <span className="muted">
-            {st.done} из {st.total} уроков, {st.solved} из {st.required} заданий
+            {st.done} из {st.total} уроков{st.drafts ? ` (${st.drafts} ещё пишутся)` : ''}, {st.solved} из {st.required} заданий
           </span>
         </div>
         <div className="bar big" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Прогресс курса">

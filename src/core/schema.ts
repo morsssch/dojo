@@ -41,7 +41,8 @@ export const RoadmapNode = z.object({
   title: z.string(),
   // topic — ключевая тема на основной линии; sub — подтема сбоку; checkpoint — проект/контрольная точка;
   // label — просто текст на холсте; title — крупный заголовок раздела; note — плашка-пояснение
-  kind: z.enum(['topic', 'sub', 'checkpoint', 'label', 'title', 'note']).default('topic'),
+  // group — рамка-кластер с заголовком, внутри которой стоят другие узлы
+  kind: z.enum(['topic', 'sub', 'checkpoint', 'label', 'title', 'note', 'group']).default('topic'),
   section: z.string().optional(),
   x: z.number(),
   y: z.number(),
@@ -64,6 +65,8 @@ const RoadmapEdge = z.union([
     fromSide: Side.optional(),
     toSide: Side.optional(),
     style: z.enum(['solid', 'dashed', 'dotted']).optional(),
+    // плавная кривая вместо прямых углов (хорошо для основного пути «змейкой»)
+    curve: z.boolean().optional(),
     // точки излома [x, y] — линия идёт через них под прямыми углами
     via: z.array(z.tuple([z.number(), z.number()])).optional(),
   }),

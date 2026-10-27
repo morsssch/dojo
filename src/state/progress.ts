@@ -16,6 +16,7 @@ export interface ProgressState {
   activity: Record<string, number>; // YYYY-MM-DD -> сколько действий
   roadmap: Record<string, Record<string, { x: number; y: number }>>; // позиции узлов, которые подвинул ученик
   marks?: Record<string, Record<string, RoadmapMark>>; // курс → узел роадмапа → отметка ученика
+  notes?: Record<string, Record<string, { text: string; at: number }>>; // курс → "lesson#step" → заметка
   achievements: Record<string, number>; // id -> когда получено
   /** устарело: перенесено в prefs.theme */
   theme?: 'light' | 'dark' | 'system';
@@ -25,13 +26,22 @@ export interface ProgressState {
 export type RoadmapMark = 'learning' | 'done' | 'skip';
 
 export interface Prefs {
-  theme: 'system' | 'light' | 'dark' | 'sepia';
+  theme: 'system' | 'light' | 'dark';
+  eyeCare: boolean; // тёплый фильтр поверх любой темы
   font: 'plex' | 'golos' | 'serif' | 'system';
   size: 's' | 'm' | 'l' | 'xl';
-  accent: 'mono' | 'blue' | 'green' | 'violet' | 'orange';
+  accent: Accent;
 }
-export const DEFAULT_PREFS: Prefs = { theme: 'system', font: 'plex', size: 'm', accent: 'mono' };
-export const prefsOf = (p: ProgressState): Prefs => ({ ...DEFAULT_PREFS, ...(p.theme ? { theme: p.theme } : {}), ...(p.prefs ?? {}) });
+export const ACCENTS = ['mono', 'blue', 'indigo', 'violet', 'pink', 'red', 'orange', 'amber', 'green', 'teal', 'cyan'] as const;
+export type Accent = (typeof ACCENTS)[number];
+export const DEFAULT_PREFS: Prefs = { theme: 'system', eyeCare: false, font: 'plex', size: 'm', accent: 'mono' };
+export const prefsOf = (p: ProgressState): Prefs => {
+  const r = { ...DEFAULT_PREFS, ...(p.theme ? { theme: p.theme } : {}), ...(p.prefs ?? {}) } as Prefs;
+  // старая тема «sepia» → светлая + защита зрения
+  if ((r.theme as string) === 'sepia') return { ...r, theme: 'light', eyeCare: true };
+  if (!(ACCENTS as readonly string[]).includes(r.accent)) r.accent = 'mono';
+  return r;
+};
 
 const KEY = 'dojo:progress:v1';
 const DRAFT_PREFIX = 'dojo:draft:';
@@ -145,6 +155,13 @@ export const progress = {
   setRoadmapPos(courseId: string, node: string, pos: { x: number; y: number }) {
     commit({ ...state, roadmap: { ...state.roadmap, [courseId]: { ...(state.roadmap[courseId] ?? {}), [node]: pos } } });
   },
+  setNote(courseId: string, lesson: string, step: number, text: string) {
+    const cur = { ...(state.notes?.[courseId] ?? {}) };
+    const k = `${lesson}#${step}`;
+    if (text.trim()) cur[k] = { text, at: Date.now() };
+    else delete cur[k];
+    commit({ ...state, notes: { ...(state.notes ?? {}), [courseId]: cur } });
+  },
   setMark(courseId: string, node: string, mark: RoadmapMark | null) {
     const cur = { ...(state.marks?.[courseId] ?? {}) };
     if (mark) cur[node] = mark;
@@ -247,21 +264,31 @@ export function lessonStatus(p: ProgressState, courseId: string, l: LessonInfo):
   return { visited, steps: l.steps.length, solved, required: l.required.length, known, done, started: visited > 0 || solved > 0, pct: done ? 1 : pct };
 }
 
+// Черновики (ещё не написанные уроки) входят в общий объём как непройденные:
+// иначе один готовый урок из ста давал бы «100%, курс пройден».
 export function moduleStatus(p: ProgressState, courseId: string, m: ModuleInfo) {
-  const ls = m.lessons.filter((l) => !l.meta.draft).map((l) => lessonStatus(p, courseId, l));
-  const done = ls.filter((s) => s.done).length;
-  const pct = ls.length ? ls.reduce((a, s) => a + s.pct, 0) / ls.length : 0;
-  return { done, total: ls.length, pct, complete: ls.length > 0 && done === ls.length, started: ls.some((s) => s.started) };
+  const all = m.lessons;
+  const ready = all.filter((l) => !l.meta.draft).map((l) => lessonStatus(p, courseId, l));
+  const done = ready.filter((s) => s.done).length;
+  const pct = all.length ? ready.reduce((a, s) => a + s.pct, 0) / all.length : 0;
+  return {
+    done,
+    total: all.length,
+    ready: ready.length,
+    pct,
+    complete: all.length > 0 && done === all.length,
+    started: ready.some((s) => s.started),
+  };
 }
 
 export function courseStatus(p: ProgressState, c: CourseInfo) {
-  const lessons = c.modules.flatMap((m) => m.lessons).filter((l) => !l.meta.draft);
-  const st = lessons.map((l) => lessonStatus(p, c.id, l));
+  const all = c.modules.flatMap((m) => m.lessons);
+  const st = all.filter((l) => !l.meta.draft).map((l) => lessonStatus(p, c.id, l));
   const done = st.filter((s) => s.done).length;
-  const pct = st.length ? st.reduce((a, s) => a + s.pct, 0) / st.length : 0;
+  const pct = all.length ? st.reduce((a, s) => a + s.pct, 0) / all.length : 0;
   const solved = st.reduce((a, s) => a + s.solved, 0);
   const required = st.reduce((a, s) => a + s.required, 0);
-  return { done, total: lessons.length, pct, solved, required };
+  return { done, total: all.length, ready: st.length, drafts: all.length - st.length, pct, solved, required };
 }
 
 /** Следующий урок: последний открытый, если не закончен, иначе первый незаконченный. */
