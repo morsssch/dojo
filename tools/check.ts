@@ -153,11 +153,21 @@ function checkQuiz(q: QuizBlock, where: string) {
   if (q.kind === 'order' && opts.length < 2) errors.push(`${where}: для order нужно ≥2 вариантов (в правильном порядке)`);
   if ((q.kind === 'text' || q.kind === 'number') && q.answer === undefined) errors.push(`${where}: нет answer`);
   if (q.kind === 'number' && Number.isNaN(Number(q.answer))) errors.push(`${where}: answer должен быть числом`);
+  if (q.kind === 'match' && (q.pairs?.length ?? 0) < 2) errors.push(`${where}: для match нужно ≥2 пар (pairs: [{left, right}])`);
+  if (q.kind === 'match' && new Set(q.pairs?.map((p) => p.right)).size !== q.pairs?.length) errors.push(`${where}: в match правые части должны быть разными`);
 }
 
 async function checkTask(t: TaskBlock, where: string) {
   if (t.lang !== 'sql' && !t.tests?.length && !t.harness) warnings.push(`${where}: нет tests и harness — задача засчитается за любой код без ошибок`);
   if (t.lang === 'sql' && !t.setup) warnings.push(`${where}: SQL-задача без setup`);
+  for (const r of [...(t.require ?? []), ...(t.forbid ?? [])]) {
+    const pat = Array.isArray(r) ? r[0] : r.pattern;
+    try {
+      new RegExp(pat);
+    } catch (e) {
+      errors.push(`${where}: битая регулярка в require/forbid «${pat}»: ${(e as Error).message}`);
+    }
+  }
   if (FAST) return;
   const r = await checkCode(t, t.solution, executors);
   if (r.error === '__skip__') return;

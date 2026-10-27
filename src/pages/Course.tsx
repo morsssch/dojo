@@ -4,7 +4,7 @@ import { findCourse, lessonHref } from '../content';
 import type { CourseInfo } from '../core/manifest';
 import { ACHIEVEMENTS } from '../state/achievements';
 import { courseStatus, lessonStatus, moduleStatus, nextLesson, ProgressState, streak, useProgress } from '../state/progress';
-import { Belt } from '../components/Belt';
+import { CourseProgress } from '../components/Belt';
 import { Markdown } from '../components/Markdown';
 import { I } from '../components/ui/icons';
 
@@ -79,38 +79,37 @@ export function CoursePage() {
   const next = nextLesson(p, c);
   const s = streak(p);
 
+  const continuePanel = (
+          <div className="panel continue">
+            {next ? (
+              <>
+                <span className="label">{st.done || p.courses[c.id]?.last ? 'Продолжить с места, где остановился' : 'Начать курс'}</span>
+                <span className="title">{next.lesson.meta.title}</span>
+                <Link className="btn primary" to={lessonHref(c.id, next.lesson.key, next.step)}>
+                  <I.play width={15} height={15} /> {st.done || p.courses[c.id]?.last ? 'Продолжить' : 'Начать'}
+                </Link>
+              </>
+            ) : (
+              <>
+                <span className="title">Курс пройден целиком</span>
+                <span className="label">Можно перепроходить уроки или заглянуть в песочницу.</span>
+              </>
+            )}
+          </div>
+  );
+
   const isOpen = (id: string, i: number) => open[id] ?? (next ? c.modules.some((m) => m.id === id && m.lessons.includes(next.lesson)) : i === 0);
 
   return (
     <main className="page">
-      <section className="course-hero">
-        <div>
-          <h1>{c.meta.title}</h1>
-          {c.meta.subtitle && <p className="lead">{c.meta.subtitle}</p>}
-          <div style={{ marginTop: 22 }}>
-            <Belt course={c} p={p} />
-          </div>
-        </div>
-        <div className="panel continue">
-          {next ? (
-            <>
-              <span className="label">{st.done || p.courses[c.id]?.last ? 'Продолжить с места, где остановился' : 'Начать курс'}</span>
-              <span className="title">{next.lesson.meta.title}</span>
-              <Link className="btn primary" to={lessonHref(c.id, next.lesson.key, next.step)}>
-                <I.play width={15} height={15} /> {st.done || p.courses[c.id]?.last ? 'Продолжить' : 'Начать'}
-              </Link>
-            </>
-          ) : (
-            <>
-              <span className="title">Курс пройден целиком 🥋</span>
-              <span className="label">Можно перепроходить уроки или заглянуть в песочницу.</span>
-            </>
-          )}
-        </div>
-      </section>
-
       <div className="dash">
-        <section>
+        <section className="dash-main">
+          <header className="course-head">
+            <h1>{c.meta.title}</h1>
+            {c.meta.subtitle && <p className="lead">{c.meta.subtitle}</p>}
+          </header>
+          <CourseProgress course={c} p={p} />
+          <div className="only-mobile">{continuePanel}</div>
           {c.meta.description && (
             <div style={{ marginBottom: 24 }}>
               <Markdown text={c.meta.description} />
@@ -157,7 +156,7 @@ export function CoursePage() {
                                 {l.meta.title}
                                 {l.meta.checkpoint && <span className="tag accent" style={{ marginLeft: 8 }}>проверь себя</span>}
                               </span>
-                              <span className="meta">{l.meta.draft ? 'скоро' : ls.known ? 'уже знаю' : `${l.steps.length} шаг. ${l.meta.minutes ? `· ~${l.meta.minutes} мин` : ''}`}</span>
+                              <span className="meta">{l.meta.draft ? 'скоро' : ls.known ? 'уже знаю' : l.meta.minutes ? `${l.meta.minutes} мин` : `${l.steps.length} шаг.`}</span>
                             </Link>
                           </li>
                         );
@@ -171,20 +170,11 @@ export function CoursePage() {
         </section>
 
         <aside className="side">
+        <div className="only-desktop">{continuePanel}</div>
           {c.roadmap && <RoadmapTeaser c={c} p={p} />}
           <div className="panel">
-            <h3>Статистика</h3>
+            <h3>Регулярность</h3>
             <div className="stats">
-              <div className="stat">
-                <b>{Math.round(st.pct * 100)}%</b>
-                <span>курса пройдено</span>
-              </div>
-              <div className="stat">
-                <b>
-                  {st.solved}/{st.required}
-                </b>
-                <span>заданий решено</span>
-              </div>
               <div className="stat">
                 <b>{s.current}</b>
                 <span>дней подряд</span>
@@ -201,11 +191,15 @@ export function CoursePage() {
               Достижения {Object.keys(p.achievements).length}/{ACHIEVEMENTS.length}
             </h3>
             <div className="ach-grid">
-              {ACHIEVEMENTS.map((a) => (
-                <span key={a.id} className={`ach${p.achievements[a.id] ? ' got' : ''}`} title={`${a.title}: ${a.text}`}>
-                  {a.icon}
-                </span>
-              ))}
+              {ACHIEVEMENTS.map((a) => {
+                const Ic = I[a.icon];
+                const got = !!p.achievements[a.id];
+                return (
+                  <span key={a.id} className={`ach${got ? ' got' : ''}`} title={`${a.title}: ${a.text}${got ? '' : ' (ещё не получено)'}`} aria-label={`${a.title}${got ? ', получено' : ''}`}>
+                    <Ic width={20} height={20} />
+                  </span>
+                );
+              })}
             </div>
           </div>
         </aside>

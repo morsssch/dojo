@@ -19,6 +19,24 @@ import kotlin from 'highlight.js/lib/languages/kotlin';
 import nginx from 'highlight.js/lib/languages/nginx';
 import protobuf from 'highlight.js/lib/languages/protobuf';
 import { I } from './ui/icons';
+import { Link } from 'react-router-dom';
+import { findCourse, lessonHref, useLessonCtx } from '../content';
+
+/** Ссылка на урок курса: lesson:module/lesson или lesson:module/lesson#3 (номер шага). */
+function LessonLink({ to, children }: { to: string; children: ReactNode }) {
+  const { courseId } = useLessonCtx();
+  const [path, step] = to.split('#');
+  const c = findCourse(courseId);
+  const [m, l] = path.split('/');
+  const mod = c?.modules.find((x) => x.id === m);
+  const lesson = l ? mod?.lessons.find((x) => x.id === l) : mod?.lessons[0];
+  if (!c || !lesson) return <span title={`Нет урока ${to}`}>{children}</span>;
+  return (
+    <Link to={lessonHref(c.id, lesson.key, step ? Number(step) - 1 : undefined)} className="lesson-ref" title={lesson.meta.title}>
+      {children}
+    </Link>
+  );
+}
 
 hljs.registerLanguage('go', go);
 hljs.registerLanguage('sql', sql);
@@ -115,6 +133,7 @@ const components: Components = {
     return <blockquote>{children}</blockquote>;
   },
   a({ href, children }) {
+    if (href?.startsWith('lesson:')) return <LessonLink to={href.slice(7)}>{children}</LessonLink>;
     const external = href && /^https?:/.test(href);
     return (
       <a href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>

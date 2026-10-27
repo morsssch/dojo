@@ -2,14 +2,19 @@ import { useEffect, useState } from 'react';
 import type { TaskBlock } from '../../core/schema';
 import { CheckResult, checkCode, prepare, SqlResult, TIMEOUT_MSG, cellText } from '../../core/runners/check';
 import { useLessonCtx } from '../../content';
-import { browserExecutors, onRuntimeStatus, preloadGo, preloadSql, runtimeStatus } from '../../runtime/executors';
+import { browserExecutors, introspectSetup, onRuntimeStatus, preloadGo, preloadSql, runtimeStatus } from '../../runtime/executors';
+import type { DbSchema } from '../../runtime/sqlSchema';
+import { DbView } from '../DbView';
+import { Workspace } from '../Workspace';
 import { drafts, progress, useProgress } from '../../state/progress';
 import { CodeEditor } from '../CodeEditor';
 import { Markdown } from '../Markdown';
 import { I, KindIcon } from '../ui/icons';
 import { Hints } from './common';
+import { Needs } from './Needs';
+import { explainError } from '../../core/runners/explain';
 
-export const LANG_LABEL: Record<string, string> = { go: 'Go', js: 'JavaScript', python: 'Python', sql: 'SQL · Postgres' };
+export const LANG_LABEL: Record<string, string> = { go: 'Go', js: 'JavaScript', python: 'Python', sql: 'PostgreSQL' };
 const SOLUTION_AFTER = 3;
 
 export function useRuntimeStatus(lang: string) {
@@ -77,6 +82,9 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
   const [res, setRes] = useState<CheckResult | null>(null);
   const [out, setOut] = useState<RunOut | null>(null);
   const [showSol, setShowSol] = useState(false);
+  const [full, setFull] = useState(false);
+  const [dbOpen, setDbOpen] = useState(true);
+  const db = useDbSchema(task.lang === 'sql' ? (task.setup ?? '') : null);
 
   useEffect(() => {
     if (task.lang === 'go') preloadGo();
@@ -120,55 +128,52 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
   };
 
   const canSeeSolution = solved || attempts >= SOLUTION_AFTER;
+  const title = task.title ?? 'Задача';
 
-  return (
-    <div className={`block task${solved ? ' solved' : ''}`}>
-      <div className="block-head">
-        <span className="kind">
-          <KindIcon kind="task" /> {task.title ?? 'Задача'}
-        </span>
-        <span className="right">
-          <span className="tag">{LANG_LABEL[task.lang]}</span>
-          {solved && <span className="tag ok">решено</span>}
-        </span>
-      </div>
-      {task.prompt && (
-        <div className="task-prompt">
-          <Markdown text={task.prompt} />
-        </div>
-      )}
-      {task.lang === 'sql' && task.setup && <SqlSchema setup={task.setup} />}
-      <CodeEditor value={code} lang={task.lang} onChange={change} onRun={check} minLines={6} />
-      <div className="block-foot">
-        <button className="btn primary" onClick={check} disabled={!!busy} title="Ctrl/⌘ + Enter">
-          {busy === 'check' ? <span className="spinner" /> : <I.check />} Проверить
-        </button>
-        <button className="btn" onClick={run} disabled={!!busy}>
-          {busy === 'run' ? <span className="spinner" /> : <I.play />} Запустить
-        </button>
-        <RuntimeNote lang={task.lang} />
-        <span className="grow" />
-        <button
-          className="btn ghost small"
-          onClick={() => {
-            change(task.starter);
-            setRes(null);
-            setOut(null);
-          }}
-          title="Вернуть стартовый код"
-        >
-          <I.reset /> Сброс
-        </button>
-        <button
-          className="btn ghost small"
-          disabled={!canSeeSolution}
-          onClick={() => setShowSol((s) => !s)}
-          title={canSeeSolution ? '' : `Решение откроется после ${SOLUTION_AFTER} попыток`}
-        >
-          <I.eye /> {showSol ? 'Скрыть решение' : canSeeSolution ? 'Решение' : `Решение (${Math.min(attempts, SOLUTION_AFTER)}/${SOLUTION_AFTER})`}
-        </button>
-      </div>
-      {out && <RunOutput out={out} />}
+  // ---- части, общие для обычного и полноэкранного режима ----
+  const runButtons = (
+    <>
+      <button className="btn primary" onClick={check} disabled={!!busy} title="Ctrl/⌘ + Enter">
+        {busy === 'check' ? <span className="spinner" /> : <I.check />} Проверить
+      </button>
+      <button className="btn" onClick={run} disabled={!!busy}>
+        {busy === 'run' ? <span className="spinner" /> : <I.play />} Запустить
+      </button>
+      <RuntimeNote lang={task.lang} />
+    </>
+  );
+  const toolButtons = (
+    <>
+      <button
+        className="btn ghost small"
+        onClick={() => {
+          change(task.starter);
+          setRes(null);
+          setOut(null);
+        }}
+        title="Вернуть стартовый код"
+      >
+        <I.reset /> <span className="hide-sm">Сброс</span>
+      </button>
+      <button
+        className="btn ghost small"
+        disabled={!canSeeSolution}
+        onClick={() => setShowSol((s) => !s)}
+        title={canSeeSolution ? '' : `Решение откроется после ${SOLUTION_AFTER} попыток`}
+      >
+        <I.eye /> {showSol ? 'Скрыть решение' : canSeeSolution ? 'Решение' : `Решение ${Math.min(attempts, SOLUTION_AFTER)}/${SOLUTION_AFTER}`}
+      </button>
+    </>
+  );
+  const tags = (
+    <>
+      <span className="tag">{LANG_LABEL[task.lang]}</span>
+      {solved && <span className="tag ok">решено</span>}
+    </>
+  );
+  const results = (
+    <>
+      {out && <RunOutput out={out} lang={task.lang} />}
       {res && <CheckOutput res={res} lang={task.lang} />}
       {showSol && canSeeSolution && (
         <div className="output">
@@ -176,53 +181,143 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
           <CodeEditor value={task.solution} lang={task.lang} readOnly minLines={2} />
         </div>
       )}
-      {(!solved && <div style={{ padding: '0 18px' }}>
-        <Hints hints={task.hints} attempts={attempts} />
-      </div>) || null}
+    </>
+  );
+  const after = (
+    <>
+      {!solved && task.hints?.length ? <Hints hints={task.hints} attempts={attempts} /> : null}
       {solved && task.explain && (
-        <div style={{ padding: '0 18px 18px' }}>
-          <div className="explain">
-            <Markdown text={task.explain} />
-          </div>
+        <div className="explain">
+          <Markdown text={task.explain} />
         </div>
       )}
-      {!solved && task.hints?.length ? <div style={{ height: 14 }} /> : null}
+    </>
+  );
+  const dbView = task.lang === 'sql' && <DbView schema={db.schema} error={db.error} loading />;
+
+  if (full)
+    return (
+      <>
+        <div className={`block task${solved ? ' solved' : ''}`}>
+          <div className="block-head">
+            <span className="kind">
+              <KindIcon kind="task" /> {title}
+            </span>
+            <span className="right">{tags}</span>
+          </div>
+          <div className="ws-empty">Задача открыта в полноэкранном режиме.</div>
+        </div>
+        <Workspace
+          title={
+            <>
+              <KindIcon kind="task" /> {title}
+            </>
+          }
+          tags={tags}
+          actions={
+            <>
+              {toolButtons}
+              {runButtons}
+            </>
+          }
+          onClose={() => setFull(false)}
+          left={
+            <>
+              {task.prompt ? <Markdown text={task.prompt} /> : <div className="muted">Без описания.</div>}
+              {task.needs?.length ? <div className="ws-needs"><Needs links={task.needs} /></div> : null}
+              {task.lang === 'sql' && (
+                <div className="ws-db">
+                  <div className="ws-section-title">База данных</div>
+                  {dbView}
+                </div>
+              )}
+              {after}
+            </>
+          }
+          main={<CodeEditor value={code} lang={task.lang} onChange={change} onRun={check} minLines={12} />}
+          bottom={out || res || showSol ? <div>{results}</div> : <div className="ws-empty">Здесь появится вывод программы и результаты проверки. Ctrl/⌘ + Enter — проверить.</div>}
+        />
+      </>
+    );
+
+  return (
+    <div className={`block task${solved ? ' solved' : ''}`}>
+      <div className="block-head">
+        <span className="kind">
+          <KindIcon kind="task" /> {title}
+        </span>
+        <span className="right">
+          {tags}
+          <button className="btn ghost small" onClick={() => setFull(true)} title="Открыть на весь экран: условие слева, код справа">
+            <I.expand /> <span className="hide-sm">На весь экран</span>
+          </button>
+        </span>
+      </div>
+      <Needs links={task.needs} />
+      {task.prompt && (
+        <div className="task-prompt">
+          <Markdown text={task.prompt} />
+        </div>
+      )}
+      {task.lang === 'sql' && (
+        <details className="db-wrap" open={dbOpen} onToggle={(e) => setDbOpen((e.target as HTMLDetailsElement).open)}>
+          <summary>
+            <I.db /> База данных{db.schema ? `: ${db.schema.map((t) => t.name).join(', ')}` : ''}
+          </summary>
+          {dbView}
+        </details>
+      )}
+      <CodeEditor value={code} lang={task.lang} onChange={change} onRun={check} minLines={6} />
+      <div className="block-foot">
+        {runButtons}
+        <span className="grow" />
+        {toolButtons}
+      </div>
+      {results}
+      {(task.hints?.length && !solved) || (solved && task.explain) ? <div className="task-after">{after}</div> : null}
     </div>
   );
 }
 
-function SqlSchema({ setup }: { setup: string }) {
-  const tables = [...setup.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?("?[\w.]+"?)\s*\(([\s\S]*?)\);/gi)].map((m) => ({
-    name: m[1].replace(/"/g, ''),
-    cols: m[2]
-      .split(/,(?![^(]*\))/)
-      .map((c) => c.trim().split(/\s+/).slice(0, 2).join(' '))
-      .filter((c) => c && !/^(primary|foreign|unique|constraint|check)\b/i.test(c)),
-  }));
-  if (!tables.length) return null;
+/** Схема БД после setup — загружается один раз на блок. */
+function useDbSchema(setup: string | null) {
+  const [schema, setSchema] = useState<DbSchema | null>(null);
+  const [error, setError] = useState<string | undefined>();
+  useEffect(() => {
+    if (setup === null) return;
+    let alive = true;
+    introspectSetup(setup).then(
+      (s) => alive && setSchema(s),
+      (e) => alive && setError(`Не удалось прочитать схему: ${(e as Error).message}`),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [setup]);
+  return { schema, error };
+}
+
+export function ErrorExplain({ lang, msg }: { lang: string; msg?: string }) {
+  const t = explainError(lang, msg);
+  if (!t) return null;
   return (
-    <details className="output" style={{ borderTop: '1px solid var(--line)' }}>
-      <summary style={{ cursor: 'pointer', fontFamily: 'var(--font-ui)', fontWeight: 600, fontSize: 14 }}>
-        <I.db style={{ verticalAlign: '-3px' }} /> Схема базы: {tables.map((t) => t.name).join(', ')}
-      </summary>
-      {tables.map((t) => (
-        <div key={t.name} style={{ marginTop: 8 }}>
-          <b>{t.name}</b>({t.cols.join(', ')})
-        </div>
-      ))}
-    </details>
+    <div className="err-explain">
+      <I.bulb width={15} height={15} />
+      <Markdown text={t} />
+    </div>
   );
 }
 
-export function RunOutput({ out }: { out: RunOut }) {
+export function RunOutput({ out, lang = '' }: { out: RunOut; lang?: string }) {
   const empty = !out.stdout && !out.stderr && !out.error && !out.table;
   return (
     <div className="output" aria-live="polite">
-      <span className="label">Вывод · {Math.round(out.ms)} мс</span>
+      <span className="label">Вывод <span className="ms">{Math.round(out.ms)} мс</span></span>
       {out.table && <SqlTable t={out.table} />}
       {out.stdout}
       {out.stderr && <span className="err">{out.stderr}</span>}
       {out.error && <span className="err">{out.error}</span>}
+      {out.error && <ErrorExplain lang={lang} msg={out.error} />}
       {empty && <span className="muted">(программа ничего не вывела)</span>}
     </div>
   );
@@ -243,7 +338,8 @@ function CheckOutput({ res, lang }: { res: CheckResult; lang: string }) {
             <div>
               {c.name}
               {c.hidden && <span className="muted"> (скрытый тест)</span>}
-              {!c.ok && c.message && <pre>{c.message}</pre>}
+              {c.message === 'требование к коду' && <span className="tag" style={{ marginLeft: 8 }}>требование к коду</span>}
+              {!c.ok && c.message && c.message !== 'требование к коду' && <pre>{c.message}</pre>}
               {!c.ok && !c.hidden && c.expected !== undefined && (
                 <div className="cmp">
                   {c.stdin ? (
@@ -270,6 +366,7 @@ function CheckOutput({ res, lang }: { res: CheckResult; lang: string }) {
         <div className="output">
           <span className="label">{lang === 'sql' ? 'Ошибка Postgres' : 'Ошибка'}</span>
           <span className="err">{res.error}</span>
+          <ErrorExplain lang={lang} msg={res.error} />
         </div>
       )}
       {lang === 'sql' && res.table && !res.ok && (

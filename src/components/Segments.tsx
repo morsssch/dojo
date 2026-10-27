@@ -9,6 +9,8 @@ import { Playground } from './blocks/Playground';
 import { Project } from './blocks/Project';
 import { Quiz } from './blocks/Quiz';
 import { Task } from './blocks/Task';
+import { Cards } from './blocks/Cards';
+import { Written } from './blocks/Written';
 
 export function Segments({ segments }: { segments: Segment[] }) {
   return (
@@ -29,6 +31,10 @@ export function Segments({ segments }: { segments: Segment[] }) {
             return <Anim key={s.id} data={s.data} />;
           case 'project':
             return <Project key={s.id} id={s.id} data={s.data} />;
+          case 'cards':
+            return <Cards key={s.id} id={s.id} data={s.data} />;
+          case 'written':
+            return <Written key={s.id} id={s.id} data={s.data} />;
         }
       })}
     </>

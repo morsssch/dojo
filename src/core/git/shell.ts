@@ -82,8 +82,9 @@ export class Shell {
   cwd = '/home/student';
   home = '/home/student';
   author = { name: 'Ученик', email: 'student@dojo.dev' };
-  /** вызывается после каждой команды — UI перерисовывает граф/файлы */
   history: string[] = [];
+  /** журнал терминала: переживает перемонтирование UI (например, переход в полноэкранный режим) */
+  transcript: { cwd?: string; cmd?: string; out?: string }[] = [];
 
   async boot() {
     await this.fs.mkdir(this.home, { recursive: true });

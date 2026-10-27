@@ -1,7 +1,8 @@
 // Граф коммитов (вертикальный, как git log --graph): новые сверху, ветки — дорожки.
 import type { GitGraph as G } from '../core/git/shell';
 
-const LANE_COLORS = ['#f3b33d', '#5b9df5', '#4fb477', '#d46bb3', '#9b6ce0', '#e0794a', '#3fb7c4'];
+// main — цветом текста, остальные ветки — приглушённые различимые цвета
+const LANE_COLORS = ['var(--text)', '#4f7fd9', '#2f9e63', '#b9549a', '#7d62cf', '#c9772f', '#2c9aa6'];
 const ROW = 34;
 const LANE = 22;
 
@@ -33,9 +34,17 @@ export function GitGraph({ g }: { g: G }) {
   const labels = new Map<string, G['refs']>();
   for (const r of g.refs) labels.set(r.oid, [...(labels.get(r.oid) ?? []), r]);
   const height = 18 + order.length * ROW;
+  // ширина по самой длинной строке: подписи веток + сообщение (≈6.6 px на символ моноширинного шрифта)
+  const width = Math.max(
+    260,
+    ...order.map((c) => {
+      const pills = (labels.get(c.oid) ?? []).reduce((a, r) => a + r.name.length * 6.6 + 30, 0);
+      return textX + 58 + pills + Math.min(c.message.length, 34) * 6.8 + 16;
+    }),
+  );
 
   return (
-    <svg className="git-graph" width="100%" height={height} viewBox={`0 0 420 ${height}`} preserveAspectRatio="xMinYMin meet" role="img" aria-label="Граф коммитов">
+    <svg className="git-graph" width={width} height={height} role="img" aria-label="Граф коммитов">
       {order.map((c) =>
         c.parents.map((p) => {
           if (!y.has(p)) return null;

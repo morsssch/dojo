@@ -23,11 +23,11 @@ nodes:
     y: 0
     links: [content/anim]
   - id: quiz
-    title: Квизы
+    title: Квизы и карточки
     section: content
     x: 140
     y: 130
-    links: [content/quizzes]
+    links: [content/quizzes, content/review]
   - id: go
     title: Задачи на Go
     section: practice

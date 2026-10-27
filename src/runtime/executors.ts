@@ -1,5 +1,6 @@
 // Исполнители кода в браузере. Всё тяжёлое грузится лениво — при первом запуске.
 import type { ExecResult, Executors, SqlExecResult, SqlResult } from '../core/runners/check';
+import { DbSchema, introspect } from './sqlSchema';
 
 const BASE = import.meta.env.BASE_URL;
 const TIMEOUT = { go: 8000, js: 5000, python: 10000 };
@@ -249,6 +250,23 @@ async function runSql(setup: string, scripts: string[]): Promise<SqlExecResult> 
   return p;
 }
 
+/** Схема и данные БД после setup (в транзакции, которая откатывается). */
+export async function introspectSetup(setup: string): Promise<DbSchema> {
+  const job = async (): Promise<DbSchema> => {
+    const db = await getPg();
+    try {
+      await db.exec('BEGIN;');
+      if (setup.trim()) await db.exec(setup);
+      return await introspect(async (sql) => ({ rows: (await db.query(sql, [], { rowMode: 'array' })).rows as unknown[][] }));
+    } finally {
+      await db.exec('ROLLBACK;').catch(() => undefined);
+    }
+  };
+  const p = sqlQueue.then(job, job);
+  sqlQueue = p.catch(() => undefined);
+  return p;
+}
+
 export function pgError(e: unknown): string {
   const err = e as { message?: string; hint?: string; position?: string };
   return [err.message ?? String(e), err.hint ? `Подсказка Postgres: ${err.hint}` : ''].filter(Boolean).join('\n');
@@ -269,6 +287,7 @@ export async function createSqlSession() {
         return { results: [], error: pgError(e), ms: performance.now() - t0 };
       }
     },
+    introspect: () => introspect(async (sql) => ({ rows: (await db.query(sql, [], { rowMode: 'array' })).rows as unknown[][] })),
     close: () => db.close(),
   };
 }

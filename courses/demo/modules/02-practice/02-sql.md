@@ -27,6 +27,39 @@ hints:
   - Сортировка — `ORDER BY`, ограничение количества — `LIMIT`.
 ```
 
+# Связанные таблицы
+
+У SQL-задач над условием есть блок **«База данных»**: ER-диаграмма (таблицы, ключи, связи) и вкладки с данными каждой таблицы. Наведи на таблицу — подсветятся её связи.
+
+```task
+id: join
+lang: sql
+title: Кто в какой команде
+prompt: |
+  Выведи имя участника и название его команды. Участников без команды не выводи.
+setup: |
+  CREATE TABLE teams (id serial PRIMARY KEY, name text NOT NULL UNIQUE);
+  CREATE TABLE users (id serial PRIMARY KEY, name text NOT NULL, email text);
+  CREATE TABLE memberships (
+    user_id int NOT NULL REFERENCES users(id),
+    team_id int NOT NULL REFERENCES teams(id),
+    role text NOT NULL,
+    PRIMARY KEY (user_id, team_id)
+  );
+  INSERT INTO teams (name) VALUES ('gophers'), ('rivals');
+  INSERT INTO users (name, email) VALUES ('Аня', 'a@x.dev'), ('Боря', NULL), ('Вика', 'v@x.dev'), ('Гоша', NULL);
+  INSERT INTO memberships VALUES (1, 1, 'design'), (2, 1, 'backend'), (3, 2, 'frontend');
+starter: |
+  SELECT
+solution: |
+  SELECT u.name, t.name
+  FROM memberships m
+  JOIN users u ON u.id = m.user_id
+  JOIN teams t ON t.id = m.team_id;
+hints:
+  - Нужно соединить три таблицы — `memberships` связывает `users` и `teams`.
+```
+
 # Агрегаты
 
 ```task

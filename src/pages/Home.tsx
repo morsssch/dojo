@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { manifest } from '../content';
 import { courseStatus, useProgress } from '../state/progress';
-import { Belt } from '../components/Belt';
+import { CourseProgress } from '../components/Belt';
 
 export function Home() {
   const p = useProgress();
@@ -25,7 +25,6 @@ export function Home() {
             <Link key={c.id} to={`/c/${c.id}`} className="panel course-row">
               <div>
                 <h2>
-                  {c.meta.icon ? `${c.meta.icon} ` : ''}
                   {c.meta.title}
                 </h2>
                 {c.meta.subtitle && <p>{c.meta.subtitle}</p>}
@@ -33,7 +32,7 @@ export function Home() {
                   {c.modules.length} модулей, {st.total} уроков{st.done ? `, пройдено ${st.done}` : ''}
                 </p>
               </div>
-              <Belt course={c} p={p} compact />
+              <CourseProgress course={c} p={p} compact />
             </Link>
           );
         })}

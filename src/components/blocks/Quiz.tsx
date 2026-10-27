@@ -5,6 +5,7 @@ import { progress, useProgress } from '../../state/progress';
 import { highlight, Markdown } from '../Markdown';
 import { I, KindIcon } from '../ui/icons';
 import { Hints } from './common';
+import { OrderList } from './OrderList';
 
 type Opt = { text: string; correct: boolean; why?: string };
 
@@ -24,6 +25,9 @@ function shuffle<T>(xs: T[], seed: string): T[] {
   if (a.every((x, i) => x === xs[i]) && a.length > 1) [a[0], a[1]] = [a[1], a[0]];
   return a;
 }
+
+/** markdown → простой текст для <option> */
+const plain = (s: string) => s.replace(/`([^`]*)`/g, '$1').replace(/\*\*?([^*]+)\*\*?/g, '$1');
 
 function checkText(q: QuizBlock, input: string): boolean {
   const val = input.trim();
@@ -46,8 +50,9 @@ export function Quiz({ data: q, id }: { data: QuizBlock; id: string }) {
   const [text, setText] = useState('');
   const [order, setOrder] = useState<number[]>(() => (solved ? opts.map((_, i) => i) : shuffle(opts.map((_, i) => i), id)));
   const [result, setResult] = useState<null | boolean>(solved ? true : null);
-  const [drag, setDrag] = useState<number | null>(null);
-  const [over, setOver] = useState<number | null>(null);
+  const pairs = q.pairs ?? [];
+  const rightOrder = useMemo(() => shuffle(pairs.map((_, i) => i), id + ':r'), [pairs, id]);
+  const [match, setMatch] = useState<(number | null)[]>(() => pairs.map((_, i) => (solved ? i : null)));
   const attempts = p.courses[courseId]?.attempts[`${lessonKey}#${id}`] ?? 0;
   const locked = result === true;
 
@@ -58,6 +63,7 @@ export function Quiz({ data: q, id }: { data: QuizBlock; id: string }) {
       const n = Number(text.replace(',', '.'));
       ok = !Number.isNaN(n) && Math.abs(n - Number(q.answer)) <= (q.tolerance ?? 1e-9);
     } else if (q.kind === 'order') ok = order.every((v, i) => v === i);
+    else if (q.kind === 'match') ok = match.every((v, i) => v === i);
     else {
       const want = opts.map((o, i) => (o.correct ? i : -1)).filter((i) => i >= 0);
       ok = want.length === sel.length && want.every((i) => sel.includes(i));
@@ -84,13 +90,14 @@ export function Quiz({ data: q, id }: { data: QuizBlock; id: string }) {
     });
   };
 
-  const canSubmit = q.kind === 'text' || q.kind === 'number' ? text.trim() !== '' : q.kind === 'order' ? true : sel.length > 0;
+  const canSubmit =
+    q.kind === 'text' || q.kind === 'number' ? text.trim() !== '' : q.kind === 'order' ? true : q.kind === 'match' ? match.every((v) => v !== null) : sel.length > 0;
 
   return (
     <div className={`block quiz${solved ? ' solved' : ''}`}>
       <div className="block-head">
         <span className="kind">
-          <KindIcon kind="quiz" /> {q.kind === 'multiple' || multi ? 'Несколько ответов' : q.kind === 'order' ? 'Расставь по порядку' : q.kind === 'text' || q.kind === 'number' ? 'Впиши ответ' : 'Один ответ'}
+          <KindIcon kind="quiz" /> {q.kind === 'multiple' || multi ? 'Несколько ответов' : q.kind === 'order' ? 'Расставь по порядку' : q.kind === 'match' ? 'Сопоставь' : q.kind === 'text' || q.kind === 'number' ? 'Впиши ответ' : 'Один ответ'}
         </span>
         <span className="right">{solved && <span className="tag ok">решено</span>}</span>
       </div>
@@ -143,45 +150,45 @@ export function Quiz({ data: q, id }: { data: QuizBlock; id: string }) {
           />
         )}
 
-        {q.kind === 'order' && (
-          <div className="order-list">
-            {order.map((oi, pos) => (
-              <div
-                key={oi}
-                className={`order-item${drag === pos ? ' dragging' : ''}${over === pos ? ' over' : ''}`}
-                draggable={!locked}
-                onDragStart={() => setDrag(pos)}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setOver(pos);
-                }}
-                onDragLeave={() => setOver(null)}
-                onDrop={() => {
-                  if (drag !== null) move(drag, pos);
-                  setDrag(null);
-                  setOver(null);
-                }}
-                onDragEnd={() => {
-                  setDrag(null);
-                  setOver(null);
-                }}
-              >
-                <span className="n">{pos + 1}</span>
-                <Markdown text={opts[oi].text} />
-                {!locked && (
-                  <span className="moves">
-                    <button className="icon-btn" style={{ width: 28, height: 28 }} onClick={() => move(pos, pos - 1)} aria-label="Выше">
-                      <I.chevron style={{ transform: 'rotate(-90deg)' }} />
-                    </button>
-                    <button className="icon-btn" style={{ width: 28, height: 28 }} onClick={() => move(pos, pos + 1)} aria-label="Ниже">
-                      <I.chevron style={{ transform: 'rotate(90deg)' }} />
-                    </button>
+        {q.kind === 'match' && (
+          <div className="match">
+            {pairs.map((pr, i) => {
+              const v = match[i];
+              const state = result === null || v === null ? '' : v === i ? ' right' : ' wrong';
+              return (
+                <div key={i} className={`match-row${state}`}>
+                  <div className="match-left">
+                    <Markdown text={pr.left} />
+                  </div>
+                  <span className="match-arrow" aria-hidden>
+                    →
                   </span>
-                )}
-              </div>
-            ))}
+                  <div className="match-right">
+                    <select
+                      value={v ?? ''}
+                      disabled={locked}
+                      aria-label={`Пара для варианта ${i + 1}`}
+                      onChange={(e) => {
+                        const n = e.target.value === '' ? null : Number(e.target.value);
+                        setResult(null);
+                        setMatch((m) => m.map((x, k) => (k === i ? n : x === n && n !== null ? null : x)));
+                      }}
+                    >
+                      <option value="">— выбери —</option>
+                      {rightOrder.map((ri) => (
+                        <option key={ri} value={ri}>
+                          {plain(pairs[ri].right)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
+
+        {q.kind === 'order' && <OrderList order={order} locked={locked} onMove={move} render={(oi) => <Markdown text={opts[oi].text} />} />}
 
         {result !== null && (q.explain || result) && (result || attempts >= 2) && q.explain && (
           <div className="explain">
@@ -215,6 +222,7 @@ export function Quiz({ data: q, id }: { data: QuizBlock; id: string }) {
               setSel([]);
               setText('');
               setOrder(shuffle(opts.map((_, i) => i), id + attempts));
+              setMatch(pairs.map(() => null));
             }}
           >
             <I.reset /> Решить снова

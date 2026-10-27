@@ -14,10 +14,9 @@ import { SettingsPage } from './pages/Settings';
 export function Logo() {
   return (
     <svg className="logo-mark" viewBox="0 0 32 32" aria-hidden>
-      <rect width="32" height="32" rx="8" fill="var(--text)" />
-      <rect x="4" y="13" width="24" height="6" rx="1.5" fill="var(--accent)" />
-      <path d="M13.5 19l-3 8M18.5 19l3 8" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" />
-      <rect x="13" y="12" width="6" height="8" rx="1.5" fill="var(--accent-strong)" />
+      <rect width="32" height="32" rx="7" fill="var(--text)" />
+      <rect x="5" y="13" width="22" height="5" rx="1" fill="var(--bg)" />
+      <path d="M14 18l-3 8M18 18l3 8" stroke="var(--bg)" strokeWidth="2.6" strokeLinecap="round" />
     </svg>
   );
 }
@@ -88,9 +87,12 @@ function Toasts() {
     <div className="toasts" aria-live="polite">
       {toasts.map((id) => {
         const a = ACHIEVEMENTS.find((x) => x.id === id)!;
+        const Ic = I[a.icon];
         return (
           <div key={id} className="toast">
-            <span className="ic">{a.icon}</span>
+            <span className="ach got" aria-hidden>
+              <Ic width={20} height={20} />
+            </span>
             <div>
               <b>{a.title}</b>
               <span>{a.text}</span>

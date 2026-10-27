@@ -24,10 +24,10 @@ const style = HighlightStyle.define([
 
 const theme = EditorView.theme({
   '&': { backgroundColor: 'transparent', color: 'var(--text)' },
-  '.cm-content': { caretColor: 'var(--accent-strong)', padding: '10px 0' },
-  '.cm-cursor': { borderLeftColor: 'var(--accent-strong)', borderLeftWidth: '2px' },
-  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': { backgroundColor: 'rgba(243,179,61,.28) !important' },
-  '.cm-matchingBracket': { backgroundColor: 'rgba(243,179,61,.25)', outline: 'none' },
+  '.cm-content': { caretColor: 'var(--text)', padding: '10px 0' },
+  '.cm-cursor': { borderLeftColor: 'var(--text)', borderLeftWidth: '2px' },
+  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': { backgroundColor: 'color-mix(in srgb, var(--info) 26%, transparent) !important' },
+  '.cm-matchingBracket': { backgroundColor: 'color-mix(in srgb, var(--info) 22%, transparent)', outline: 'none' },
   '.cm-placeholder': { color: 'var(--muted)' },
 });
 

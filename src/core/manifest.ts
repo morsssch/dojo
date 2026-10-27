@@ -53,6 +53,24 @@ export function buildManifest(files: Record<string, string>): Manifest {
       })),
     };
   });
+  // needs и ссылки lesson: в тексте уроков должны вести на существующие уроки.
+  for (const c of courses) {
+    const exists = (link: string) => {
+      const [mid, lid] = link.split('#')[0].split('/');
+      const mod = c.modules.find((m) => m.id === mid);
+      return !!mod && (!lid || mod.lessons.some((l) => l.id === lid));
+    };
+    for (const m of c.modules)
+      for (const l of m.lessons) {
+        const raw = files[l.file] ?? '';
+        // примеры синтаксиса в `коде` — не ссылки
+        const text = raw.replace(/`[^`\n]*`/g, '');
+        for (const mm of text.matchAll(/\]\(lesson:([^)\s]+)\)/g)) if (!exists(mm[1])) errors.push(`${l.file}: ссылка lesson:${mm[1]} ведёт на несуществующий урок`);
+        for (const mm of text.matchAll(/^\s*needs:\s*\[([^\]]*)\]/gm))
+          for (const link of mm[1].split(',').map((x) => x.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean))
+            if (!exists(link)) errors.push(`${l.file}: needs «${link}» ведёт на несуществующий урок`);
+      }
+  }
   // Ссылки роадмапа должны вести на существующие модули/уроки.
   for (const c of courses) {
     if (!c.roadmap) continue;

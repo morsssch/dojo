@@ -1,43 +1,64 @@
-// Пояс — главный визуальный маркер прогресса. Цвет = уровень, полоски на конце = модули.
+// Прогресс курса: обычный прогресс-бар + отдельно значок пояса, которому он соответствует.
 import type { CourseInfo } from '../core/manifest';
-import { beltFor, courseStatus, moduleStatus, ProgressState } from '../state/progress';
+import { beltFor, courseStatus, ProgressState } from '../state/progress';
 
-export function Belt({ course, p, compact }: { course: CourseInfo; p: ProgressState; compact?: boolean }) {
-  const st = courseStatus(p, course);
-  const { current, next } = beltFor(course, st.pct);
-  const mods = course.modules.filter((m) => !m.meta.draft && m.lessons.some((l) => !l.meta.draft));
-  // Не больше 12 полосок, иначе пояс превращается в штрихкод.
-  const stripes = mods.length <= 12 ? mods.map((m) => moduleStatus(p, course.id, m).pct) : chunk(mods.map((m) => moduleStatus(p, course.id, m).pct), 12);
+/** Значок завязанного пояса цвета уровня. */
+export function BeltBadge({ color, size = 44 }: { color: string; size?: number }) {
   return (
-    <div className="belt-wrap">
-      <div className="belt" style={{ ['--belt' as string]: current.color }} role="img" aria-label={`${current.name}, пройдено ${Math.round(st.pct * 100)}%`}>
-        {stripes.length > 0 && (
-          <div className="belt-tip">
-            {stripes.map((s, i) => (
-              <i key={i} className={s >= 1 ? 'on' : s > 0 ? 'part' : ''} style={{ ['--p' as string]: `${Math.round(s * 100)}%` }} />
-            ))}
-          </div>
-        )}
-      </div>
-      {!compact && (
-        <div className="belt-meta">
-          <span className="belt-name">{current.name}</span>
-          <span className="muted">
-            {Math.round(st.pct * 100)}% курса
-            {next ? ` · до «${next.name.toLowerCase()}» ещё ${Math.max(1, Math.round((next.at - st.pct) * 100))}%` : ''}
-          </span>
-        </div>
-      )}
-    </div>
+    <svg className="belt-badge" width={size} height={size * 0.62} viewBox="0 0 64 40" aria-hidden>
+      <g fill={color} stroke="var(--belt-edge)" strokeWidth="1.5" strokeLinejoin="round">
+        <rect x="2" y="9" width="60" height="9" rx="1.5" />
+        <path d="M27 17 L19 37 L26 38 L31 21 Z" />
+        <path d="M37 17 L45 37 L38 38 L33 21 Z" />
+        <rect x="26" y="7" width="12" height="13" rx="2" />
+      </g>
+    </svg>
   );
 }
 
-function chunk(xs: number[], n: number): number[] {
-  const size = Math.ceil(xs.length / n);
-  const out: number[] = [];
-  for (let i = 0; i < xs.length; i += size) {
-    const part = xs.slice(i, i + size);
-    out.push(part.reduce((a, b) => a + b, 0) / part.length);
-  }
-  return out;
+export function CourseProgress({ course, p, compact }: { course: CourseInfo; p: ProgressState; compact?: boolean }) {
+  const st = courseStatus(p, course);
+  const pct = Math.round(st.pct * 100);
+  const { current, next } = beltFor(course, st.pct);
+  const toNext = next ? Math.max(1, Math.round((next.at - st.pct) * 100)) : 0;
+
+  if (compact)
+    return (
+      <div className="cprog compact">
+        <div className="cprog-row">
+          <span className="cprog-pct">{pct}%</span>
+          <span className="belt-chip">
+            <BeltBadge color={current.color} size={26} /> {current.name}
+          </span>
+        </div>
+        <div className="bar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+          <i style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+    );
+
+  return (
+    <div className="cprog">
+      <div className="cprog-main">
+        <div className="cprog-row">
+          <span className="cprog-pct">{pct}%</span>
+          <span className="muted">
+            {st.done} из {st.total} уроков, {st.solved} из {st.required} заданий
+          </span>
+        </div>
+        <div className="bar big" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Прогресс курса">
+          <i style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+      <div className="cprog-belt">
+        <BeltBadge color={current.color} />
+        <div>
+          <div className="belt-name">{current.name}</div>
+          <div className="muted" style={{ fontSize: 13.5 }}>
+            {next ? `до пояса «${next.name.replace(/ пояс$/, '').toLowerCase()}» ещё ${toNext}%` : 'высший уровень'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

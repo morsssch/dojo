@@ -43,11 +43,30 @@ export const I = {
   sandbox: P(['M4 4h16v16H4z', 'M4 9h16', 'M9 9v11']),
   trophy: P(['M8 21h8', 'M12 17v4', 'M7 4h10v5a5 5 0 01-10 0z', 'M17 5h3v2a3 3 0 01-3 3', 'M7 5H4v2a3 3 0 003 3']),
   copy: P(['M9 9h11v11H9z', 'M5 15H4V4h11v1']),
+  expand: P(['M15 3h6v6', 'M9 21H3v-6', 'M21 3l-7 7', 'M3 21l7-7']),
+  shrink: P(['M4 14h6v6', 'M20 10h-6V4', 'M14 10l7-7', 'M3 21l7-7']),
+  sidebar: P(['M3 4h18v16H3z', 'M9 4v16']),
+  table: P(['M3 4h18v16H3z', 'M3 10h18', 'M3 15h18', 'M9 10v10']),
+  grip: P(['M9 6h.01', 'M15 6h.01', 'M9 12h.01', 'M15 12h.01', 'M9 18h.01', 'M15 18h.01']),
+  cards: P(['M4 6h12v14H4z', 'M8 2h12v14', 'M7 11h6', 'M7 15h4']),
+  pen: P(['M4 20h4L19 9l-4-4L4 16z', 'M13.5 6.5l4 4']),
+  // значки ачивок
+  flag: P(['M5 21V4', 'M5 4h11l-2 4 2 4H5']),
+  checkCircle: P(['M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19z', 'M8 12.5l2.7 2.7L16 9.8']),
+  bolt: P('M13 2L4 14h7l-1 8 9-12h-7z'),
+  cpu: P(['M6 6h12v12H6z', 'M9 9h6v6H9z', 'M9 2v4', 'M15 2v4', 'M9 18v4', 'M15 18v4', 'M2 9h4', 'M2 15h4', 'M18 9h4', 'M18 15h4']),
+  target: P(['M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19z', 'M12 7a5 5 0 100 10 5 5 0 000-10z', 'M12 11a1 1 0 100 2 1 1 0 000-2z']),
+  calendar: P(['M4 5h16v16H4z', 'M4 10h16', 'M8 3v4', 'M16 3v4']),
+  calendarCheck: P(['M4 5h16v16H4z', 'M4 10h16', 'M8 3v4', 'M16 3v4', 'M9 15l2 2 4-4']),
+  mountain: P(['M3 20l6-11 4 6 3-4 5 9z', 'M9 9l1.6 2.8']),
+  package: P(['M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z', 'M3 7.5l9 4.5 9-4.5', 'M12 12v9']),
+  half: P(['M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19z', 'M12 2.5v19']),
+  belt: P(['M2 10h20v4H2z', 'M10 14l-2 7', 'M14 14l2 7', 'M10 9h4v6h-4z']),
 };
 
 /** Иконка вида шага/блока */
 export function KindIcon({ kind, ...p }: { kind: string } & SVGProps<SVGSVGElement>) {
-  const map: Record<string, keyof typeof I> = { theory: 'book', quiz: 'quiz', task: 'code', git: 'branch', anim: 'film', project: 'hammer' };
+  const map: Record<string, keyof typeof I> = { theory: 'book', quiz: 'quiz', task: 'code', git: 'branch', anim: 'film', project: 'hammer', cards: 'cards', written: 'pen' };
   const C = I[map[kind] ?? 'book'];
   return <C {...p} />;
 }
@@ -59,4 +78,6 @@ export const KIND_LABEL: Record<string, string> = {
   git: 'Git-практика',
   anim: 'Схема',
   project: 'Проект',
+  cards: 'Карточки',
+  written: 'Письменный ответ',
 };

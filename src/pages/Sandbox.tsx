@@ -81,7 +81,7 @@ function CodeSandbox({ lang }: { lang: 'go' | 'js' | 'python' }) {
         <summary style={{ cursor: 'pointer', fontFamily: 'var(--font-ui)', fontWeight: 600, fontSize: 14 }}>Ввод программы (stdin)</summary>
         <textarea className="q-input" style={{ maxWidth: '100%', minHeight: 80, marginTop: 8 }} value={stdin} onChange={(e) => setStdin(e.target.value)} aria-label="Ввод программы" />
       </details>
-      {out && <RunOutput out={out} />}
+      {out && <RunOutput out={out} lang={lang} />}
     </div>
   );
 }

@@ -27,8 +27,15 @@ interface Line {
 const COMMANDS = ['git', 'ls', 'cd', 'cat', 'echo', 'touch', 'mkdir', 'rm', 'mv', 'pwd', 'tree', 'clear', 'help'];
 const GIT_SUBS = ['init', 'status', 'add', 'commit', 'log', 'branch', 'checkout', 'switch', 'merge', 'reset', 'restore', 'diff', 'tag', 'show', 'remote', 'clone', 'push', 'pull', 'fetch', 'config', 'rm'];
 
-export function Terminal({ shell, onCommand, greeting, height }: { shell: Shell; onCommand?: (cmd: string, ok: boolean) => void; greeting?: string; height?: number }) {
-  const [lines, setLines] = useState<Line[]>(greeting ? [{ out: greeting }] : []);
+export function Terminal({ shell, onCommand, greeting }: { shell: Shell; onCommand?: (cmd: string, ok: boolean) => void; greeting?: string }) {
+  if (!shell.transcript.length && greeting) shell.transcript.push({ out: greeting });
+  const [lines, setLinesState] = useState<Line[]>(() => shell.transcript.slice());
+  const setLines = (fn: Line[] | ((l: Line[]) => Line[])) =>
+    setLinesState((prev) => {
+      const next = typeof fn === 'function' ? fn(prev) : fn;
+      shell.transcript = next;
+      return next;
+    });
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const hist = useRef<string[]>([]);
@@ -110,7 +117,7 @@ export function Terminal({ shell, onCommand, greeting, height }: { shell: Shell;
   };
 
   return (
-    <div className="term" ref={box} onClick={() => window.getSelection()?.isCollapsed && inp.current?.focus({ preventScroll: true })} style={height ? { height } : undefined}>
+    <div className="term" ref={box} onClick={() => window.getSelection()?.isCollapsed && inp.current?.focus({ preventScroll: true })}>
       {lines.map((l, i) => (
         <div key={i} className="line">
           {l.cmd !== undefined && (

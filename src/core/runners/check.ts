@@ -1,6 +1,7 @@
 // Проверка решений. Не знает, где исполняется код: исполнители передаются снаружи
 // (браузер — воркеры и wasm, `npm run check` — node).
-import type { TaskBlock } from '../schema';
+import type { CodeRule, TaskBlock } from '../schema';
+import { stripComments } from './explain';
 import { fixGoErrorLines, GO_HARNESS_PRELUDE, GO_PRELUDE_IMPORTS, mergeGo } from './gosrc';
 
 export type Lang = 'go' | 'js' | 'python' | 'sql';
@@ -85,7 +86,24 @@ function parseHarness(stdout: string): { cases: CaseResult[]; rest: string } {
   return { cases, rest: rest.join('\n').replace(/^\n+|\n+$/g, '') };
 }
 
+/** Правила require/forbid по тексту кода. Возвращает проваленные проверки. */
+export function checkRules(task: TaskBlock, code: string): CaseResult[] {
+  const bare = stripComments(task.lang, code);
+  const norm = (r: CodeRule) => (Array.isArray(r) ? { pattern: r[0], message: r[1], flags: undefined } : r);
+  const out: CaseResult[] = [];
+  for (const r of (task.require ?? []).map(norm)) if (!new RegExp(r.pattern, r.flags).test(bare)) out.push({ name: r.message, ok: false });
+  for (const r of (task.forbid ?? []).map(norm)) if (new RegExp(r.pattern, r.flags).test(bare)) out.push({ name: r.message, ok: false });
+  return out;
+}
+
 export async function checkCode(task: TaskBlock, code: string, ex: Executors): Promise<CheckResult> {
+  const r = await checkCodeInner(task, code, ex);
+  const rules = checkRules(task, code);
+  if (!rules.length) return r;
+  return { ...r, ok: false, cases: [...r.cases, ...rules.map((x) => ({ ...x, message: 'требование к коду' }))] };
+}
+
+async function checkCodeInner(task: TaskBlock, code: string, ex: Executors): Promise<CheckResult> {
   if (task.lang === 'sql') return checkSql(task, code, ex);
   const lang = task.lang;
   const t0 = Date.now();

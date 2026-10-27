@@ -56,6 +56,12 @@ export function LessonPage() {
     <LessonCtx.Provider value={{ courseId: c.id, lessonKey: key }}>
       <div className={`lesson-layout${collapsed ? ' collapsed' : ''}`}>
         <nav className="toc" aria-label="Уроки курса">
+          <div className="toc-head">
+            <span>Содержание</span>
+            <button className="icon-btn" onClick={() => setCollapsed(true)} aria-label="Скрыть список уроков" title="Скрыть список уроков">
+              <I.sidebar />
+            </button>
+          </div>
           {c.modules.map((m, mi) => (
             <div key={m.id} className="toc-module">
               <div className="h">
@@ -74,12 +80,14 @@ export function LessonPage() {
           ))}
         </nav>
 
+        {collapsed && (
+          <button className="toc-open" onClick={() => setCollapsed(false)} aria-label="Показать список уроков" title="Показать список уроков">
+            <I.sidebar />
+          </button>
+        )}
         <main className="lesson-main">
           <div className="lesson-head">
-            <div className="kicker" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button className="icon-btn" onClick={() => setCollapsed((x) => !x)} aria-label={collapsed ? 'Показать список уроков' : 'Скрыть список уроков'} title="Список уроков">
-                <I.menu />
-              </button>
+            <div className="kicker">
               Модуль {modIndex + 1}. {module.meta.title}
             </div>
             <h1>{info.meta.title}</h1>
@@ -127,7 +135,7 @@ export function LessonPage() {
 
           {lesson && isLast && status.done && (
             <div className="panel lesson-done">
-              <span style={{ fontSize: 30 }}>🥋</span>
+              <span className="done-ic"><I.checkCircle width={28} height={28} /></span>
               <div style={{ flex: 1 }}>
                 <b>Урок пройден</b>
                 <span className="muted">{next ? `Дальше: ${next.l.meta.title}` : 'Это был последний урок курса.'}</span>
@@ -142,7 +150,7 @@ export function LessonPage() {
 
           {checkpointPassed && !moduleKnown && (
             <div className="panel lesson-done">
-              <span style={{ fontSize: 30 }}>🎯</span>
+              <span className="done-ic"><I.target width={28} height={28} /></span>
               <div style={{ flex: 1 }}>
                 <b>Похоже, ты это уже знаешь</b>
                 <span className="muted">Можно отметить весь модуль «{module.meta.title}» как пройденный и идти дальше.</span>

@@ -5,6 +5,7 @@ import { drafts, progress, useProgress } from '../../state/progress';
 import { Markdown } from '../Markdown';
 import { I, KindIcon } from '../ui/icons';
 import { Hints } from './common';
+import { Needs } from './Needs';
 
 /** Задание «у себя на компьютере»: инструкция, команды и чек-лист, который ученик отмечает сам. */
 export function Project({ data, id }: { data: ProjectBlock; id: string }) {
@@ -38,6 +39,7 @@ export function Project({ data, id }: { data: ProjectBlock; id: string }) {
           {solved && <span className="tag ok">готово</span>}
         </span>
       </div>
+      <Needs links={data.needs} />
       <div className="block-body">
         {data.prompt && <Markdown text={data.prompt} />}
         {data.commands?.length ? (

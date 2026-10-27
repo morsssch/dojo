@@ -35,7 +35,8 @@ export function Playground({ data }: { data: PlaygroundBlock }) {
   return (
     <div className="playground">
       <div className="bar-top">
-        <span>{LANG_LABEL[data.lang]} · можно менять и запускать</span>
+        <span>{LANG_LABEL[data.lang]}</span>
+        <span className="pg-hint hide-sm">пример можно менять</span>
         <RuntimeNote lang={data.lang} />
         <span className="right">
           {code !== data.code && (
@@ -49,7 +50,7 @@ export function Playground({ data }: { data: PlaygroundBlock }) {
         </span>
       </div>
       <CodeEditor value={code} lang={data.lang} onChange={setCode} onRun={run} minLines={2} />
-      {out && <RunOutput out={out} />}
+      {out && <RunOutput out={out} lang={data.lang} />}
     </div>
   );
 }

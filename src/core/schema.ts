@@ -63,7 +63,7 @@ const QuizOption = z.union([
 
 export const QuizBlock = z.object({
   id: z.string().optional(),
-  kind: z.enum(['single', 'multiple', 'text', 'number', 'order']).default('single'),
+  kind: z.enum(['single', 'multiple', 'text', 'number', 'order', 'match']).default('single'),
   question: md,
   code: z.string().optional(),
   lang: z.string().optional(),
@@ -71,10 +71,21 @@ export const QuizBlock = z.object({
   // text: строка, список допустимых строк или /regex/; number: число; order: не нужно (порядок options правильный)
   answer: z.union([z.string(), z.number(), z.array(z.union([z.string(), z.number()]))]).optional(),
   tolerance: z.number().optional(),
+  // match: пары «левое — правое»; правая колонка показывается перемешанной
+  pairs: z.array(z.object({ left: md, right: md })).optional(),
   explain: md.optional(),
   hints: z.array(md).optional(),
 });
 export type QuizBlock = z.infer<typeof QuizBlock>;
+
+/** Ссылки на уроки, которые нужно знать: "module/lesson" или "module". */
+const Needs = z.array(z.string()).optional();
+/** Правило по тексту кода (комментарии вырезаются): [regex, сообщение] или { pattern, message, flags } */
+const CodeRule = z.union([
+  z.tuple([z.string(), z.string()]),
+  z.object({ pattern: z.string(), message: z.string(), flags: z.string().optional() }),
+]);
+export type CodeRule = z.infer<typeof CodeRule>;
 
 const IoTest = z.object({
   name: z.string().optional(),
@@ -98,6 +109,10 @@ export const TaskBlock = z.object({
   setup: z.string().optional(),
   ordered: z.boolean().optional(),
   check: z.string().optional(),
+  // в коде обязательно должно быть / не должно быть (например: «используй for range», «без sort.Ints»)
+  require: z.array(CodeRule).optional(),
+  forbid: z.array(CodeRule).optional(),
+  needs: Needs,
   explain: md.optional(),
 });
 export type TaskBlock = z.infer<typeof TaskBlock>;
@@ -131,6 +146,7 @@ export const GitBlock = z.object({
   explain: md.optional(),
   // Свободная песочница без целей — блок не требуется для прохождения.
   sandbox: z.boolean().optional(),
+  needs: Needs,
 });
 export type GitBlock = z.infer<typeof GitBlock>;
 
@@ -175,8 +191,28 @@ export const ProjectBlock = z.object({
   commands: z.array(z.string()).optional(),
   checklist: z.array(md).min(1),
   hints: z.array(md).optional(),
+  needs: Needs,
 });
 export type ProjectBlock = z.infer<typeof ProjectBlock>;
+
+/** Карточки «как это могут спросить»: вопрос → показать ответ → «знаю / повторить». Не обязательный блок. */
+export const CardsBlock = z.object({
+  id: z.string().optional(),
+  title: z.string().optional(),
+  items: z.array(z.object({ q: md, a: md })).min(1),
+});
+export type CardsBlock = z.infer<typeof CardsBlock>;
+
+/** Письменные ответы: ученик пишет текстом, потом копирует всё одним промптом на проверку ИИ-ментору. */
+export const WrittenBlock = z.object({
+  id: z.string().optional(),
+  title: z.string(),
+  intro: md.optional(),
+  questions: z.array(z.object({ q: md, rows: z.number().optional() })).min(1),
+  // кем должен быть проверяющий и на что смотреть — попадёт в начало скопированного текста
+  reviewer: z.string().optional(),
+});
+export type WrittenBlock = z.infer<typeof WrittenBlock>;
 
 export const PlaygroundBlock = z.object({
   lang: z.enum(['go', 'js', 'python', 'sql']),
@@ -192,5 +228,7 @@ export const BLOCK_SCHEMAS = {
   git: GitBlock,
   anim: AnimBlock,
   project: ProjectBlock,
+  cards: CardsBlock,
+  written: WrittenBlock,
 } as const;
 export type BlockType = keyof typeof BLOCK_SCHEMAS;

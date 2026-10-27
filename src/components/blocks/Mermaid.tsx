@@ -16,7 +16,7 @@ export function Mermaid({ code }: { code: string }) {
     mermaidP ??= import('mermaid').then((m) => m.default);
     mermaidP
       .then(async (m) => {
-        m.initialize({ startOnLoad: false, theme: isDark() ? 'dark' : 'neutral', fontFamily: 'Onest, sans-serif', securityLevel: 'strict' });
+        m.initialize({ startOnLoad: false, theme: isDark() ? 'dark' : 'neutral', fontFamily: 'IBM Plex Sans, sans-serif', securityLevel: 'strict' });
         const r = await m.render(`m${id}`, code);
         if (alive) setSvg(r.svg);
       })

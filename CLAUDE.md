@@ -29,7 +29,9 @@ npm run build              # check + tsc + vite build → dist/
   - `runners/check.ts` — проверка задач (io-тесты, харнесс `@@PASS/@@FAIL`, сравнение SQL-таблиц); `runners/gosrc.ts` — склейка Go-исходников.
   - `git/` — MemFS, эмулятор оболочки с isomorphic-git, проверки целей.
 - `src/runtime/executors.ts` — исполнители в браузере: Go (yaegi wasm в воркере), JS (воркер), Python (pyodide CDN), SQL (PGlite).
-- `src/components/blocks/` — UI блоков: Quiz, Task, Git, Anim, Project, Playground, Mermaid. Рендер — `Segments.tsx`.
+- `src/components/blocks/` — UI блоков: Quiz (+OrderList), Task, Git, Anim, Project, Cards, Written, Playground, Mermaid, Needs. Рендер — `Segments.tsx`.
+- `src/components/Workspace.tsx` — полноэкранный режим задач; `DbView.tsx` — ER-диаграмма и данные БД (интроспекция — `src/runtime/sqlSchema.ts`).
+- `src/core/runners/explain.ts` — объяснения ошибок Go/Postgres по-русски, `require`/`forbid`.
 - `src/state/progress.ts` — прогресс в localStorage, экспорт/импорт; `achievements.ts` — ачивки.
 - `src/pages/` — Home, Course (дашборд), Lesson (плеер шагов), Roadmap (@xyflow/react), Sandbox, Settings.
 - `runtimes/go/` — исходник Go-рантайма (`main.go`) и `build.sh` (список пакетов stdlib).
@@ -46,6 +48,7 @@ npm run build              # check + tsc + vite build → dist/
 
 - Текст интерфейса — по-русски, на «ты», без канцелярита.
 - Стили — только через CSS-переменные из `src/styles/app.css` (светлая и тёмная тема).
+- Дизайн строгий и монохромный: основное действие — цветом текста, цвет только смысловой (ok/bad/warn/deep, цвета поясов). Шрифты — IBM Plex Sans / Mono. Без эмодзи в интерфейсе — только SVG-иконки из `ui/icons.tsx`.
 - После изменений: `npx tsc -p tsconfig.json`, `npm run check`, глазами в `npm run dev`.
 - Обнови `BACKLOG.md` в конце сессии: что сделано, что дальше.
 - Репозиторий публичный: никаких имён, названий команд и личного контекста в файлах и коммитах.

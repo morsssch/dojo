@@ -119,7 +119,7 @@ export type Segment =
   | { kind: 'mermaid'; code: string }
   | { kind: 'playground'; data: PlaygroundBlock };
 
-export type StepKind = 'theory' | 'quiz' | 'task' | 'git' | 'project' | 'anim';
+export type StepKind = 'theory' | 'quiz' | 'task' | 'git' | 'project' | 'anim' | 'cards' | 'written';
 
 export interface Step {
   index: number;
@@ -222,7 +222,7 @@ export function parseLesson(text: string, where = 'lesson'): Lesson {
         const id = (data?.id as string | undefined) ?? `s${si + 1}-${type}${n + 1}`;
         if (seen.has(id)) errs.push(`${where2}: повторяется id "${id}"`);
         seen.add(id);
-        const isRequired = type !== 'anim' && !(type === 'git' && data?.sandbox);
+        const isRequired = type !== 'anim' && type !== 'cards' && !(type === 'git' && data?.sandbox);
         if (isRequired) required.push(id);
         errors.push(...errs);
         segments.push({ kind: 'block', type, id, data, required: isRequired, error: errs.join('\n') || undefined, raw: code });
@@ -231,8 +231,8 @@ export function parseLesson(text: string, where = 'lesson'): Lesson {
     }
     flush();
     const firstReq = segments.find((s) => s.kind === 'block' && s.required) as Extract<Segment, { kind: 'block' }> | undefined;
-    const hasAnim = segments.some((s) => s.kind === 'block' && s.type === 'anim');
-    const kind: StepKind = firstReq ? (firstReq.type as StepKind) : hasAnim ? 'anim' : 'theory';
+    const firstOpt = segments.find((s) => s.kind === 'block' && (s.type === 'anim' || s.type === 'cards')) as Extract<Segment, { kind: 'block' }> | undefined;
+    const kind: StepKind = firstReq ? (firstReq.type as StepKind) : firstOpt ? (firstOpt.type as StepKind) : 'theory';
     return { index: si, title: rs.title, kind, segments, required };
   });
   return { meta, steps, errors };
