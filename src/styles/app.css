@@ -3531,11 +3531,14 @@ pre {
     padding-right: 396px;
   }
 }
-.quote-btn {
+.quote-pop {
   position: fixed;
   z-index: 70;
   transform: translate(-50%, calc(-100% - 8px));
+}
+.quote-pop .btn {
   box-shadow: var(--shadow);
+  white-space: nowrap;
 }
 .note-card {
   padding: 14px 18px;
@@ -3762,10 +3765,29 @@ pre {
 .lab-whole summary { cursor: pointer; color: var(--text-2); font-size: 13.5px; margin-bottom: 8px; }
 
 /* ---------- варианты курса ---------- */
-.variant-select { display: grid; gap: 6px; font-size: 14px; color: var(--text-2); }
-.variant-select select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
-.variant-picker { display: grid; gap: 6px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 10px; margin: 0 0 20px; font-size: 14.5px; }
-.variant-picker .row-btns { margin-top: 4px; }
+.variant-panel p { margin: 0 0 12px; font-size: 13.5px; }
+.variant-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.variant-opts.compact { grid-template-columns: 1fr; }
+.variant-opt {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left;
+  padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--text); font: inherit; cursor: pointer;
+  transition: border-color .15s, background-color .15s;
+}
+.variant-opt:hover { border-color: var(--text-2); }
+.variant-opt:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.variant-opt.on { border-color: var(--text); background: var(--bg-2); }
+.variant-radio {
+  flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%;
+  border: 1.5px solid var(--text-2); display: grid; place-items: center;
+}
+.variant-opt.on .variant-radio { background: var(--text); border-color: var(--text); color: var(--bg); }
+.variant-text { display: grid; gap: 2px; min-width: 0; }
+.variant-text b { font-size: 14.5px; font-weight: 600; }
+.variant-text span { font-size: 13px; color: var(--text-2); }
+.variant-picker { display: grid; gap: 12px; padding: 16px; margin: 0 0 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.variant-picker-head { display: grid; gap: 3px; font-size: 14.5px; }
+.variant-picker-head .muted { font-size: 13.5px; }
 
 /* ---------- синхронизация ---------- */
 .sync-form { display: flex; gap: 8px; flex-wrap: wrap; }

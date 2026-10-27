@@ -181,11 +181,7 @@ export function CoursePage() {
 
         <aside className="side">
         <div className="only-desktop">{continuePanel}</div>
-          {c.meta.variants && (
-            <div className="panel">
-              <VariantSelect course={c} />
-            </div>
-          )}
+          {c.meta.variants && <VariantSelect course={c} />}
           {c.roadmap && <RoadmapTeaser c={c} p={p} />}
           <Link to={`/c/${c.id}/notes`} className="panel side-link">
             <I.note /> Мои заметки

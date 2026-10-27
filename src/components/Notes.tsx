@@ -84,26 +84,32 @@ export function QuoteToNote({ container, onQuote }: { container: HTMLElement | n
         const r = sel.getRangeAt(0).getBoundingClientRect();
         setPos({ x: r.left + r.width / 2, y: r.top, text });
       }, 0);
-    const down = (e: MouseEvent) => !(e.target as HTMLElement).closest('.quote-btn') && setPos(null);
+    const down = (e: MouseEvent) => !(e.target as HTMLElement).closest('.quote-pop') && setPos(null);
+    const hide = () => setPos(null);
     document.addEventListener('mouseup', up);
     document.addEventListener('mousedown', down);
+    window.addEventListener('scroll', hide, true);
     return () => {
+      window.removeEventListener('scroll', hide, true);
       document.removeEventListener('mouseup', up);
       document.removeEventListener('mousedown', down);
     };
   }, [container]);
   if (!pos) return null;
+  // Сдвиг держит обёртка: у .btn:active свой transform, и без обёртки кнопка уезжала из-под курсора — клик не срабатывал.
   return (
-    <button
-      className="quote-btn btn small primary"
-      style={{ left: pos.x, top: pos.y }}
-      onClick={() => {
-        onQuote(pos.text);
-        window.getSelection()?.removeAllRanges();
-        setPos(null);
-      }}
-    >
-      <I.quote width={14} height={14} /> В заметку
-    </button>
+    <div className="quote-pop" style={{ left: pos.x, top: pos.y }}>
+      <button
+        className="btn small primary"
+        onMouseDown={(e) => e.preventDefault()} // не сбрасывать выделение до клика
+        onClick={() => {
+          onQuote(pos.text);
+          window.getSelection()?.removeAllRanges();
+          setPos(null);
+        }}
+      >
+        <I.quote width={14} height={14} /> В заметку
+      </button>
+    </div>
   );
 }
