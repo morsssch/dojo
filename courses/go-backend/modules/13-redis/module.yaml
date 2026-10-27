@@ -1,0 +1,2 @@
+title: 'Redis и кэширование'
+description: 'In-memory хранилище: кэш, rate limit, сессии, pub/sub.'

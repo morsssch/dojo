@@ -1,0 +1,173 @@
+sections:
+  - { id: basics, title: 'Основа', color: '#5b9df5' }
+  - { id: go, title: 'Язык Go', color: '#4fb477' }
+  - { id: team, title: 'Командная работа', color: '#d46bb3' }
+  - { id: web, title: 'Веб и API', color: '#f3b33d' }
+  - { id: data, title: 'Данные', color: '#3fb7c4' }
+  - { id: arch, title: 'Архитектура', color: '#9b6ce0' }
+  - { id: infra, title: 'Инфраструктура', color: '#e0794a' }
+  - { id: project, title: 'Проекты', color: '#f06b6b' }
+nodes:
+  - id: start
+    title: 'Старт и окружение'
+    section: basics
+    x: 260
+    y: 0
+    description: 'Ставим Go, учимся жить в терминале.'
+    links: [start]
+  - id: go-basics
+    title: 'Основы Go'
+    section: go
+    x: 260
+    y: 140
+    description: 'Переменные, типы, циклы, функции.'
+    links: [go-basics]
+  - id: git
+    title: 'Git и команда'
+    section: team
+    x: 780
+    y: 140
+    description: 'Коммиты, ветки, конфликты, push/pull, PR.'
+    links: [git]
+  - id: go-data
+    title: 'Слайсы, мапы, структуры'
+    section: go
+    x: 0
+    y: 280
+    description: 'Как устроены коллекции и почему слайсы удивляют.'
+    links: [go-data]
+  - id: go-oop
+    title: 'ООП по-гошному'
+    section: go
+    x: 520
+    y: 280
+    description: 'Методы, указатели, интерфейсы, дженерики.'
+    links: [go-oop]
+  - id: errors
+    title: 'Ошибки, пакеты, go test'
+    section: go
+    x: 260
+    y: 420
+    description: 'Ошибки как значения, структура модуля, первые тесты.'
+    links: [go-errors-packages]
+  - id: concurrency
+    title: 'Конкурентность'
+    section: go
+    x: 0
+    y: 560
+    description: 'Горутины, каналы, select, mutex, context.'
+    links: [concurrency]
+  - id: web
+    title: 'HTTP и сервер на Go'
+    section: web
+    x: 520
+    y: 560
+    description: 'Как работает веб, REST, JSON, net/http, middleware.'
+    links: [web]
+  - id: sql
+    title: 'SQL и PostgreSQL'
+    section: data
+    x: 780
+    y: 420
+    description: 'SELECT, JOIN, агрегаты, индексы, транзакции.'
+    links: [sql]
+  - id: go-pg
+    title: 'Go + Postgres'
+    section: data
+    x: 780
+    y: 700
+    description: 'pgx, миграции, sqlc, репозитории.'
+    links: [go-postgres]
+  - id: arch
+    title: 'Архитектура сервиса'
+    section: arch
+    x: 260
+    y: 700
+    description: 'Слои, конфиг, логи, graceful shutdown.'
+    links: [architecture]
+  - id: auth
+    title: 'Авторизация'
+    section: web
+    x: 520
+    y: 840
+    description: 'bcrypt, JWT, роли.'
+    links: [auth]
+  - id: starter
+    title: 'Хакатон-стартер'
+    section: project
+    x: 520
+    y: 980
+    description: 'Свой шаблон: CRUD, файлы, WebSocket, TG-бот, LLM, админка.'
+    links: [starter]
+  - id: docker
+    title: 'Docker и деплой'
+    section: infra
+    x: 0
+    y: 980
+    description: 'Dockerfile, compose, CI/CD, VPS + nginx.'
+    links: [docker-deploy]
+  - id: testing
+    title: 'Тестирование'
+    section: arch
+    x: 1040
+    y: 840
+    description: 'Табличные тесты, моки, testcontainers.'
+    links: [testing]
+  - id: redis
+    title: 'Redis и кэш'
+    section: data
+    x: 1040
+    y: 1120
+    description: 'Кэш, rate limit, сессии.'
+    links: [redis]
+    optional: true
+  - id: queues
+    title: 'Очереди (Kafka)'
+    section: infra
+    x: 780
+    y: 1120
+    description: 'Асинхронная обработка, надёжность.'
+    links: [queues]
+    optional: true
+  - id: observability
+    title: 'Наблюдаемость'
+    section: infra
+    x: 0
+    y: 1120
+    description: 'Метрики, трейсы, healthcheck.'
+    links: [observability]
+    optional: true
+  - id: capstone
+    title: 'Финальный проект'
+    section: project
+    x: 520
+    y: 1260
+    description: 'Продукт поверх стартера — генеральная репетиция хакатона.'
+    links: [capstone]
+edges:
+  - [start, go-basics]
+  - [start, git]
+  - [go-basics, go-data]
+  - [go-basics, go-oop]
+  - [go-data, errors]
+  - [go-oop, errors]
+  - [errors, concurrency]
+  - [errors, web]
+  - [go-basics, sql]
+  - [sql, go-pg]
+  - [web, go-pg]
+  - [web, arch]
+  - [concurrency, arch]
+  - [arch, auth]
+  - [go-pg, auth]
+  - [auth, starter]
+  - [git, starter]
+  - [arch, docker]
+  - [errors, testing]
+  - [go-pg, testing]
+  - [starter, redis]
+  - [starter, queues]
+  - [docker, observability]
+  - [starter, capstone]
+  - [docker, capstone]
+  - [testing, capstone]

@@ -1,0 +1,8 @@
+node_modules
+dist
+public/runtimes/go/yaegi.wasm
+public/runtimes/go/wasm_exec.js
+*.tsbuildinfo
+.DS_Store
+runtimes/go/stdlib
+tools/scratch

@@ -1,0 +1,2 @@
+title: 'Go + Postgres'
+description: 'Подключаем базу к сервису: pgx, миграции, sqlc, репозитории.'

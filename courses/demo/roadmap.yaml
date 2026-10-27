@@ -1,0 +1,72 @@
+sections:
+  - id: content
+    title: Контент
+    color: '#5b9df5'
+  - id: practice
+    title: Практика
+    color: '#f3b33d'
+  - id: check
+    title: Проверка
+    color: '#4fb477'
+nodes:
+  - id: theory
+    title: Теория и выноски
+    section: content
+    x: 0
+    y: 0
+    description: Markdown, выноски, «под капотом», mermaid, запускаемые примеры.
+    links: [content/theory]
+  - id: anim
+    title: Анимированные схемы
+    section: content
+    x: 280
+    y: 0
+    links: [content/anim]
+  - id: quiz
+    title: Квизы
+    section: content
+    x: 140
+    y: 130
+    links: [content/quizzes]
+  - id: go
+    title: Задачи на Go
+    section: practice
+    x: 0
+    y: 270
+    links: [practice/go]
+  - id: sql
+    title: SQL на Postgres
+    section: practice
+    x: 280
+    y: 270
+    links: [practice/sql]
+  - id: git
+    title: Git-терминал
+    section: practice
+    x: 560
+    y: 270
+    links: [practice/git]
+  - id: other
+    title: JS, Python и проекты
+    section: practice
+    x: 560
+    y: 130
+    optional: true
+    links: [practice/other]
+  - id: checkpoint
+    title: Проверь себя
+    section: check
+    x: 280
+    y: 410
+    description: Чекпоинт — если решить 80% вопросов, модуль можно отметить как пройденный.
+    links: [checkpoint]
+edges:
+  - [theory, quiz]
+  - [anim, quiz]
+  - [quiz, go]
+  - [quiz, sql]
+  - [quiz, git]
+  - [quiz, other]
+  - [go, checkpoint]
+  - [sql, checkpoint]
+  - [git, checkpoint]
