@@ -7,6 +7,7 @@ import { bracketMatching, indentOnInput, indentUnit, StreamLanguage, syntaxHighl
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { tags as t } from '@lezer/highlight';
 import { go } from '@codemirror/legacy-modes/mode/go';
+import { csharp } from '@codemirror/legacy-modes/mode/clike';
 import { sql, PostgreSQL } from '@codemirror/lang-sql';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
@@ -35,6 +36,8 @@ function langExt(lang: string) {
   switch (lang) {
     case 'go':
       return [StreamLanguage.define(go), indentUnit.of('\t')];
+    case 'cs':
+      return [StreamLanguage.define(csharp), indentUnit.of('    ')];
     case 'sql':
       return sql({ dialect: PostgreSQL, upperCaseKeywords: true });
     case 'js':

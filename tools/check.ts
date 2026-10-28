@@ -7,7 +7,7 @@
 // Флаги: --fast (без запуска кода), --course <id>
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { ChildProcess, execFileSync, spawn } from 'node:child_process';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { buildManifest } from '../src/core/manifest';
@@ -15,6 +15,7 @@ import { Lesson, parseLesson } from '../src/core/parse';
 import type { QuizBlock, TaskBlock, GitBlock, LabBlock } from '../src/core/schema';
 import { assembleLab, assembleStage, findLab, labAsTask, labParts, labStages } from '../src/core/lab';
 import { checkCode, ExecResult, Executors, SqlExecResult } from '../src/core/runners/check';
+import { csError, type CsRunResult } from '../src/core/runners/cssrc';
 import { bootShell, evalGoals } from '../src/core/git/checks';
 import { readCourseFiles } from './vite-plugin-dojo';
 
@@ -54,6 +55,62 @@ async function loadGo() {
       });
     });
   return goRun;
+}
+
+// C#: рантайм из public/runtimes/cs в отдельном процессе (tools/cs-host.mjs)
+let csHost: { proc: ChildProcess; wait: Map<number, (r: CsRunResult) => void> } | null = null;
+let csSeq = 0;
+let csMissing = false;
+function startCsHost(): Promise<NonNullable<typeof csHost>> {
+  const fw = path.join(ROOT, 'public/runtimes/cs/_framework');
+  const proc = spawn(process.execPath, [path.join(ROOT, 'tools/cs-host.mjs'), fw], { stdio: ['pipe', 'pipe', 'ignore'] });
+  const host = { proc, wait: new Map<number, (r: CsRunResult) => void>() };
+  return new Promise((resolve, reject) => {
+    let buf = '';
+    proc.stdout!.on('data', (d: Buffer) => {
+      buf += d.toString();
+      let i;
+      while ((i = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, i);
+        buf = buf.slice(i + 1);
+        const j = line.indexOf('\u0001');
+        if (j < 0) continue;
+        const msg = JSON.parse(line.slice(j + 1));
+        if (msg.ready) resolve(host);
+        else host.wait.get(msg.id)?.(msg);
+      }
+    });
+    proc.on('exit', () => {
+      for (const cb of host.wait.values()) cb({ output: '', errors: [], crashed: true, exception: { type: 'Crash', message: 'exit(1)' } });
+      host.wait.clear();
+      if (csHost === host) csHost = null;
+      reject(new Error('C#-рантайм не запустился'));
+    });
+  });
+}
+async function runCs(files: string[], stdin: string): Promise<ExecResult> {
+  if (csMissing || !fs.existsSync(path.join(ROOT, 'public/runtimes/cs/_framework/dotnet.js'))) {
+    if (!csMissing) warnings.push('C#-рантайм не собран (npm run build:cs-runtime) — C#-задачи не проверены.');
+    csMissing = true;
+    return { stdout: '', stderr: '', error: '__skip__', ms: 0 };
+  }
+  const t0 = Date.now();
+  const host = (csHost ??= await startCsHost());
+  const id = ++csSeq;
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      host.wait.delete(id);
+      host.proc.kill();
+      csHost = null;
+      resolve({ stdout: '', stderr: '', timeout: true, ms: Date.now() - t0 });
+    }, 20000);
+    host.wait.set(id, (r) => {
+      clearTimeout(timer);
+      host.wait.delete(id);
+      resolve({ stdout: r.output, stderr: '', error: csError(r), ms: Date.now() - t0 });
+    });
+    host.proc.stdin!.write(JSON.stringify({ id, files, stdin }) + '\n');
+  });
 }
 
 function runJs(files: string[], stdin: string): Promise<ExecResult> {
@@ -122,6 +179,7 @@ const executors: Executors = {
       return g(files, stdin);
     }
     if (lang === 'js') return runJs(files, stdin);
+    if (lang === 'cs') return runCs(files, stdin);
     if (hasPython === undefined) {
       try {
         execFileSync('python3', ['--version']);
@@ -264,6 +322,7 @@ async function main() {
   for (const e of uniq) console.log(`❌ ${e}`);
   const lessons = m.courses.reduce((a, c) => a + c.modules.reduce((b, x) => b + x.lessons.length, 0), 0);
   console.log(`\nКурсов: ${m.courses.length}, уроков: ${lessons}, прогнано решений: ${checked}. Ошибок: ${uniq.length}, предупреждений: ${new Set(warnings).size}.`);
+  csHost?.proc.kill();
   process.exit(uniq.length ? 1 : 0);
 }
 

@@ -1,9 +1,10 @@
 // Исполнители кода в браузере. Всё тяжёлое грузится лениво — при первом запуске.
 import type { ExecResult, Executors, SqlExecResult, SqlResult } from '../core/runners/check';
 import { DbSchema, introspect } from './sqlSchema';
+import { csError, type CsRunResult } from '../core/runners/cssrc';
 
 const BASE = import.meta.env.BASE_URL;
-const TIMEOUT = { go: 8000, js: 5000, python: 10000 };
+const TIMEOUT = { go: 8000, js: 5000, python: 10000, cs: 10000 };
 
 export type RuntimeStatus = 'idle' | 'loading' | 'ready' | 'error';
 type Listener = (lang: string, s: RuntimeStatus) => void;
@@ -101,6 +102,78 @@ export const preloadGo = () => {
     throw e;
   });
   goWorker.catch(() => undefined);
+};
+
+// ---------------- C# ----------------
+// .NET + Roslyn в модульном воркере (public/runtimes/cs). Грузится ≈15 МБ при первом запуске C#, дальше из кэша браузера.
+
+let csWorker: Promise<Worker> | null = null;
+export const csProgress = { loaded: 0, total: 0 };
+
+function spawnCs(): Promise<Worker> {
+  return (async () => {
+    setStatus('cs', 'loading');
+    const w = new Worker(`${BASE}runtimes/cs/cs-worker.js`, { type: 'module' });
+    await new Promise<void>((resolve, reject) => {
+      w.onmessage = (e) => {
+        if (e.data.type === 'progress') {
+          csProgress.loaded = e.data.loaded;
+          csProgress.total = e.data.total;
+          setStatus('cs', 'loading');
+        } else if (e.data.type === 'ready') resolve();
+        else if (e.data.type === 'result' && e.data.crashed) reject(new Error(`Не удалось запустить C#-рантайм: ${e.data.exception?.message ?? ''}`));
+      };
+      w.onerror = (e) => reject(new Error(e.message || 'Не удалось загрузить C#-рантайм. Если это локальная сборка — запусти npm run build:cs-runtime.'));
+      w.postMessage({ type: 'init' });
+    });
+    setStatus('cs', 'ready');
+    return w;
+  })().catch((e) => {
+    csWorker = null;
+    setStatus('cs', 'error');
+    throw e;
+  });
+}
+
+async function runCs(files: string[], stdin: string): Promise<ExecResult> {
+  return serial(async () => {
+    const t0 = performance.now();
+    csWorker ??= spawnCs();
+    let w: Worker;
+    try {
+      w = await csWorker;
+    } catch (e) {
+      return { stdout: '', stderr: '', error: (e as Error).message, ms: 0 };
+    }
+    const id = ++runId;
+    return new Promise<ExecResult>((resolve) => {
+      const timer = setTimeout(() => {
+        w.terminate();
+        csWorker = null;
+        setStatus('cs', 'idle');
+        resolve({ stdout: '', stderr: '', timeout: true, ms: performance.now() - t0 });
+      }, TIMEOUT.cs);
+      w.onmessage = (e) => {
+        if (e.data.type !== 'result' || e.data.id !== id) return;
+        clearTimeout(timer);
+        const r = e.data as CsRunResult;
+        if (r.crashed) {
+          // после StackOverflow рантайм мёртв — поднимем новый при следующем запуске
+          w.terminate();
+          csWorker = null;
+          setStatus('cs', 'idle');
+        }
+        resolve({ stdout: r.output, stderr: '', error: csError(r), ms: performance.now() - t0 });
+      };
+      w.postMessage({ type: 'run', id, files, stdin });
+    });
+  });
+}
+
+/** Начать грузить C#-рантайм заранее. */
+export const preloadCs = () => {
+  csWorker ??= spawnCs();
+  csWorker.catch(() => undefined);
 };
 
 // ---------------- JS ----------------
@@ -295,6 +368,7 @@ export async function createSqlSession() {
 export const browserExecutors: Executors = {
   code(lang, files, stdin) {
     if (lang === 'go') return runGo(files, stdin);
+    if (lang === 'cs') return runCs(files, stdin);
     if (lang === 'js') return runJs(files, stdin);
     return runPython(files, stdin);
   },

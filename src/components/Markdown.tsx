@@ -18,6 +18,7 @@ import diff from 'highlight.js/lib/languages/diff';
 import kotlin from 'highlight.js/lib/languages/kotlin';
 import nginx from 'highlight.js/lib/languages/nginx';
 import protobuf from 'highlight.js/lib/languages/protobuf';
+import csharp from 'highlight.js/lib/languages/csharp';
 import { I } from './ui/icons';
 import { Link } from 'react-router-dom';
 import { findCourse, lessonHref, useLessonCtx } from '../content';
@@ -53,7 +54,8 @@ hljs.registerLanguage('diff', diff);
 hljs.registerLanguage('kotlin', kotlin);
 hljs.registerLanguage('nginx', nginx);
 hljs.registerLanguage('protobuf', protobuf);
-const ALIAS: Record<string, string> = { js: 'javascript', ts: 'typescript', py: 'python', sh: 'bash', shell: 'bash', console: 'bash', golang: 'go', yml: 'yaml', html: 'xml', proto: 'protobuf' };
+hljs.registerLanguage('csharp', csharp);
+const ALIAS: Record<string, string> = { js: 'javascript', ts: 'typescript', py: 'python', sh: 'bash', shell: 'bash', console: 'bash', golang: 'go', cs: 'csharp', 'c#': 'csharp', yml: 'yaml', html: 'xml', proto: 'protobuf' };
 
 export function highlight(code: string, lang?: string): string {
   const l = lang ? (ALIAS[lang] ?? lang) : undefined;

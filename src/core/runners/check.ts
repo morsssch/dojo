@@ -2,9 +2,10 @@
 // (браузер — воркеры и wasm, `npm run check` — node).
 import type { CodeRule, TaskBlock } from '../schema';
 import { stripComments } from './explain';
+import { CS_HARNESS_PRELUDE } from './cssrc';
 import { dropGoMain, fixGoErrorLines, GO_HARNESS_PRELUDE, GO_PRELUDE_IMPORTS, mergeGo } from './gosrc';
 
-export type Lang = 'go' | 'js' | 'python' | 'sql';
+export type Lang = 'go' | 'js' | 'python' | 'cs' | 'sql';
 
 export interface ExecResult {
   stdout: string;
@@ -26,7 +27,7 @@ export interface SqlExecResult {
 }
 
 export interface Executors {
-  /** go: код уже склеен в один файл. js/python: [код ученика, харнесс?] */
+  /** go: код уже склеен в один файл. js/python: [код ученика, харнесс?]. cs: [код ученика, пролог и харнесс?] — отдельные файлы. */
   code(lang: Exclude<Lang, 'sql'>, files: string[], stdin: string): Promise<ExecResult>;
   /** Выполняет setup, затем scripts по очереди в чистой БД; возвращает результаты последнего скрипта. */
   sql(setup: string, scripts: string[]): Promise<SqlExecResult>;
@@ -70,6 +71,7 @@ export function prepare(lang: Exclude<Lang, 'sql'>, user: string, harness?: stri
     const m = mergeGo(user, extras);
     return { files: [m.code], fixError: (e: string) => fixGoErrorLines(e, m.userOffset, m.userLines) };
   }
+  if (lang === 'cs') return { files: harness ? [user, CS_HARNESS_PRELUDE, harness] : [user], fixError: (e: string) => e };
   return { files: harness ? [user, harness] : [user], fixError: (e: string) => e };
 }
 
@@ -125,9 +127,16 @@ async function checkCodeInner(task: TaskBlock, code: string, ex: Executors): Pro
     if (!h.cases.length) cases.push({ name: 'проверка', ok: false, message: 'Проверочный код ничего не сообщил — возможно, программа завершилась раньше.' });
   }
   for (const [i, t] of (task.tests ?? []).entries()) {
-    const { files, fixError } = prepare(lang, code);
+    const { files, fixError } = prepare(lang, code, t.harness);
     const r = await ex.code(lang, files, t.stdin);
     const name = t.name ?? `тест ${i + 1}`;
+    if (t.throws !== undefined) {
+      // ждём падения с нужной ошибкой
+      const ok = !r.timeout && !!r.error && r.error.includes(t.throws);
+      cases.push({ name, ok, hidden: t.hidden, stdin: t.stdin, message: ok ? undefined : r.error ? `упало не так: ${fixError(r.error).split('\n')[0]}` : `ожидалась ошибка ${t.throws}, но программа завершилась нормально` });
+      if (!stdout) stdout = r.stdout;
+      continue;
+    }
     if (r.error || r.timeout)
       return {
         ok: false,
@@ -138,8 +147,8 @@ async function checkCodeInner(task: TaskBlock, code: string, ex: Executors): Pro
         timeout: r.timeout,
         ms: Date.now() - t0,
       };
-    const ok = norm(r.stdout) === norm(t.stdout);
-    cases.push({ name, ok, hidden: t.hidden, stdin: t.stdin, expected: t.stdout, got: r.stdout });
+    const ok = t.match !== undefined ? new RegExp(t.match, t.matchFlags).test(r.stdout) : norm(r.stdout) === norm(t.stdout ?? '');
+    cases.push({ name, ok, hidden: t.hidden, stdin: t.stdin, expected: t.stdout ?? `соответствие шаблону /${t.match}/${t.matchFlags ?? ''}`, got: r.stdout });
     if (!stdout) stdout = r.stdout;
     stderr ||= r.stderr;
   }

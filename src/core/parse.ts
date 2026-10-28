@@ -151,6 +151,8 @@ const RUN_LANGS: Record<string, PlaygroundBlock['lang']> = {
   python: 'python',
   py: 'python',
   sql: 'sql',
+  cs: 'cs',
+  csharp: 'cs',
 };
 
 export function parseLesson(text: string, where = 'lesson'): Lesson {

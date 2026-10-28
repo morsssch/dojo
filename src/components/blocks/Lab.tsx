@@ -13,7 +13,7 @@ import { Markdown } from '../Markdown';
 import { I, KindIcon } from '../ui/icons';
 import { CheckOutput, LANG_LABEL } from './Task';
 
-const EXT: Record<string, string> = { go: 'go', js: 'js', python: 'py' };
+const EXT: Record<string, string> = { go: 'go', js: 'js', python: 'py', cs: 'cs' };
 
 export function Lab({ data: lab, id }: { data: LabBlock; id: string }) {
   const { courseId, lessonKey, lesson } = useLessonCtx();

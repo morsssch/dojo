@@ -23,6 +23,13 @@ jobs:
         with:
           go-version: '1.24'
           cache-dependency-path: runtimes/go/go.sum
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('runtimes/cs/CsRunner.csproj') }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -30,6 +37,8 @@ jobs:
       - run: npm ci
       - name: Build Go runtime (yaegi → wasm)
         run: npm run build:go-runtime
+      - name: Build C# runtime (Roslyn + .NET → wasm)
+        run: npm run build:cs-runtime
       - name: Check content + build
         run: npm run build
       - uses: actions/upload-pages-artifact@v3

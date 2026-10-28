@@ -6,3 +6,6 @@ public/runtimes/go/wasm_exec.js
 .DS_Store
 runtimes/go/stdlib
 tools/scratch
+public/runtimes/cs/_framework
+runtimes/cs/bin
+runtimes/cs/obj

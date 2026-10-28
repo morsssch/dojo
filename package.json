@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "check": "tsx tools/check.ts",
     "build:go-runtime": "bash runtimes/go/build.sh",
-    "roadmap:layout": "tsx tools/roadmap-layout.ts"
+    "roadmap:layout": "tsx tools/roadmap-layout.ts",
+    "build:cs-runtime": "bash runtimes/cs/build.sh"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

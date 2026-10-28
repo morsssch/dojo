@@ -15,6 +15,7 @@ Dojo — статическая платформа интерактивных к
 ```bash
 npm install
 npm run build:go-runtime   # один раз: собирает Go-интерпретатор в public/runtimes/go (нужен Go 1.22+)
+npm run build:cs-runtime   # один раз: собирает C# (Roslyn + .NET 10 в wasm) в public/runtimes/cs (нужен .NET SDK 10)
 npm run dev                # http://localhost:5173
 npm run check              # валидирует курсы и прогоняет эталонные решения всех задач
 npm run build              # check + tsc + vite build → dist/
@@ -28,13 +29,17 @@ npm run build              # check + tsc + vite build → dist/
   - `manifest.ts` — лёгкое описание курсов (строится при сборке Vite-плагином `tools/vite-plugin-dojo.ts`).
   - `runners/check.ts` — проверка задач (io-тесты, харнесс `@@PASS/@@FAIL`, сравнение SQL-таблиц); `runners/gosrc.ts` — склейка Go-исходников.
   - `git/` — MemFS, эмулятор оболочки с isomorphic-git, проверки целей.
-- `src/runtime/executors.ts` — исполнители в браузере: Go (yaegi wasm в воркере), JS (воркер), Python (pyodide CDN), SQL (PGlite).
+- `src/runtime/executors.ts` — исполнители в браузере: Go (yaegi wasm в воркере), C# (.NET + Roslyn в модульном воркере), JS (воркер), Python (pyodide CDN), SQL (PGlite).
+- `runtimes/cs/` — C#-раннер (`Runner.cs`: Roslyn компилирует файлы в памяти, код проверки оборачивается в свою точку входа) и `build.sh`;
+  воркер — `public/runtimes/cs/cs-worker.js`; в `npm run check` C# идёт через `tools/cs-host.mjs` (отдельный процесс, убивается по таймауту).
+  Пролог проверки `Dojo.Check/Assert/Throws` и разбор ответа раннера — `src/core/runners/cssrc.ts`.
 - `src/components/blocks/` — UI блоков: Quiz (+OrderList), Task, Git, Anim, Project, Cards, Written, Playground, Mermaid, Needs. Рендер — `Segments.tsx`.
 - `src/components/Workspace.tsx` — полноэкранный режим задач; `DbView.tsx` — ER-диаграмма и данные БД (интроспекция — `src/runtime/sqlSchema.ts`).
 - `src/core/runners/explain.ts` — объяснения ошибок Go/Postgres по-русски, `require`/`forbid`.
 - `src/state/progress.ts` — прогресс в localStorage, экспорт/импорт; `achievements.ts` — ачивки.
 - `src/pages/` — Home, Course (дашборд), Lesson (плеер шагов), Roadmap (@xyflow/react), Sandbox, Settings.
 - `runtimes/go/` — исходник Go-рантайма (`main.go`) и `build.sh` (список пакетов stdlib).
+- Личные курсы: `owners` в course.yaml — курс виден на сайте только после входа синхронизацией под этим логином (`src/content.ts`).
 
 ## Добавить новый тип блока
 

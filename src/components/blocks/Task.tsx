@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { TaskBlock } from '../../core/schema';
 import { CheckResult, checkCode, prepare, SqlResult, TIMEOUT_MSG, cellText } from '../../core/runners/check';
 import { useLessonCtx } from '../../content';
-import { browserExecutors, introspectSetup, onRuntimeStatus, preloadGo, preloadSql, runtimeStatus } from '../../runtime/executors';
+import { browserExecutors, csProgress, introspectSetup, onRuntimeStatus, preloadCs, preloadGo, preloadSql, runtimeStatus } from '../../runtime/executors';
 import type { DbSchema } from '../../runtime/sqlSchema';
 import { DbView } from '../DbView';
 import { Workspace } from '../Workspace';
@@ -15,7 +15,7 @@ import { Hints } from './common';
 import { Needs } from './Needs';
 import { explainError } from '../../core/runners/explain';
 
-export const LANG_LABEL: Record<string, string> = { go: 'Go', js: 'JavaScript', python: 'Python', sql: 'PostgreSQL' };
+export const LANG_LABEL: Record<string, string> = { go: 'Go', js: 'JavaScript', python: 'Python', cs: 'C#', sql: 'PostgreSQL' };
 const SOLUTION_AFTER = 3;
 
 export function useRuntimeStatus(lang: string) {
@@ -32,7 +32,17 @@ export function useRuntimeStatus(lang: string) {
 export function RuntimeNote({ lang }: { lang: string }) {
   const s = useRuntimeStatus(lang);
   if (s !== 'loading') return null;
-  const what = lang === 'go' ? 'Загружаю Go (около 5 МБ, только в первый раз)' : lang === 'python' ? 'Загружаю Python (около 10 МБ, только в первый раз)' : lang === 'sql' ? 'Запускаю Postgres в браузере' : 'Загрузка';
+  const cs = csProgress.total ? ` ${Math.round((csProgress.loaded / csProgress.total) * 100)}%` : '';
+  const what =
+    lang === 'go'
+      ? 'Загружаю Go (около 5 МБ, только в первый раз)'
+      : lang === 'python'
+        ? 'Загружаю Python (около 10 МБ, только в первый раз)'
+        : lang === 'cs'
+          ? `Загружаю C# и компилятор Roslyn (около 15 МБ, только в первый раз)${cs}`
+          : lang === 'sql'
+            ? 'Запускаю Postgres в браузере'
+            : 'Загрузка';
   return (
     <span className="rt-note">
       <span className="spinner" /> {what}…
@@ -89,6 +99,7 @@ export function Task({ data: task, id }: { data: TaskBlock; id: string }) {
 
   useEffect(() => {
     if (task.lang === 'go') preloadGo();
+    if (task.lang === 'cs') preloadCs();
     if (task.lang === 'sql') preloadSql();
   }, [task.lang]);
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Shell } from '../core/git/shell';
 import type { SqlExecResult } from '../core/runners/check';
 import { prepare, TIMEOUT_MSG } from '../core/runners/check';
-import { browserExecutors, createSqlSession, preloadGo } from '../runtime/executors';
+import { browserExecutors, createSqlSession, preloadCs, preloadGo } from '../runtime/executors';
 import { drafts } from '../state/progress';
 import { CodeEditor } from '../components/CodeEditor';
 import { GitWorkbench } from '../components/blocks/Git';
@@ -10,6 +10,15 @@ import { RunOutput, RuntimeNote, SqlTable } from '../components/blocks/Task';
 import { I } from '../components/ui/icons';
 
 const SAMPLES: Record<string, string> = {
+  cs: `// Операторы верхнего уровня: класс Program и Main писать не обязательно
+var names = new List<string> { "Аня", "Борис", "Вика" };
+foreach (var (n, i) in names.Select((n, i) => (n, i)))
+    Console.WriteLine($"{i + 1}. {n}");
+
+Console.Write("Как тебя зовут? ");
+var me = Console.ReadLine() ?? "гость";
+Console.WriteLine($"Привет, {me}! Сегодня {DateTime.Now:dddd}.");
+`,
   go: `package main
 
 import "fmt"
@@ -40,13 +49,14 @@ print(f"Привет, {name}!")
 `,
 };
 
-function CodeSandbox({ lang }: { lang: 'go' | 'js' | 'python' }) {
+function CodeSandbox({ lang }: { lang: 'go' | 'js' | 'python' | 'cs' }) {
   const [code, setCode] = useState(() => drafts.get(`sandbox:${lang}`) ?? SAMPLES[lang]);
   const [stdin, setStdin] = useState('');
   const [busy, setBusy] = useState(false);
   const [out, setOut] = useState<Parameters<typeof RunOutput>[0]['out'] | null>(null);
   useEffect(() => {
     if (lang === 'go') preloadGo();
+    if (lang === 'cs') preloadCs();
   }, [lang]);
   const run = async () => {
     setBusy(true);
@@ -174,6 +184,7 @@ function GitSandbox() {
 
 const TABS = [
   ['go', 'Go'],
+  ['cs', 'C#'],
   ['sql', 'SQL'],
   ['git', 'Git'],
   ['js', 'JavaScript'],

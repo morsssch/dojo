@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { PlaygroundBlock } from '../../core/schema';
 import { prepare, TIMEOUT_MSG } from '../../core/runners/check';
-import { browserExecutors, preloadGo } from '../../runtime/executors';
+import { browserExecutors, preloadCs, preloadGo } from '../../runtime/executors';
 import { CodeEditor } from '../CodeEditor';
 import { I } from '../ui/icons';
 import { LANG_LABEL, RunOutput, RuntimeNote } from './Task';
@@ -14,6 +14,7 @@ export function Playground({ data }: { data: PlaygroundBlock }) {
 
   useEffect(() => {
     if (data.lang === 'go') preloadGo();
+    if (data.lang === 'cs') preloadCs();
   }, [data.lang]);
 
   const run = async () => {

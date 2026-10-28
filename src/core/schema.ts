@@ -131,16 +131,23 @@ const CodeRule = z.union([
 ]);
 export type CodeRule = z.infer<typeof CodeRule>;
 
-const IoTest = z.object({
-  name: z.string().optional(),
-  stdin: z.string().default(''),
-  stdout: z.string(),
-  hidden: z.boolean().optional(),
-});
+const IoTest = z
+  .object({
+    name: z.string().optional(),
+    stdin: z.string().default(''),
+    stdout: z.string().optional(), // ожидаемый вывод целиком
+    match: z.string().optional(), // или регулярка, которой должен соответствовать вывод (флаги — matchFlags)
+    matchFlags: z.string().optional(),
+    throws: z.string().optional(), // или: программа должна упасть с ошибкой, в тексте которой есть эта строка (тип исключения, panic)
+    harness: z.string().optional(), // свой код проверки для этого теста: запускается вместе с кодом ученика, вывод сравнивается с stdout
+    hidden: z.boolean().optional(),
+  })
+  .strict()
+  .refine((t) => t.stdout !== undefined || t.match !== undefined || t.throws !== undefined, { message: 'у теста нужен stdout, match или throws' });
 
 export const TaskBlock = z.object({
   id: z.string().optional(),
-  lang: z.enum(['go', 'js', 'python', 'sql']),
+  lang: z.enum(['go', 'js', 'python', 'cs', 'sql']),
   title: z.string().optional(),
   prompt: md.optional(),
   starter: z.string().default(''),
@@ -246,7 +253,7 @@ export type ProjectBlock = z.infer<typeof ProjectBlock>;
 export const LabBlock = z.object({
   id: z.string(),
   title: z.string(),
-  lang: z.enum(['go', 'js', 'python']),
+  lang: z.enum(['go', 'js', 'python', 'cs']),
   intro: md.optional(),
   template: z.string(),
   // заглушки для ещё не сделанных этапов: код, который компилируется, но ничего не умеет
@@ -278,7 +285,7 @@ export const WrittenBlock = z.object({
 export type WrittenBlock = z.infer<typeof WrittenBlock>;
 
 export const PlaygroundBlock = z.object({
-  lang: z.enum(['go', 'js', 'python', 'sql']),
+  lang: z.enum(['go', 'js', 'python', 'cs', 'sql']),
   code: z.string(),
   setup: z.string().optional(),
   stdin: z.string().optional(),
