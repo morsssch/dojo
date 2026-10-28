@@ -14,6 +14,9 @@ export const CourseMeta = z.object({
   belts: z.array(z.object({ at: z.number().min(0).max(1), name: z.string(), color: z.string() })).optional(),
   draft: z.boolean().optional(),
   order: z.number().optional(),
+  // Личный курс: на сайте виден только после входа синхронизацией под одним из этих логинов GitHub.
+  // Это не защита (файлы курса лежат в публичном репозитории), а просто не показывать его всем подряд.
+  owners: z.array(z.string()).optional(),
   // Варианты (например, лабы по вариантам): ученик выбирает свой, блоки ```variant показываются только ему.
   variants: z
     .object({

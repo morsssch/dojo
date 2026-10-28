@@ -48,6 +48,9 @@ function writeCfg(c: SyncConfig | null) {
   set({ config: c });
 }
 
+/** Логин GitHub, под которым вошли синхронизацией. */
+export const syncLogin = () => status.config?.login;
+
 export const useSync = () =>
   useSyncExternalStore(
     (l) => {

@@ -3,8 +3,24 @@ import { createContext, useContext } from 'react';
 import rawManifest from 'virtual:dojo-manifest';
 import type { CourseInfo, LessonInfo, Manifest, ModuleInfo } from './core/manifest';
 import { Lesson, parseLesson } from './core/parse';
+import { syncLogin } from './state/sync';
 
-export const manifest = rawManifest as Manifest;
+const all = rawManifest as Manifest;
+
+/** Курс с owners виден только тому, кто вошёл синхронизацией под одним из этих логинов (в dev видно всё). */
+export const courseVisible = (c: CourseInfo) => {
+  if (!c.meta.owners?.length || import.meta.env.DEV) return true;
+  const login = syncLogin()?.toLowerCase();
+  return !!login && c.meta.owners.some((o) => o.toLowerCase() === login);
+};
+
+/** Манифест с учётом видимости: courses пересчитывается при каждом обращении (вход и выход меняют список). */
+export const manifest: Manifest = {
+  get courses() {
+    return all.courses.filter(courseVisible);
+  },
+  errors: all.errors,
+};
 
 const lessonFiles = import.meta.glob('/courses/**/*.md', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>;
 const cache = new Map<string, Lesson>();

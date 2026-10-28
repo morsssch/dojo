@@ -1,3 +1,4 @@
+import { useSync } from './state/sync';
 import { useCallback, useEffect, useState } from 'react';
 import { HashRouter, Link, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { findCourse, manifest } from './content';
@@ -131,6 +132,7 @@ function NotFound() {
 }
 
 export function App() {
+  useSync(); // вход и выход меняют список видимых курсов — перерисовываем всё
   return (
     <HashRouter>
       <ScrollTop />

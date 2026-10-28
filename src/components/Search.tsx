@@ -10,6 +10,8 @@ import { I } from './ui/icons';
 
 let indexP: Promise<SearchEntry[]> | null = null;
 const loadIndex = () => (indexP ??= import('virtual:dojo-search').then((m) => (m.default as SearchEntry[]).filter((e) => !e.draft)));
+// курсы, скрытые от этого посетителя (owners), в поиск не попадают
+const visibleEntries = (list: SearchEntry[]) => list.filter((e) => findCourse(e.course));
 
 const norm = (s: string) => s.toLowerCase().replace(/ё/g, 'е');
 
@@ -65,7 +67,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
   const list = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadIndex().then(setIndex);
+    loadIndex().then((l) => setIndex(visibleEntries(l)));
     input.current?.focus();
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -98,6 +100,7 @@ export function SearchPalette({ onClose }: { onClose: () => void }) {
     }
     // заметки ученика тоже ищутся
     for (const n of notesList(p)) {
+      if (!findCourse(n.course)) continue;
       if (!all && n.course !== currentCourse) continue;
       const tx = norm(n.text);
       if (!tokens.every((t) => tx.includes(t))) continue;
