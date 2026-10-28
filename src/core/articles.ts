@@ -7,24 +7,38 @@ export const ArticleMeta = z.object({
   description: z.string().optional(),
   tags: z.array(z.string()).default([]),
   draft: z.boolean().optional(),
+  // скрипт статьи: модуль с export function mount(root, ctx) — оживляет места крепления в теле статьи
+  script: z.string().optional(),
+  // стили статьи (только токены Dojo: var(--text), var(--accent), …); действуют только на её странице
+  style: z.string().optional(),
+  // ширина колонки: обычная (как у текста) или широкая — для таблиц и схем рядом с графиками
+  width: z.enum(['text', 'wide']).default('text'),
 }).strict();
 export type ArticleMeta = z.infer<typeof ArticleMeta>;
 
 export interface ArticleInfo {
   id: string;
   meta: ArticleMeta;
+  /** index.md (Markdown, можно с HTML и $формулами$) или index.html (готовая разметка, например из артефакта) */
   file: string;
+  format: 'md' | 'html';
 }
 
 export interface InteractiveSpec {
   id: string;
   module: string;
+  /** какую функцию модуля вызвать: (el, props, ctx) => …; по умолчанию mount */
+  export?: string;
   props?: Record<string, unknown>;
 }
 
 export type ArticleSegment =
   | { kind: 'markdown'; text: string }
+  | { kind: 'html'; html: string }
   | { kind: 'interactive'; spec: InteractiveSpec; error?: string };
+
+/** Путь к файлу статьи из относительного ("./interactive/x.ts") */
+export const articlePath = (articleId: string, rel: string) => `/articles/${articleId}/${rel.replace(/^\.\//, '')}`;
 
 export function parseArticleMeta(text: string, where: string): { meta?: ArticleMeta; error?: string } {
   try {
@@ -48,7 +62,7 @@ export function parseArticleSegments(text: string, where: string): { segments: A
     try {
       const raw = yaml.load(match[1]) as Record<string, unknown>;
       if (typeof raw?.id !== 'string' || typeof raw?.module !== 'string') throw new Error('нужны поля id и module');
-      spec = { id: raw.id, module: raw.module, props: (raw.props as Record<string, unknown> | undefined) ?? {} };
+      spec = { id: raw.id, module: raw.module, export: typeof raw.export === 'string' ? raw.export : undefined, props: (raw.props as Record<string, unknown> | undefined) ?? {} };
     } catch (error) {
       const message = `${where}: интерактивный блок не разобран — ${(error as Error).message}`;
       errors.push(message);

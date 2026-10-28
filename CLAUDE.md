@@ -39,6 +39,8 @@ npm run build              # check + tsc + vite build → dist/
 - `src/state/progress.ts` — прогресс в localStorage, экспорт/импорт; `achievements.ts` — ачивки.
 - `src/pages/` — Home, Course (дашборд), Lesson (плеер шагов), Roadmap (@xyflow/react), Sandbox, Settings.
 - `runtimes/go/` — исходник Go-рантайма (`main.go`) и `build.sh` (список пакетов stdlib).
+- Статьи: `articles/<id>/` (`index.md` или `index.html`, `script` с `mount(root, ctx)`, `style` на токенах Dojo); рантайм —
+  `src/articles/runtime.ts` (ctx, область CSS), формулы — `src/articles/math.ts` (KaTeX), страница — `src/pages/Article.tsx`.
 - Личные курсы: `owners` в course.yaml — курс виден на сайте только после входа синхронизацией под этим логином (`src/content.ts`).
 
 ## Добавить новый тип блока

@@ -301,25 +301,56 @@ async function checkGit(g: GitBlock, where: string) {
 function checkArticles() {
   const root = path.join(ROOT, 'articles');
   if (!fs.existsSync(root)) return;
+  const inside = (dir: string, rel: string) => {
+    const p = path.resolve(dir, rel);
+    return p.startsWith(`${dir}${path.sep}`) && fs.existsSync(p) ? p : null;
+  };
+  const exportsFn = (src: string, name: string) => new RegExp(`export\\s+(async\\s+)?function\\s+${name}\\b|export\\s+const\\s+${name}\\b|export\\s*\\{[^}]*\\b${name}\\b`).test(src);
+  // цвета — только токенами Dojo (var(--text), var(--accent), …), иначе статья не переключается с темой
+  const hardColors = (file: string) => {
+    const src = fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\/|(^|[^:])\/\/[^\n]*/g, '$1');
+    const m = src.match(/#[0-9a-fA-F]{3,8}\b(?![\w-])|\brgba?\(\s*\d/g)?.filter((x) => !/^#(\d+|[0-9a-f]{1,2})$/i.test(x));
+    if (m?.length) warnings.push(`${path.relative(ROOT, file)}: цвета заданы вручную (${[...new Set(m)].slice(0, 4).join(', ')}) — используй токены Dojo, см. AUTHORING «Статьи»`);
+  };
   for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const dir = path.join(root, entry.name);
+    const rel = path.relative(ROOT, dir);
     const metaFile = path.join(dir, 'article.yaml');
-    const indexFile = path.join(dir, 'index.md');
-    if (!fs.existsSync(metaFile) || !fs.existsSync(indexFile)) {
-      errors.push(`${path.relative(ROOT, dir)}: нужны article.yaml и index.md`);
+    const md = path.join(dir, 'index.md');
+    const html = path.join(dir, 'index.html');
+    if (!fs.existsSync(metaFile) || (!fs.existsSync(md) && !fs.existsSync(html))) {
+      errors.push(`${rel}: нужны article.yaml и index.md (или index.html)`);
       continue;
     }
     const meta = parseArticleMeta(fs.readFileSync(metaFile, 'utf8'), metaFile);
     if (meta.error) errors.push(meta.error);
-    const parsed = parseArticleSegments(fs.readFileSync(indexFile, 'utf8'), indexFile);
+    if (meta.meta?.script) {
+      const f = inside(dir, meta.meta.script);
+      if (!f) errors.push(`${rel}/article.yaml: script не найден: ${meta.meta.script}`);
+      else {
+        if (!exportsFn(fs.readFileSync(f, 'utf8'), 'mount')) errors.push(`${path.relative(ROOT, f)}: нет export function mount(root, ctx)`);
+        hardColors(f);
+      }
+    }
+    if (meta.meta?.style) {
+      const f = inside(dir, meta.meta.style);
+      if (!f) errors.push(`${rel}/article.yaml: style не найден: ${meta.meta.style}`);
+      else hardColors(f);
+    }
+    const bodyFile = fs.existsSync(html) ? html : md;
+    const body = fs.readFileSync(bodyFile, 'utf8');
+    // <script> в теле не выполнится — код статьи живёт в script из article.yaml
+    if (/<script\b/i.test(body)) errors.push(`${path.relative(ROOT, bodyFile)}: <script> в теле статьи не выполняется — вынеси код в script (article.yaml)`);
+    if (bodyFile === html) continue;
+    const parsed = parseArticleSegments(body, md);
     errors.push(...parsed.errors);
     for (const segment of parsed.segments) {
       if (segment.kind !== 'interactive' || segment.error) continue;
-      const modulePath = path.resolve(dir, segment.spec.module);
-      if (!modulePath.startsWith(`${dir}${path.sep}`) || !fs.existsSync(modulePath)) {
-        errors.push(`${indexFile}: интерактивный модуль не найден: ${segment.spec.module}`);
-      }
+      const f = inside(dir, segment.spec.module);
+      if (!f) errors.push(`${md}: интерактивный модуль не найден: ${segment.spec.module}`);
+      else if (!exportsFn(fs.readFileSync(f, 'utf8'), segment.spec.export ?? 'mount'))
+        errors.push(`${path.relative(ROOT, f)}: нет export function ${segment.spec.export ?? 'mount'}(el, props, ctx) для блока ${segment.spec.id}`);
     }
   }
 }

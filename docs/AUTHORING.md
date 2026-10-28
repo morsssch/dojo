@@ -68,40 +68,93 @@ codewars:                    # необязательно: разминка на
 
 ### Статьи и интерактивные артефакты
 
-Статья — самостоятельный материал, не часть курса. Она лежит в `articles/<article-id>/`:
+Статья — самостоятельный материал, не часть курса: методичка, лонгрид, тренажёр. Лежит в `articles/<article-id>/`.
+Два живых образца: `articles/how-articles-work/` (Markdown + блок-интерактив) и `articles/linear-programming/`
+(артефакт Claude, перенесённый почти без правок: HTML + скрипт).
 
 ```text
-articles/
-  linear-programming/
-    article.yaml
-    index.md
-    interactive/
-      simplex-walkthrough.ts
+articles/<article-id>/
+  article.yaml
+  index.md   или  index.html   # тело статьи (если есть оба — берётся index.html)
+  style.css                    # необязательно: стили статьи
+  lp.js / *.ts                 # необязательно: скрипт статьи и модули блоков (TS можно, import между файлами можно)
 ```
 
-`article.yaml` содержит `title`, необязательный `subtitle`, `description`, `tags` и `draft`. В `index.md` можно вставить декларативный блок:
-
-````markdown
-```interactive
-id: simplex-walkthrough
-module: ./interactive/simplex-walkthrough.ts
-props:
-  example: workshop
-```
-````
-
-Модуль собирается Vite отдельно от текста и запускается в `iframe` с `sandbox="allow-scripts"`. Он не получает доступ к DOM приложения, localStorage или токенам. После загрузки модуль ждёт сообщение `dojo:init` и рисует интерфейс в `#app`; высоту можно сообщить родителю так:
-
-```ts
-window.addEventListener('message', (event) => {
-  if (event.data?.type !== 'dojo:init') return;
-  const root = document.getElementById('app');
-  // создать UI только внутри root
-  window.parent.postMessage({ type: 'dojo:resize', height: root?.scrollHeight ?? 200 }, '*');
-}, { once: true });
+```yaml
+title: Линейное программирование с нуля   # заголовок рисует Dojo — в теле его не дублируй
+subtitle: Одна-две фразы под заголовком
+description: Для карточки на главной
+tags: [симплекс-метод]
+draft: false
+script: ./lp.js        # модуль с export function mount(root, ctx) — оживляет тело статьи
+style: ./style.css     # стили, действуют только на странице этой статьи
+width: wide            # text (по умолчанию, колонка текста) | wide — для таблиц и графиков рядом
 ```
 
-Не вставляй `<script>` в Markdown и не читай состояние родительского окна из интерактива. Для схем без состояния используй обычный Markdown/SVG; отдельный интерактивный модуль нужен, когда пользователю важно двигать шаги, менять параметры или видеть вычисления.
+**Тело.** `index.md` — обычный Markdown Dojo (выноски `> [!NOTE]`, таблицы, код) плюс формулы и HTML-вставки:
+`$…$` в строке, `$$…$$` отдельным абзацем; внутри HTML работают `\(…\)` и `\[…\]` (как в MathJax). Формулы рисует KaTeX.
+`index.html` — готовая разметка без `<html>`, `<head>`, `<body>` и без `<script>` (не выполнится): так проще всего
+переносить артефакты. Якорные ссылки `href="#раздел"` работают (прокрутка к `id` внутри статьи).
+
+**Интерактив — прямо на странице, без iframe.** Код статьи собирает Vite, поэтому работают TypeScript и `import`.
+Два способа, можно вместе:
+
+1. **Скрипт всей статьи** (`script` в article.yaml) — для артефактов, где один движок оживляет много мест по `id`/`data-*`:
+
+   ```js
+   export function mount(root, ctx) {
+     // вместо document.getElementById — root.querySelector('#id'); вместо window.addEventListener — ctx.on(window, …)
+     new Stepper(root.querySelector('#demo-simplex'), steps);
+     return () => { /* снять таймеры, если есть */ };
+   }
+   ```
+
+2. **Блок в Markdown** — самостоятельный виджет в конкретном месте текста:
+
+   ````markdown
+   ```interactive
+   id: wave            # уникальный в статье
+   module: ./wave.ts
+   export: wave        # функция модуля (el, props, ctx) => cleanup?; по умолчанию mount
+   props:
+     amplitude: 1.5
+   ```
+   ````
+
+`ctx` — помощники платформы:
+
+| | |
+|---|---|
+| `ctx.root` | корень статьи |
+| `ctx.typeset(el)` | отрисовать формулы `\( \)` `\[ \]` `$$` в элементе — вызывай после вставки HTML (замена `MathJax.typesetPromise`) |
+| `ctx.tex(el, 'x^2', display?)` | одна формула в элемент (замена `MathJax.tex2svg`) |
+| `ctx.reducedMotion` | ученик просил меньше анимации — показывай сразу результат |
+| `ctx.store.get(key, fallback)` / `.set(key, value)` | хранилище статьи (localStorage с префиксом) |
+| `ctx.on(target, type, fn)` / `ctx.onCleanup(fn)` | подписки и уборка, которые снимутся при уходе со страницы |
+
+**Стиль — только Dojo.** В `style.css` и в коде цвета задаются **только токенами**: `var(--text)`, `var(--muted)`,
+`var(--line)`, `var(--line-2)`, `var(--surface)`, `var(--surface-2)`, `var(--bg)`, `var(--accent)` (главный цвет:
+линии, выделения), `var(--ok)`, `var(--bad)`, `var(--warn)`, `var(--info)`; полупрозрачные — `color-mix(in srgb, var(--accent) 15%, transparent)`.
+Шрифты — `var(--font-ui)`, `var(--font-display)`, `var(--font-mono)`; радиусы — `var(--r-s|m|l)`. Тогда статья сама
+переключается с темой, акцентом и шрифтом. Кнопки — классы Dojo `btn`, `btn primary`, `btn small`. `npm run check`
+предупреждает о цветах, заданных вручную. CSS статьи оборачивается в `[data-article="id"]`, поэтому её классы
+не протекают на сайт; `:root`, `html`, `body` в нём означают саму статью.
+
+> [!WARNING]
+> Классы Dojo (`.toc`, `.toc-head`, `.panel`, `.bar`, `.tag`, `.md`…) уже заняты, и правила сайта действуют и внутри статьи.
+> Свои классы называй с префиксом статьи (`.lp-…`) или проверяй, что имя свободно: `grep -n "^\.имя" src/styles/app.css`.
+
+**Перенос артефакта Claude (HTML-страница с `<style>` и `<script>`)** — почти механически:
+
+1. Разметку из `<body>` (без своей шапки с заголовком) → `index.html`. Убери личный контекст: имена, группы, даты.
+2. `<style>` → `style.css`. Если артефакт держит палитру в переменных (`--ink`, `--blue`…), переопредели их токенами
+   Dojo в `:root { --ink: var(--text); --blue: var(--accent); … }` — правила менять почти не придётся. Убери оформление
+   страницы (фон «тетради», свои кнопки, шрифты) — их даёт Dojo. Вшитые шрифты и MathJax не нужны.
+3. `<script>` (обычно IIFE) → `script.js` с `export function mount(root, ctx) { … }`: `document.getElementById` →
+   `root.querySelector('#…')`, `document.querySelector(All)` → `root.querySelector(All)`, `MathJax.typesetPromise([el])` →
+   `ctx.typeset(el)`, `MathJax.tex2svg` → `ctx.tex`, прокрутка/resize окна → `ctx.on(window, …)`, `prefers-reduced-motion` → `ctx.reducedMotion`.
+4. Оглавление, а не чек-лист: нумерованные разделы со ссылками на подтемы (как в `linear-programming`).
+5. Проверь в браузере каждый интерактив, светлую/тёмную тему и ширину 390 px.
 
 ### module.yaml
 

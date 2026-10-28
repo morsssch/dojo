@@ -30,12 +30,15 @@
     "highlight.js": "^11.12.0",
     "isomorphic-git": "^1.44.5",
     "js-yaml": "^4.3.2",
+    "katex": "^0.16.47",
     "mermaid": "^11.17.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.1.0",
     "react-router-dom": "^6.30.6",
-    "remark-gfm": "^4.0.1"
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

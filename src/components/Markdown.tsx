@@ -2,6 +2,8 @@
 import { Children, isValidElement, memo, ReactNode } from 'react';
 import ReactMarkdown, { Components, defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeRaw from 'rehype-raw';
 import hljs from 'highlight.js/lib/core';
 import go from 'highlight.js/lib/languages/go';
 import sql from 'highlight.js/lib/languages/sql';
@@ -87,6 +89,8 @@ const components: Components = {
       const props = child.props as { className?: string; children?: ReactNode };
       const lang = props.className?.replace('language-', '');
       const code = textOf(props.children).replace(/\n$/, '');
+      // $$…$$ из remark-math: отрисует KaTeX (src/articles/math.ts)
+      if (props.className?.includes('math-display')) return <div className="math-tex" data-display="true">{code}</div>;
       return (
         <pre>
           <code className={`hljs${lang ? ` language-${lang}` : ''}`} dangerouslySetInnerHTML={{ __html: highlight(code, lang) }} />
@@ -146,12 +150,26 @@ const components: Components = {
   table({ children }) {
     return <table>{children}</table>;
   },
+  code({ className, children }) {
+    if (className?.includes('math-inline')) return <span className="math-tex">{textOf(children)}</span>;
+    return <code className={className}>{children}</code>;
+  },
 };
 
-export const Markdown = memo(function Markdown({ text, className }: { text: string; className?: string }) {
+const PLAIN = [remarkGfm];
+const RICH_REMARK = [remarkGfm, remarkMath];
+const RICH_REHYPE = [rehypeRaw];
+
+/** rich — для статей: формулы $…$ / $$…$$ и HTML внутри Markdown (статьи пишем мы сами, им можно доверять). */
+export const Markdown = memo(function Markdown({ text, className, rich }: { text: string; className?: string; rich?: boolean }) {
   return (
     <div className={`md ${className ?? ''}`}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components} urlTransform={(url) => url.startsWith('lesson:') ? url : defaultUrlTransform(url)}>
+      <ReactMarkdown
+        remarkPlugins={rich ? RICH_REMARK : PLAIN}
+        rehypePlugins={rich ? RICH_REHYPE : undefined}
+        components={components}
+        urlTransform={(url) => (url.startsWith('lesson:') ? url : defaultUrlTransform(url))}
+      >
         {text}
       </ReactMarkdown>
     </div>

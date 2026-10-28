@@ -3836,3 +3836,12 @@ pre {
 .interactive-error { margin: 18px 0; padding: 14px; border: 1px solid var(--bad); border-radius: var(--r-m); color: var(--bad); background: var(--bad-soft); }
 @media (max-width: 620px) { .article-lede { font-size: 16px; } .article-head { margin-bottom: 28px; } }
 
+
+/* статьи: широкая колонка для разборов с таблицами и графиками */
+.article-page.wide { max-width: 980px; }
+.article-page.wide .article-head,
+.article-page.wide .article-body { max-width: none; }
+.ix-block { margin: 0 0 22px; }
+.article-html > :first-child { margin-top: 0; }
+/* текст внутри формул (\text{…}) — шрифтом интерфейса, как обычный текст */
+.katex .text .mord { font-family: var(--font-ui); }

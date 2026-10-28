@@ -7,13 +7,18 @@ import { ArticleInfo, parseArticleMeta, parseArticleSegments } from './core/arti
 import { syncLogin } from './state/sync';
 
 const articleMetaFiles = import.meta.glob('/articles/**/article.yaml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-const articleFiles = import.meta.glob('/articles/**/index.md', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>;
+const articleFiles = import.meta.glob('/articles/*/index.{md,html}', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>;
+// скрипты и стили статей собирает Vite: TS компилируется, работают import между файлами статьи
+export const articleModules = import.meta.glob('/articles/**/*.{ts,js}') as Record<string, () => Promise<Record<string, unknown>>>;
+export const articleStyles = import.meta.glob('/articles/**/*.css', { query: '?inline', import: 'default' }) as Record<string, () => Promise<string>>;
 
 export const articles: ArticleInfo[] = Object.entries(articleMetaFiles).flatMap(([file, text]) => {
   const parsed = parseArticleMeta(text, file);
-  if (!parsed.meta) return [];
+  if (!parsed.meta || (parsed.meta.draft && !import.meta.env.DEV)) return [];
   const id = file.match(/^\/articles\/([^/]+)\//)?.[1];
-  return id ? [{ id, meta: parsed.meta, file: `/articles/${id}/index.md` }] : [];
+  if (!id) return [];
+  const html = `/articles/${id}/index.html`;
+  return [articleFiles[html] ? { id, meta: parsed.meta, file: html, format: 'html' as const } : { id, meta: parsed.meta, file: `/articles/${id}/index.md`, format: 'md' as const }];
 }).sort((a, b) => a.meta.title.localeCompare(b.meta.title));
 
 export const findArticle = (id?: string) => articles.find((a) => a.id === id);
@@ -21,7 +26,9 @@ export const findArticle = (id?: string) => articles.find((a) => a.id === id);
 export async function loadArticle(article: ArticleInfo) {
   const loader = articleFiles[article.file];
   if (!loader) return { segments: [], errors: [`Файл статьи не найден: ${article.file}`] };
-  return parseArticleSegments(await loader(), article.file);
+  const text = await loader();
+  if (article.format === 'html') return { segments: [{ kind: 'html' as const, html: text }], errors: [] };
+  return parseArticleSegments(text, article.file);
 }
 
 export interface ArticleContextValue { articleId: string }
