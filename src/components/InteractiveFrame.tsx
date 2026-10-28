@@ -33,7 +33,11 @@ export function InteractiveFrame({ articleId, spec }: { articleId: string; spec:
     if (!frame || !url) return;
     const send = () => frame.contentWindow?.postMessage({ type: 'dojo:init', id: spec.id, props: spec.props ?? {} }, '*');
     frame.addEventListener('load', send);
-    return () => frame.removeEventListener('load', send);
+    const timer = window.setTimeout(send, 100);
+    return () => {
+      frame.removeEventListener('load', send);
+      window.clearTimeout(timer);
+    };
   }, [spec.id, spec.props, url]);
 
   if (!url) return <div className="interactive-error">Интерактивный модуль не найден: <code>{spec.module}</code></div>;
