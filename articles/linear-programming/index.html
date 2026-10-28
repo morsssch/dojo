@@ -26,13 +26,16 @@
       <p class="lpt-desc">когда Δ ≥ 0, а b &lt; 0: задачи на min с ≥</p>
       <ul class="lpt-subs"><li><a href="#dsim-theory">Теория</a></li><li><a href="#dsim-demo">Разбор по шагам</a></li><li><a href="#dsim-whatif">Что если в твоей задаче…</a></li><li><a href="#dsim-practice">Практика</a></li></ul>
     </li>
+    <li><div class="lpt-head"><span class="lpt-n">7</span><a href="#ticket">Разбор билета</a><span class="lpt-min">15 мин</span></div>
+      <p class="lpt-desc">вариант 4: искусственный базис, проверка плана, двойственный симплекс</p>
+    </li>
   </ol>
   <p class="lpt-cheat"><a href="#cheat">Шпаргалка перед контрольной</a> — все алгоритмы на одном экране.</p>
 </nav>
 </div>
 
 <nav class="top" aria-label="Разделы"><div class="in">
-  <a href="#base">Основы</a><a href="#graph">Графический</a><a href="#simplex">Симплекс</a><a href="#art">Искусств. базис</a><a href="#dual">Двойственность</a><a href="#dsim">Двойств. симплекс</a><a href="#cheat">Шпаргалка</a>
+  <a href="#base">Основы</a><a href="#graph">Графический</a><a href="#simplex">Симплекс</a><a href="#art">Искусств. базис</a><a href="#dual">Двойственность</a><a href="#dsim">Двойств. симплекс</a><a href="#cheat">Шпаргалка</a><a href="#ticket">Билет</a>
 </div></nav>
 
 <!-- ================= ОСНОВЫ ================= -->
@@ -1020,6 +1023,57 @@
       <li>Столбец: a &lt; 0, min Δ/|a|. Нет a &lt; 0 → Нр1.</li></ol>
       <p class="muted" style="font-size:.88rem">Ведущий элемент всегда отрицательный. Жордановы преобразования те же.</p></div>
   </div>
+</section>
+
+<!-- ================= РАЗБОР БИЛЕТА ================= -->
+<section class="sec" id="ticket">
+  <div class="sec-head"><div><div class="eyebrow">Часть 7 · ~15 мин</div><h2>Разбор билета: вариант 4</h2></div></div>
+  <p>Три вопроса из контрольной. Каждый — на свою тему: искусственный базис, проверка плана на оптимальность, двойственный симплекс. Сначала попробуй сам, потом открывай решение.</p>
+
+  <div class="task"><div class="task-h"><span class="task-n">В1</span><span class="task-t">Решить симплекс-методом</span></div>
+    <div class="task-b"><div class="tex">\[\begin{array}{l}z=-4x_2+3x_3\to\max\\[4pt]\begin{cases}-x_1+x_4=5\\-x_2+x_3=5\\x_1+3x_2\ge5\\x_j\ge0,\ j=\overline{1,4}\end{cases}\end{array}\]</div><p class="hint">Посмотри, у каких строк уже есть «своя» переменная с коэффициентом +1.</p></div>
+    <details><summary>Показать решение</summary><div class="nb">
+      <p class="hd">Каноническая форма</p>
+      <p>(3) ≥ ⇒ вычитаем x₅:</p>
+      <div class="tex">\[\begin{cases}-x_1+x_4=5\\-x_2+x_3=5\\x_1+3x_2-x_5=5\\x_j\ge0,\ j=\overline{1,5}\end{cases}\]</div>
+      <p>x₄ — единичный в (1), x₃ — единичный в (2). В (3) «своей» переменной нет: у x₅ коэффициент −1 ⇒ одна искусственная w₁</p>
+      <div class="tex">\[F=-w_1\to\max,\qquad x_1+3x_2-x_5+w_1=5\]</div>
+      <div class="flow" data-ax2="T1"></div>
+      <p>Все Δ ≥ 0 ⇒ оптимум</p>
+      <p class="ans">\(x^*=(5;\,0;\,5;\,10),\quad z_{\max}=-4\cdot0+3\cdot5=15\)</p>
+      <p class="pen">проверка: −5 + 10 = 5 ✓; −0 + 5 = 5 ✓; 5 + 0 = 5 ≥ 5 ✓</p>
+      <p class="hd">Оптимум не единственный</p>
+      <p>У свободной x₅ оценка Δ = 0 ⇒ её можно увеличивать без потери z. Её столбец (−1; 0; −1) весь ≤ 0, поэтому ограничений на рост нет: оптимальные решения лежат на луче</p>
+      <div class="tex">\[x^*(t)=(5+t;\ 0;\ 5;\ 10+t),\quad t\ge0,\qquad z=15\]</div>
+      <p class="pen">в ответ достаточно x* = (5; 0; 5; 10), z = 15. Про луч можно дописать одной строкой — это плюс</p>
+      <p class="pen">быстрая проверка без таблиц: из (2) x₃ = 5 + x₂ ⇒ z = −4x₂ + 15 + 3x₂ = 15 − x₂, максимум при x₂ = 0</p>
+    </div></details></div>
+
+  <div class="task"><div class="task-h"><span class="task-n">В2</span><span class="task-t">Проверить, является ли x̄ = (3; 0; 3; 0; 2) оптимальным</span></div>
+    <div class="task-b"><div class="tex">\[\begin{array}{l}f=-4x_1-2x_2+4x_3\to\min\\[4pt]\begin{cases}x_1-x_2+x_3-x_4+x_5\le2\\-2x_1+x_2-2x_3+x_4+2x_5\ge1\\x_1+2x_2-3x_3+x_4-x_5=-2\\x_3\ge0\end{cases}\end{array}\]</div><p class="hint">Та же задача, что Д10 в главе про двойственность, только план другой. С чего начинается схема проверки?</p></div>
+    <details><summary>Показать решение</summary><div class="nb">
+      <p class="hd">0) Допустимость — первый шаг схемы</p>
+      <div class="tex">\[\begin{array}{lll}(1):&3-0+3-0+2=8\le2&\times\\[3pt](2):&-6+0-6+0+4=-8\ge1&\times\\[3pt](3):&3+0-9+0-2=-8=-2&\times\end{array}\]</div>
+      <p>x̄ нарушает все три ограничения ⇒ он не допустим, а недопустимый план не может быть оптимальным. Строить J, I и систему (7) не нужно.</p>
+      <p class="ans">x̄ не является оптимальным решением: он недопустим</p>
+      <p class="pen">в билете x̄ назван допустимым, но подстановка это опровергает — так и пиши, с проверкой всех трёх строк</p>
+      <p class="pen">ловушка: f(x̄) = −12 − 0 + 12 = 0 совпадает с настоящим минимумом (он достигается в x = (0; 2; 1; 0; 3), см. Д10). Совпадение f ничего не доказывает, если план не допустим</p>
+    </div></details></div>
+
+  <div class="task"><div class="task-h"><span class="task-n">В3</span><span class="task-t">Решить двойственным симплекс-методом</span></div>
+    <div class="task-b"><div class="tex">\[\begin{array}{l}f=2x_1+x_2\to\min\\[4pt]\begin{cases}3x_1+x_2\ge3\\4x_1+3x_2\ge5\\x\ge0\end{cases}\end{array}\]</div><p class="hint">Это ДЗ №3–4, задача 5а (ДС1).</p></div>
+    <details><summary>Показать решение</summary><div class="nb">
+      <p class="hd">Подготовка</p>
+      <p>min → max(−f), оба ≥ умножаем на −1 и прибавляем x₃, x₄:</p>
+      <div class="tex">\[\begin{array}{l}-f=-2x_1-x_2\to\max\\[4pt]\begin{cases}-3x_1-x_2+x_3=-3\\-4x_1-3x_2+x_4=-5\end{cases}\end{array}\]</div>
+      <p>Δ = (2; 1) ≥ 0, а b &lt; 0 ⇒ условия двойственного симплекса выполнены</p>
+      <div class="flow" data-ds="a"></div>
+      <p class="pen">1-й шаг: самое отрицательное b = −5 (строка x₄); Δ/|a|: 2/4 = 1/2 и 1/3 ⇒ столбец x₂</p>
+      <p class="pen">2-й шаг: b = −4/3 (строка x₃); Δ/|a|: (2/3)/(5/3) = 2/5 и (1/3)/(1/3) = 1 ⇒ столбец x₁</p>
+      <p>Все b ≥ 0 ⇒ оптимум</p>
+      <p class="ans">\(x^*=(\tfrac45;\,\tfrac35),\quad f_{\min}=-(-\tfrac{11}5)=\tfrac{11}5\)</p>
+      <p class="pen">проверка: 2·4/5 + 3/5 = 11/5 ✓; 12/5 + 3/5 = 3 ≥ 3 ✓; 16/5 + 9/5 = 5 ≥ 5 ✓</p>
+    </div></details></div>
 </section>
 
 <footer>Все таблицы в разборах и решениях посчитаны прямо на странице в точных дробях, поэтому числа можно сверять со своими вычислениями. Прогресс в маршруте сохраняется в этом браузере.</footer>
