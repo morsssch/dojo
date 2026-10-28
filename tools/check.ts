@@ -12,6 +12,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { buildManifest } from '../src/core/manifest';
 import { Lesson, parseLesson } from '../src/core/parse';
+import { parseArticleMeta, parseArticleSegments } from '../src/core/articles';
 import type { QuizBlock, TaskBlock, GitBlock, LabBlock } from '../src/core/schema';
 import { assembleLab, assembleStage, findLab, labAsTask, labParts, labStages } from '../src/core/lab';
 import { checkCode, ExecResult, Executors, SqlExecResult } from '../src/core/runners/check';
@@ -297,7 +298,34 @@ async function checkGit(g: GitBlock, where: string) {
   after.forEach((ok, i) => !ok && errors.push(`${where}: после решения не выполнена цель «${g.goals[i].text}»`));
 }
 
+function checkArticles() {
+  const root = path.join(ROOT, 'articles');
+  if (!fs.existsSync(root)) return;
+  for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const dir = path.join(root, entry.name);
+    const metaFile = path.join(dir, 'article.yaml');
+    const indexFile = path.join(dir, 'index.md');
+    if (!fs.existsSync(metaFile) || !fs.existsSync(indexFile)) {
+      errors.push(`${path.relative(ROOT, dir)}: нужны article.yaml и index.md`);
+      continue;
+    }
+    const meta = parseArticleMeta(fs.readFileSync(metaFile, 'utf8'), metaFile);
+    if (meta.error) errors.push(meta.error);
+    const parsed = parseArticleSegments(fs.readFileSync(indexFile, 'utf8'), indexFile);
+    errors.push(...parsed.errors);
+    for (const segment of parsed.segments) {
+      if (segment.kind !== 'interactive' || segment.error) continue;
+      const modulePath = path.resolve(dir, segment.spec.module);
+      if (!modulePath.startsWith(`${dir}${path.sep}`) || !fs.existsSync(modulePath)) {
+        errors.push(`${indexFile}: интерактивный модуль не найден: ${segment.spec.module}`);
+      }
+    }
+  }
+}
+
 async function main() {
+  checkArticles();
   const files = readCourseFiles(ROOT);
   const m = buildManifest(files);
   errors.push(...m.errors);

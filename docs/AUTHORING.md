@@ -66,6 +66,43 @@ codewars:                    # необязательно: разминка на
 - `after` — id модуля: задача попадает в разминку, когда ученик прошёл в этом модуле хотя бы один урок. Без `after` — сразу.
   Задачи не встраиваются в сайт: ученик открывает ссылку, решает на Codewars и отмечает «Решил».
 
+### Статьи и интерактивные артефакты
+
+Статья — самостоятельный материал, не часть курса. Она лежит в `articles/<article-id>/`:
+
+```text
+articles/
+  linear-programming/
+    article.yaml
+    index.md
+    interactive/
+      simplex-walkthrough.ts
+```
+
+`article.yaml` содержит `title`, необязательный `subtitle`, `description`, `tags` и `draft`. В `index.md` можно вставить декларативный блок:
+
+````markdown
+```interactive
+id: simplex-walkthrough
+module: ./interactive/simplex-walkthrough.ts
+props:
+  example: workshop
+```
+````
+
+Модуль собирается Vite отдельно от текста и запускается в `iframe` с `sandbox="allow-scripts"`. Он не получает доступ к DOM приложения, localStorage или токенам. После загрузки модуль ждёт сообщение `dojo:init` и рисует интерфейс в `#app`; высоту можно сообщить родителю так:
+
+```ts
+window.addEventListener('message', (event) => {
+  if (event.data?.type !== 'dojo:init') return;
+  const root = document.getElementById('app');
+  // создать UI только внутри root
+  window.parent.postMessage({ type: 'dojo:resize', height: root?.scrollHeight ?? 200 }, '*');
+}, { once: true });
+```
+
+Не вставляй `<script>` в Markdown и не читай состояние родительского окна из интерактива. Для схем без состояния используй обычный Markdown/SVG; отдельный интерактивный модуль нужен, когда пользователю важно двигать шаги, менять параметры или видеть вычисления.
+
 ### module.yaml
 
 ```yaml
