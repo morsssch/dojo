@@ -13,4 +13,4 @@ npm run build:go-runtime   # нужен Go 1.22+
 npm run dev
 ```
 
-Как писать курсы — в [`docs/AUTHORING.md`](docs/AUTHORING.md).
+Как писать курсы — в [`docs/AUTHORING.md`](docs/AUTHORING.md). Готовые скиллы для создания курсов и статей и инструкции по установке — в [`skills/README.md`](skills/README.md).
