@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+
+const emptyFrame = '<!doctype html><html><body></body></html>';
 import type { InteractiveSpec } from '../core/articles';
 
 const moduleUrls = import.meta.glob('/articles/**/interactive/*.ts', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
@@ -16,7 +18,27 @@ function frameHtml(url: string) {
 export function InteractiveFrame({ articleId, spec }: { articleId: string; spec: InteractiveSpec }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(260);
+  const [moduleSrc, setModuleSrc] = useState<string>();
   const url = useMemo(() => moduleUrl(articleId, spec.module), [articleId, spec.module]);
+
+  useEffect(() => {
+    let objectUrl: string | undefined;
+    setModuleSrc(undefined);
+    if (!url) return;
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Не удалось загрузить интерактив: ${response.status}`);
+        return response.text();
+      })
+      .then((source) => {
+        objectUrl = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
+        setModuleSrc(objectUrl);
+      })
+      .catch(() => setModuleSrc(undefined));
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [url]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
@@ -30,7 +52,7 @@ export function InteractiveFrame({ articleId, spec }: { articleId: string; spec:
 
   useEffect(() => {
     const frame = ref.current;
-    if (!frame || !url) return;
+    if (!frame || !moduleSrc) return;
     const send = () => frame.contentWindow?.postMessage({ type: 'dojo:init', id: spec.id, props: spec.props ?? {} }, '*');
     frame.addEventListener('load', send);
     const timer = window.setTimeout(send, 100);
@@ -38,12 +60,12 @@ export function InteractiveFrame({ articleId, spec }: { articleId: string; spec:
       frame.removeEventListener('load', send);
       window.clearTimeout(timer);
     };
-  }, [spec.id, spec.props, url]);
+  }, [spec.id, spec.props, moduleSrc]);
 
   if (!url) return <div className="interactive-error">Интерактивный модуль не найден: <code>{spec.module}</code></div>;
   return (
     <div className="interactive-frame" data-interactive={spec.id}>
-      <iframe ref={ref} title={spec.id} sandbox="allow-scripts" srcDoc={frameHtml(url)} style={{ height }} />
+      <iframe ref={ref} title={spec.id} sandbox="allow-scripts" srcDoc={moduleSrc ? frameHtml(moduleSrc) : emptyFrame} style={{ height }} />
     </div>
   );
 }
