@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 200" role="img" aria-label="В кадре метода MoveTo параметр this указывает на ящик A, параметр other — на ящик B; оба объекта лежат в куче"><defs><marker id="mv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"></marker></defs>
+<g style="color:#59636f"><text x="120" y="20" text-anchor="middle" font-size="13" font-weight="700">Кадр MoveTo (стек)</text><text x="470" y="20" text-anchor="middle" font-size="13" font-weight="700">Куча</text>
+<rect x="20" y="32" width="200" height="156" rx="6" fill="#59636f" stroke="#8a919b"/><rect x="330" y="32" width="280" height="156" rx="6" fill="#59636f" stroke="#8a919b"/>
+<rect x="36" y="46" width="168" height="32" rx="4" fill="#ffffff" stroke="#24549b"/><text x="48" y="67" font-size="13" class="mono">this</text><circle cx="190" cy="62" r="4" fill="#24549b"/>
+<rect x="36" y="88" width="168" height="32" rx="4" fill="#ffffff" stroke="#59636f"/><text x="48" y="109" font-size="13" class="mono">other</text><circle cx="190" cy="104" r="4" fill="#59636f"/>
+<rect x="36" y="130" width="168" height="32" rx="4" fill="#ffffff" stroke="#8a919b"/><text x="48" y="151" font-size="13" class="mono">n = 3</text>
+<rect x="400" y="44" width="190" height="56" rx="6" fill="#e7eef9" stroke="#24549b"/><text x="414" y="66" font-size="12" class="mono">Box: name = "A"</text><text x="414" y="88" font-size="12" class="mono">apples: 10 → 7</text>
+<rect x="400" y="118" width="190" height="56" rx="6" fill="#59636f" stroke="#59636f"/><text x="414" y="140" font-size="12" class="mono">Box: name = "B"</text><text x="414" y="162" font-size="12" class="mono">apples: 2 → 5</text>
+<path d="M194,62 C290,62 320,70 396,72" fill="none" stroke="#24549b" stroke-width="1.6" marker-end="url(#mv)" style="color:#24549b"/><path d="M194,104 C290,104 320,140 396,144" fill="none" stroke="#59636f" stroke-width="1.6" marker-end="url(#mv)" style="color:#59636f"/></g></svg>

@@ -114,7 +114,7 @@ export function LessonPage() {
             {lesson && (
               <div className="pips" role="tablist" aria-label="Шаги урока">
                 {lesson.steps.map((s, i) => {
-                  const done = visited.includes(i) && s.required.every((id) => solvedMap[id]);
+                  const done = visited.includes(i) && s.required.filter((id) => req.includes(id)).every((id) => solvedMap[id]);
                   return (
                     <button
                       key={i}

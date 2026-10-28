@@ -1,0 +1,158 @@
+# СГЕНЕРИРОВАНО из roadmap.plan.yaml командой: npm run roadmap:layout -- csharp
+# Можно править руками, но повторная генерация перезапишет файл.
+sections:
+  - id: course
+    title: C#
+nodes:
+  - id: roadmap-title
+    kind: title
+    title: Курс C# к лабораторным
+    x: 460
+    'y': 0
+    w: 340
+  - id: start
+    kind: topic
+    title: Старт
+    section: course
+    x: 500
+    'y': 111
+    w: 260
+    h: 52
+    description: Как устроен курс, варианты, запуск кода, установка C# и отладка.
+    links: [start]
+  - id: dotnet
+    kind: topic
+    title: 'C# и .NET: как всё устроено'
+    section: course
+    x: 500
+    'y': 261
+    w: 260
+    h: 52
+    description: Язык C#, платформа .NET, компиляция, IL, CLR и библиотеки.
+    links: [dotnet]
+  - id: variables
+    kind: topic
+    title: Переменные и типы данных
+    section: course
+    x: 500
+    'y': 411
+    w: 260
+    h: 52
+    description: Переменные, типы данных, преобразования, boxing и nullable-значения.
+    links: [variables]
+  - id: control-flow
+    kind: topic
+    title: Управление выполнением
+    section: course
+    x: 500
+    'y': 561
+    w: 260
+    h: 52
+    description: Условия, циклы, switch, исключения и управление потоком программы.
+    links: [control-flow]
+  - id: arrays-strings
+    kind: topic
+    title: Массивы, кортежи, строки
+    section: course
+    x: 500
+    'y': 711
+    w: 260
+    h: 52
+    description: Массивы, коллекции, кортежи и обработка строк.
+    links: [arrays-strings]
+  - id: methods
+    kind: topic
+    title: Методы
+    section: course
+    x: 500
+    'y': 861
+    w: 260
+    h: 52
+    description: Методы, параметры, перегрузка, рекурсия и область видимости.
+    links: [methods]
+  - id: oop
+    kind: topic
+    title: 'ООП: классы, наследование, интерфейсы'
+    section: course
+    x: 500
+    'y': 1011
+    w: 260
+    h: 52
+    description: Классы, свойства, наследование, интерфейсы и полиморфизм.
+    links: [oop]
+  - id: structs
+    kind: topic
+    title: Структуры, равенство, операторы
+    section: course
+    x: 500
+    'y': 1161
+    w: 260
+    h: 52
+    description: Структуры, равенство, сравнение и перегрузка операторов.
+    links: [structs]
+  - id: delegates
+    kind: topic
+    title: Делегаты, лямбды, события
+    section: course
+    x: 500
+    'y': 1311
+    w: 260
+    h: 52
+    description: Делегаты, лямбды, замыкания и события.
+    links: [delegates]
+  - id: linq
+    kind: topic
+    title: Расширения, LINQ, записи
+    section: course
+    x: 500
+    'y': 1461
+    w: 260
+    h: 52
+    description: Методы расширения, IEnumerable, yield, LINQ, записи и pattern matching.
+    links: [linq]
+edges:
+  - from: start
+    to: dotnet
+    fromSide: bottom
+    toSide: top
+    style: solid
+  - from: dotnet
+    to: variables
+    fromSide: bottom
+    toSide: top
+    style: solid
+  - from: variables
+    to: control-flow
+    fromSide: bottom
+    toSide: top
+    style: solid
+  - from: control-flow
+    to: arrays-strings
+    fromSide: bottom
+    toSide: top
+    style: solid
+  - from: arrays-strings
+    to: methods
+    fromSide: bottom
+    toSide: top
+    style: solid
+  - from: methods
+    to: oop
+    fromSide: bottom
+    toSide: top
+    style: solid
+  - from: oop
+    to: structs
+    fromSide: bottom
+    toSide: top
+    style: solid
+  - from: structs
+    to: delegates
+    fromSide: bottom
+    toSide: top
+    style: solid
+  - from: delegates
+    to: linq
+    fromSide: bottom
+    toSide: top
+    style: solid

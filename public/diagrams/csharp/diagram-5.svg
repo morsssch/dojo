@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 210" role="img" aria-label="Вложенные множества: мебель содержит шкафы, шкафы содержат платяные шкафы" style="display:block;max-width:420px;margin:0 auto">
+<ellipse cx="210" cy="105" rx="200" ry="98" fill="#e7eef9" stroke="#24549b" stroke-width="1.5"/>
+<ellipse cx="250" cy="120" rx="130" ry="66" fill="#59636f" stroke="#59636f" stroke-width="1.5"/>
+<ellipse cx="290" cy="132" rx="62" ry="34" fill="#ffffff" stroke="#59636f" stroke-width="1.5"/>
+<text x="60" y="60" fill="#59636f" font-size="14" font-family="Roboto, sans-serif" font-weight="700">Мебель</text>
+<text x="150" y="102" fill="#59636f" font-size="14" font-family="Roboto, sans-serif" font-weight="700">Шкаф</text>
+<text x="290" y="137" text-anchor="middle" fill="#59636f" font-size="13" font-family="Roboto, sans-serif" font-weight="700">Платяной шкаф</text>
+</svg>

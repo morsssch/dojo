@@ -1,6 +1,6 @@
 // Markdown для теории: GFM, подсветка кода, выноски > [!NOTE] / [!TIP] / [!WARNING] / [!DANGER] / [!DEEP].
 import { Children, isValidElement, memo, ReactNode } from 'react';
-import ReactMarkdown, { Components } from 'react-markdown';
+import ReactMarkdown, { Components, defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import hljs from 'highlight.js/lib/core';
 import go from 'highlight.js/lib/languages/go';
@@ -151,7 +151,7 @@ const components: Components = {
 export const Markdown = memo(function Markdown({ text, className }: { text: string; className?: string }) {
   return (
     <div className={`md ${className ?? ''}`}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components} urlTransform={(url) => url.startsWith('lesson:') ? url : defaultUrlTransform(url)}>
         {text}
       </ReactMarkdown>
     </div>

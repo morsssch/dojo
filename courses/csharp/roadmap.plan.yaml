@@ -1,0 +1,56 @@
+layout: straight
+title: "Курс C# к лабораторным"
+sections:
+  - id: course
+    title: "C#"
+topics:
+  - id: start
+    title: Старт
+    section: course
+    links: [start]
+    description: "Как устроен курс, варианты, запуск кода, установка C# и отладка."
+  - id: dotnet
+    title: "C# и .NET: как всё устроено"
+    section: course
+    links: [dotnet]
+    description: "Язык C#, платформа .NET, компиляция, IL, CLR и библиотеки."
+  - id: variables
+    title: Переменные и типы данных
+    section: course
+    links: [variables]
+    description: "Переменные, типы данных, преобразования, boxing и nullable-значения."
+  - id: control-flow
+    title: Управление выполнением
+    section: course
+    links: [control-flow]
+    description: "Условия, циклы, switch, исключения и управление потоком программы."
+  - id: arrays-strings
+    title: "Массивы, кортежи, строки"
+    section: course
+    links: [arrays-strings]
+    description: "Массивы, коллекции, кортежи и обработка строк."
+  - id: methods
+    title: Методы
+    section: course
+    links: [methods]
+    description: "Методы, параметры, перегрузка, рекурсия и область видимости."
+  - id: oop
+    title: "ООП: классы, наследование, интерфейсы"
+    section: course
+    links: [oop]
+    description: "Классы, свойства, наследование, интерфейсы и полиморфизм."
+  - id: structs
+    title: "Структуры, равенство, операторы"
+    section: course
+    links: [structs]
+    description: "Структуры, равенство, сравнение и перегрузка операторов."
+  - id: delegates
+    title: "Делегаты, лямбды, события"
+    section: course
+    links: [delegates]
+    description: "Делегаты, лямбды, замыкания и события."
+  - id: linq
+    title: "Расширения, LINQ, записи"
+    section: course
+    links: [linq]
+    description: "Методы расширения, IEnumerable, yield, LINQ, записи и pattern matching."
