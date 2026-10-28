@@ -3765,9 +3765,21 @@ pre {
 .lab-whole summary { cursor: pointer; color: var(--text-2); font-size: 13.5px; margin-bottom: 8px; }
 
 /* ---------- варианты курса ---------- */
-.variant-panel p { margin: 0 0 12px; font-size: 13.5px; }
-.variant-group { display: grid; gap: 6px; margin: 0 0 12px; font-size: 13.5px; }
-.variant-group input { width: 130px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text); }
+.variant-panel > p { margin: 0 0 14px; font-size: 13.5px; }
+.variant-group { display: grid; gap: 9px; margin: 0; padding: 13px 0 15px; border-top: 1px solid var(--line); font-size: 13.5px; }
+.variant-group-head { display: grid; gap: 1px; }
+.variant-group-head label { font-weight: 600; color: var(--text); }
+.variant-group-head .muted { font-size: 12.5px; line-height: 1.45; }
+.variant-group-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.variant-group input { min-width: 0; width: 100%; padding: 8px 10px; border: 1px solid var(--line-2); border-radius: var(--r-s); background: var(--surface-2); color: var(--text); font: inherit; font-variant-numeric: tabular-nums; transition: border-color .15s, background-color .15s; }
+.variant-group input::placeholder { color: var(--muted); }
+.variant-group input:hover { border-color: var(--muted); }
+.variant-group input:focus { outline: none; border-color: var(--text); background: var(--surface); }
+.variant-group input[aria-invalid='true'] { border-color: var(--bad); }
+.variant-group-message { min-height: 1.4em; color: var(--text-2); line-height: 1.45; }
+.variant-group-message.error { color: var(--bad); }
+.variant-manual { display: grid; gap: 7px; padding-top: 1px; }
+.variant-manual-label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
 .variant-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
 .variant-opts.compact { grid-template-columns: 1fr; }
 .variant-opt {
@@ -3806,7 +3818,7 @@ pre {
 /* ---------- статьи и интерактивные артефакты ---------- */
 .home-materials { margin: 0 0 28px; }
 .article-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
-.article-card { display: block; color: var(--text); text-decoration: none; transition: border-color .15s, transform .15s; }
+.article-card { display: block; padding: 18px; color: var(--text); text-decoration: none; transition: border-color .15s, transform .15s; }
 .article-card:hover { border-color: var(--text-2); transform: translateY(-1px); }
 .article-card h3 { margin: 8px 0 4px; }
 .article-card p { color: var(--text-2); margin: 0; }

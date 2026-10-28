@@ -11,8 +11,8 @@ variants:
     structs/ex: 5
     linq/ex: 5
   options:
-    - { id: v1, title: Вариант 1 }
-    - { id: v2, title: Вариант 2, description: Рациональные числа и конвейер текста }
-    - { id: v3, title: Вариант 3 }
-    - { id: v4, title: Вариант 4 }
-    - { id: v5, title: Вариант 5 }
+    - { id: v1, title: Вариант 1, description: "Банковские счета и финансовые транзакции" }
+    - { id: v2, title: Вариант 2, description: "Рациональные числа и конвейер текста" }
+    - { id: v3, title: Вариант 3, description: "IPv4-адреса и приоритетные оповещения" }
+    - { id: v4, title: Вариант 4, description: "Деньги, валюты и математические выражения" }
+    - { id: v5, title: Вариант 5, description: "Палитра цветов и обработка заказов" }
