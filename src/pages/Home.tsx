@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { findCourse, lessonHref, manifest } from '../content';
+import { articles, findCourse, lessonHref, manifest } from '../content';
 import { allAchievements } from '../state/achievements';
 import { beltFor, courseStatus, nextLesson, streak, useProgress } from '../state/progress';
 import { AchBadge, Heatmap, plural, WeekRow } from '../components/Activity';
@@ -39,6 +39,24 @@ export function Home() {
             : 'Место, где изучают любую IT-тему: теория маленькими порциями, вопрос после каждого куска и практика прямо в браузере — код, SQL, git, схемы и роадмапы.'}
         </p>
       </section>
+      {articles.length > 0 && (
+        <section className="home-materials">
+          <div className="section-head">
+            <h2>Материалы</h2>
+            <span className="muted" style={{ fontSize: 14 }}>{articles.length}</span>
+          </div>
+          <div className="article-list">
+            {articles.map((article) => (
+              <Link key={article.id} to={`/articles/${article.id}`} className="panel article-card">
+                <span className="eyebrow">Статья</span>
+                <h3>{article.meta.title}</h3>
+                {article.meta.subtitle && <p>{article.meta.subtitle}</p>}
+                {article.meta.tags.length > 0 && <div className="tag-list">{article.meta.tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       <div className="home-grid">
         <div className="home-main">
 
