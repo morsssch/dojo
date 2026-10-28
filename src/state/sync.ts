@@ -127,6 +127,7 @@ function mergeCourse(a: CourseProgress | undefined, b: CourseProgress | undefine
     known: mergeTimes(a.known, b.known),
     last,
     variant: a.variant ?? b.variant,
+    groupNumber: a.groupNumber ?? b.groupNumber,
   };
 }
 export function mergeState(a: ProgressState, b: ProgressState): ProgressState {

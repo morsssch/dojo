@@ -1,56 +1,112 @@
-layout: straight
-title: "Курс C# к лабораторным"
+# Смысловая карта курса. Координаты генерируются: npm run roadmap:layout -- csharp
+layout: snake
+perRow: 3
+title: C# с нуля
 sections:
-  - id: course
-    title: "C#"
+  - { id: foundation, title: "Основы", color: '#6b7280' }
+  - { id: language, title: "Язык C#", color: '#4f7fd9' }
+  - { id: objects, title: "Объекты и типы", color: '#7d62cf' }
+  - { id: functional, title: "Функциональный стиль", color: '#2f9e63' }
+  - { id: labs, title: "Лабораторные работы", color: '#c9772f' }
 topics:
   - id: start
-    title: Старт
-    section: course
+    title: Старт и окружение
+    section: foundation
     links: [start]
-    description: "Как устроен курс, варианты, запуск кода, установка C# и отладка."
+    description: Как устроен курс, запуск C# в браузере, настройка проекта и отладка.
+    resources:
+      - { title: "Установка .NET", url: "https://dotnet.microsoft.com/download", kind: docs }
+    subs:
+      - { id: setup, title: "Проект и отладка", links: [start/l3] }
   - id: dotnet
-    title: "C# и .NET: как всё устроено"
-    section: course
+    title: C# и .NET
+    section: foundation
     links: [dotnet]
-    description: "Язык C#, платформа .NET, компиляция, IL, CLR и библиотеки."
+    description: От исходного кода через Roslyn и IL к выполнению CLR.
+    resources:
+      - { title: ".NET — обзор", url: "https://learn.microsoft.com/dotnet/core/introduction", kind: docs }
+    subs:
+      - { id: il, title: "Компиляция и IL", links: [dotnet/l2] }
+      - { id: program, title: "Устройство программы", links: [dotnet/l4] }
   - id: variables
-    title: Переменные и типы данных
-    section: course
+    title: Переменные и типы
+    section: language
     links: [variables]
-    description: "Переменные, типы данных, преобразования, boxing и nullable-значения."
+    description: Значимые и ссылочные типы, преобразования, boxing, null.
+    subs:
+      - { id: types, title: "Типы и переменные", links: [variables/l1] }
+      - { id: boxing, title: "Ссылки и boxing", links: [variables/l3] }
+    checkpoint: { id: cp-variables, title: "Проверь себя: типы", links: [variables/mx] }
   - id: control-flow
     title: Управление выполнением
-    section: course
+    section: language
     links: [control-flow]
-    description: "Условия, циклы, switch, исключения и управление потоком программы."
+    description: Условия, циклы, switch и обработка ошибок.
+    subs:
+      - { id: conditions, title: "Условия", links: [control-flow/l1] }
+      - { id: loops, title: "Циклы", links: [control-flow/l2] }
+      - { id: exceptions, title: "Исключения", links: [control-flow/l4] }
+    checkpoint: { id: cp-flow, title: "Проверь себя: управление", links: [control-flow/mx] }
   - id: arrays-strings
-    title: "Массивы, кортежи, строки"
-    section: course
+    title: Массивы и строки
+    section: language
     links: [arrays-strings]
-    description: "Массивы, коллекции, кортежи и обработка строк."
+    description: Массивы, кортежи, коллекции, обработка текста.
+    subs:
+      - { id: arrays, title: "Массивы", links: [arrays-strings/l1] }
+      - { id: tuples, title: "Кортежи", links: [arrays-strings/l2] }
+      - { id: strings, title: "Строки", links: [arrays-strings/l5] }
+    checkpoint: { id: cp-arrays, title: "Проверь себя: данные", links: [arrays-strings/mx] }
   - id: methods
     title: Методы
-    section: course
+    section: language
     links: [methods]
-    description: "Методы, параметры, перегрузка, рекурсия и область видимости."
+    description: Параметры, стек вызовов, рекурсия и возврат значений.
+    subs:
+      - { id: methods-basics, title: "Вызов и стек", links: [methods/l1] }
+      - { id: parameters, title: "ref, out, in", links: [methods/l2] }
+    checkpoint: { id: cp-methods, title: "Проверь себя: методы", links: [methods/mx] }
   - id: oop
-    title: "ООП: классы, наследование, интерфейсы"
-    section: course
+    title: Классы и интерфейсы
+    section: objects
     links: [oop]
-    description: "Классы, свойства, наследование, интерфейсы и полиморфизм."
+    description: Инкапсуляция, наследование, полиморфизм, интерфейсы.
+    group: Объектная модель
+    subs:
+      - { id: classes, title: "Классы и объекты", links: [oop/l2] }
+      - { id: properties, title: "Свойства", links: [oop/l5] }
+      - { id: inheritance, title: "Наследование", links: [oop/l3] }
+      - { id: interfaces, title: "Интерфейсы", links: [oop/l4] }
+    checkpoint: { id: cp-oop, title: "Проверь себя: ООП", links: [oop/mx] }
   - id: structs
-    title: "Структуры, равенство, операторы"
-    section: course
+    title: Структуры и операторы
+    section: objects
     links: [structs]
-    description: "Структуры, равенство, сравнение и перегрузка операторов."
+    description: Неизменяемые типы, равенство, сравнение и перегрузка операторов.
+    group: Лабораторная 1
+    subs:
+      - { id: readonly, title: "readonly struct", links: [structs/l1] }
+      - { id: equality, title: "Равенство и хэш", links: [structs/l3] }
+      - { id: operators, title: "Операторы", links: [structs/l4] }
+    checkpoint: { id: lab1, title: "Лабораторная 1", links: [structs/ex] }
   - id: delegates
-    title: "Делегаты, лямбды, события"
-    section: course
+    title: Делегаты и события
+    section: functional
     links: [delegates]
-    description: "Делегаты, лямбды, замыкания и события."
+    description: Функции как значения, лямбды, захват переменных и события.
+    subs:
+      - { id: delegates-basics, title: "Делегаты", links: [delegates/l1] }
+      - { id: lambdas, title: "Лямбды", links: [delegates/l2] }
+      - { id: events, title: "События", links: [delegates/l3] }
   - id: linq
-    title: "Расширения, LINQ, записи"
-    section: course
+    title: Расширения и LINQ
+    section: functional
     links: [linq]
-    description: "Методы расширения, IEnumerable, yield, LINQ, записи и pattern matching."
+    description: IEnumerable, yield, LINQ, записи и сопоставление с образцом.
+    group: Лабораторная 2
+    subs:
+      - { id: extensions, title: "Расширения", links: [linq/l1] }
+      - { id: iterators, title: "Итераторы", links: [linq/l2] }
+      - { id: queries, title: "LINQ", links: [linq/l3] }
+      - { id: records, title: "Записи", links: [linq/l4] }
+    checkpoint: { id: lab2, title: "Лабораторная 2", links: [linq/ex] }

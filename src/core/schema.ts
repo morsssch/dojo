@@ -21,6 +21,8 @@ export const CourseMeta = z.object({
   variants: z
     .object({
       label: z.string().optional(), // как называть выбор: «Вариант», «Стек», «Язык»…
+      byGroup: z.boolean().optional(), // вариант лабы = номер в списке mod число вариантов
+      labCounts: z.record(z.number().int().positive()).optional(), // ключ урока → число вариантов, если отличается от общего
       options: z.array(z.object({ id: z.string(), title: z.string(), description: z.string().optional() }).strict()).min(2),
     })
     .strict()

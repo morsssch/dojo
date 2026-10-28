@@ -3766,6 +3766,8 @@ pre {
 
 /* ---------- варианты курса ---------- */
 .variant-panel p { margin: 0 0 12px; font-size: 13.5px; }
+.variant-group { display: grid; gap: 6px; margin: 0 0 12px; font-size: 13.5px; }
+.variant-group input { width: 130px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text); }
 .variant-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
 .variant-opts.compact { grid-template-columns: 1fr; }
 .variant-opt {
@@ -3800,3 +3802,25 @@ pre {
 .reset-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
 .reset-row:last-child { border-bottom: 0; }
 .reset-course { justify-self: start; color: var(--text-2); }
+
+/* ---------- статьи и интерактивные артефакты ---------- */
+.home-materials { margin: 0 0 28px; }
+.article-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.article-card { display: block; color: var(--text); text-decoration: none; transition: border-color .15s, transform .15s; }
+.article-card:hover { border-color: var(--text-2); transform: translateY(-1px); }
+.article-card h3 { margin: 8px 0 4px; }
+.article-card p { color: var(--text-2); margin: 0; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.article-page { max-width: 900px; }
+.back-link { display: inline-block; color: var(--text-2); margin-bottom: 28px; text-decoration: none; }
+.back-link:hover { color: var(--text); }
+.article-head { max-width: var(--content); margin: 0 auto 42px; }
+.article-head .display { margin-top: 8px; }
+.article-lede { color: var(--text-2); font-size: 18px; max-width: 60ch; }
+.article-body { max-width: var(--content); margin: 0 auto; }
+.article-body > .md { margin-bottom: 22px; }
+.interactive-frame { margin: 24px 0; border: 1px solid var(--line); border-radius: var(--r-l); background: var(--surface); overflow: hidden; box-shadow: var(--shadow); }
+.interactive-frame iframe { display: block; width: 100%; border: 0; }
+.interactive-error { margin: 18px 0; padding: 14px; border: 1px solid var(--bad); border-radius: var(--r-m); color: var(--bad); background: var(--bad-soft); }
+@media (max-width: 620px) { .article-lede { font-size: 16px; } .article-head { margin-bottom: 28px; } }
+

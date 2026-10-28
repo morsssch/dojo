@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { findCourse, findLesson, LessonCtx, lessonHref, loadLesson, neighbours } from '../content';
 import type { Lesson } from '../core/parse';
-import { lessonStatus, progress, requiredFor, useProgress } from '../state/progress';
+import { lessonStatus, progress, requiredFor, useProgress, variantForLesson } from '../state/progress';
 import { Segments } from '../components/Segments';
 import { VariantPicker } from '../components/Variant';
 import { I, KIND_LABEL, KindIcon } from '../components/ui/icons';
@@ -56,7 +56,7 @@ export function LessonPage() {
   const pass = info.meta.pass ?? 0.8;
   const req = requiredFor(p, c.id, info);
   const checkpointPassed = info.meta.checkpoint && req.length > 0 && req.filter((id) => solvedMap[id]).length / req.length >= pass;
-  const variant = c.meta.variants ? (p.courses[c.id]?.variant ?? c.meta.variants.options[0].id) : undefined;
+  const variant = variantForLesson(p, c.id, info);
   const hasVariants = !!c.meta.variants && !!cur?.segments.some((g) => g.variants);
   const moduleKnown = module.lessons.every((l) => l.meta.draft || lessonStatus(p, c.id, l).done);
 
@@ -149,7 +149,7 @@ export function LessonPage() {
           {cur && (
             <article className="step" key={`${key}-${step}`}>
               <h2 className="step-title">{cur.title}</h2>
-              {hasVariants && !p.courses[c.id]?.variant && <VariantPicker course={c} />}
+              {hasVariants && !p.courses[c.id]?.variant && !p.courses[c.id]?.groupNumber && <VariantPicker course={c} />}
               <Segments segments={cur.segments.filter((g) => !g.variants || (variant && g.variants.includes(variant)))} />
             </article>
           )}

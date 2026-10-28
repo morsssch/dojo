@@ -3,7 +3,31 @@ import { createContext, useContext } from 'react';
 import rawManifest from 'virtual:dojo-manifest';
 import type { CourseInfo, LessonInfo, Manifest, ModuleInfo } from './core/manifest';
 import { Lesson, parseLesson } from './core/parse';
+import { ArticleInfo, parseArticleMeta, parseArticleSegments } from './core/articles';
 import { syncLogin } from './state/sync';
+
+const articleMetaFiles = import.meta.glob('/articles/**/article.yaml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const articleFiles = import.meta.glob('/articles/**/index.md', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>;
+
+export const articles: ArticleInfo[] = Object.entries(articleMetaFiles).flatMap(([file, text]) => {
+  const parsed = parseArticleMeta(text, file);
+  if (!parsed.meta) return [];
+  const id = file.match(/^\/articles\/([^/]+)\//)?.[1];
+  return id ? [{ id, meta: parsed.meta, file: `/articles/${id}/index.md` }] : [];
+}).sort((a, b) => a.meta.title.localeCompare(b.meta.title));
+
+export const findArticle = (id?: string) => articles.find((a) => a.id === id);
+
+export async function loadArticle(article: ArticleInfo) {
+  const loader = articleFiles[article.file];
+  if (!loader) return { segments: [], errors: [`Файл статьи не найден: ${article.file}`] };
+  return parseArticleSegments(await loader(), article.file);
+}
+
+export interface ArticleContextValue { articleId: string }
+export const ArticleCtx = createContext<ArticleContextValue>({ articleId: '' });
+export const useArticleCtx = () => useContext(ArticleCtx);
+
 
 const all = rawManifest as Manifest;
 

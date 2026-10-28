@@ -1,158 +1,592 @@
 # СГЕНЕРИРОВАНО из roadmap.plan.yaml командой: npm run roadmap:layout -- csharp
 # Можно править руками, но повторная генерация перезапишет файл.
 sections:
-  - id: course
-    title: C#
+  - id: foundation
+    title: Основы
+    color: '#6b7280'
+  - id: language
+    title: Язык C#
+    color: '#4f7fd9'
+  - id: objects
+    title: Объекты и типы
+    color: '#7d62cf'
+  - id: functional
+    title: Функциональный стиль
+    color: '#2f9e63'
+  - id: labs
+    title: Лабораторные работы
+    color: '#c9772f'
 nodes:
   - id: roadmap-title
     kind: title
-    title: Курс C# к лабораторным
-    x: 460
+    title: C# с нуля
+    x: 280
     'y': 0
     w: 340
   - id: start
     kind: topic
-    title: Старт
-    section: course
-    x: 500
-    'y': 111
+    title: Старт и окружение
+    section: foundation
+    x: 0
+    'y': 80
     w: 260
     h: 52
-    description: Как устроен курс, варианты, запуск кода, установка C# и отладка.
+    description: Как устроен курс, запуск C# в браузере, настройка проекта и отладка.
     links: [start]
+    resources: [{title: Установка .NET, url: https://dotnet.microsoft.com/download, kind: docs}]
+  - id: start-box
+    kind: group
+    title: ''
+    x: 0
+    'y': 154
+    w: 260
+    h: 60
+  - id: setup
+    kind: sub
+    title: Проект и отладка
+    section: foundation
+    x: 12
+    'y': 166
+    w: 236
+    h: 36
+    links: [start/l3]
   - id: dotnet
     kind: topic
-    title: 'C# и .NET: как всё устроено'
-    section: course
-    x: 500
-    'y': 261
+    title: C# и .NET
+    section: foundation
+    x: 320
+    'y': 80
     w: 260
     h: 52
-    description: Язык C#, платформа .NET, компиляция, IL, CLR и библиотеки.
+    description: От исходного кода через Roslyn и IL к выполнению CLR.
     links: [dotnet]
+    resources: [{title: .NET — обзор, url: https://learn.microsoft.com/dotnet/core/introduction, kind: docs}]
+  - id: dotnet-box
+    kind: group
+    title: ''
+    x: 320
+    'y': 154
+    w: 260
+    h: 104
+  - id: il
+    kind: sub
+    title: Компиляция и IL
+    section: foundation
+    x: 332
+    'y': 166
+    w: 236
+    h: 36
+    links: [dotnet/l2]
+  - id: program
+    kind: sub
+    title: Устройство программы
+    section: foundation
+    x: 332
+    'y': 210
+    w: 236
+    h: 36
+    links: [dotnet/l4]
   - id: variables
     kind: topic
-    title: Переменные и типы данных
-    section: course
-    x: 500
-    'y': 411
+    title: Переменные и типы
+    section: language
+    x: 640
+    'y': 80
     w: 260
     h: 52
-    description: Переменные, типы данных, преобразования, boxing и nullable-значения.
+    description: Значимые и ссылочные типы, преобразования, boxing, null.
     links: [variables]
+  - id: variables-box
+    kind: group
+    title: ''
+    x: 640
+    'y': 154
+    w: 260
+    h: 148
+  - id: types
+    kind: sub
+    title: Типы и переменные
+    section: language
+    x: 652
+    'y': 166
+    w: 236
+    h: 36
+    links: [variables/l1]
+  - id: boxing
+    kind: sub
+    title: Ссылки и boxing
+    section: language
+    x: 652
+    'y': 210
+    w: 236
+    h: 36
+    links: [variables/l3]
+  - id: cp-variables
+    kind: checkpoint
+    title: 'Проверь себя: типы'
+    x: 652
+    'y': 254
+    w: 236
+    h: 36
+    links: [variables/mx]
   - id: control-flow
     kind: topic
     title: Управление выполнением
-    section: course
-    x: 500
-    'y': 561
+    section: language
+    x: 640
+    'y': 366
     w: 260
     h: 52
-    description: Условия, циклы, switch, исключения и управление потоком программы.
+    description: Условия, циклы, switch и обработка ошибок.
     links: [control-flow]
+  - id: control-flow-box
+    kind: group
+    title: ''
+    x: 640
+    'y': 440
+    w: 260
+    h: 192
+  - id: conditions
+    kind: sub
+    title: Условия
+    section: language
+    x: 652
+    'y': 452
+    w: 236
+    h: 36
+    links: [control-flow/l1]
+  - id: loops
+    kind: sub
+    title: Циклы
+    section: language
+    x: 652
+    'y': 496
+    w: 236
+    h: 36
+    links: [control-flow/l2]
+  - id: exceptions
+    kind: sub
+    title: Исключения
+    section: language
+    x: 652
+    'y': 540
+    w: 236
+    h: 36
+    links: [control-flow/l4]
+  - id: cp-flow
+    kind: checkpoint
+    title: 'Проверь себя: управление'
+    x: 652
+    'y': 584
+    w: 236
+    h: 36
+    links: [control-flow/mx]
   - id: arrays-strings
     kind: topic
-    title: Массивы, кортежи, строки
-    section: course
-    x: 500
-    'y': 711
+    title: Массивы и строки
+    section: language
+    x: 320
+    'y': 366
     w: 260
     h: 52
-    description: Массивы, коллекции, кортежи и обработка строк.
+    description: Массивы, кортежи, коллекции, обработка текста.
     links: [arrays-strings]
+  - id: arrays-strings-box
+    kind: group
+    title: ''
+    x: 320
+    'y': 440
+    w: 260
+    h: 192
+  - id: arrays
+    kind: sub
+    title: Массивы
+    section: language
+    x: 332
+    'y': 452
+    w: 236
+    h: 36
+    links: [arrays-strings/l1]
+  - id: tuples
+    kind: sub
+    title: Кортежи
+    section: language
+    x: 332
+    'y': 496
+    w: 236
+    h: 36
+    links: [arrays-strings/l2]
+  - id: strings
+    kind: sub
+    title: Строки
+    section: language
+    x: 332
+    'y': 540
+    w: 236
+    h: 36
+    links: [arrays-strings/l5]
+  - id: cp-arrays
+    kind: checkpoint
+    title: 'Проверь себя: данные'
+    x: 332
+    'y': 584
+    w: 236
+    h: 36
+    links: [arrays-strings/mx]
   - id: methods
     kind: topic
     title: Методы
-    section: course
-    x: 500
-    'y': 861
+    section: language
+    x: 0
+    'y': 366
     w: 260
     h: 52
-    description: Методы, параметры, перегрузка, рекурсия и область видимости.
+    description: Параметры, стек вызовов, рекурсия и возврат значений.
     links: [methods]
+  - id: methods-box
+    kind: group
+    title: ''
+    x: 0
+    'y': 440
+    w: 260
+    h: 148
+  - id: methods-basics
+    kind: sub
+    title: Вызов и стек
+    section: language
+    x: 12
+    'y': 452
+    w: 236
+    h: 36
+    links: [methods/l1]
+  - id: parameters
+    kind: sub
+    title: ref, out, in
+    section: language
+    x: 12
+    'y': 496
+    w: 236
+    h: 36
+    links: [methods/l2]
+  - id: cp-methods
+    kind: checkpoint
+    title: 'Проверь себя: методы'
+    x: 12
+    'y': 540
+    w: 236
+    h: 36
+    links: [methods/mx]
   - id: oop
     kind: topic
-    title: 'ООП: классы, наследование, интерфейсы'
-    section: course
-    x: 500
-    'y': 1011
+    title: Классы и интерфейсы
+    section: objects
+    x: 0
+    'y': 696
     w: 260
     h: 52
-    description: Классы, свойства, наследование, интерфейсы и полиморфизм.
+    description: Инкапсуляция, наследование, полиморфизм, интерфейсы.
     links: [oop]
+  - id: oop-box
+    kind: group
+    title: Объектная модель
+    x: 0
+    'y': 770
+    w: 260
+    h: 266
+  - id: classes
+    kind: sub
+    title: Классы и объекты
+    section: objects
+    x: 12
+    'y': 812
+    w: 236
+    h: 36
+    links: [oop/l2]
+  - id: properties
+    kind: sub
+    title: Свойства
+    section: objects
+    x: 12
+    'y': 856
+    w: 236
+    h: 36
+    links: [oop/l5]
+  - id: inheritance
+    kind: sub
+    title: Наследование
+    section: objects
+    x: 12
+    'y': 900
+    w: 236
+    h: 36
+    links: [oop/l3]
+  - id: interfaces
+    kind: sub
+    title: Интерфейсы
+    section: objects
+    x: 12
+    'y': 944
+    w: 236
+    h: 36
+    links: [oop/l4]
+  - id: cp-oop
+    kind: checkpoint
+    title: 'Проверь себя: ООП'
+    x: 12
+    'y': 988
+    w: 236
+    h: 36
+    links: [oop/mx]
   - id: structs
     kind: topic
-    title: Структуры, равенство, операторы
-    section: course
-    x: 500
-    'y': 1161
+    title: Структуры и операторы
+    section: objects
+    x: 320
+    'y': 696
     w: 260
     h: 52
-    description: Структуры, равенство, сравнение и перегрузка операторов.
+    description: Неизменяемые типы, равенство, сравнение и перегрузка операторов.
     links: [structs]
+  - id: structs-box
+    kind: group
+    title: Лабораторная 1
+    x: 320
+    'y': 770
+    w: 260
+    h: 222
+  - id: readonly
+    kind: sub
+    title: readonly struct
+    section: objects
+    x: 332
+    'y': 812
+    w: 236
+    h: 36
+    links: [structs/l1]
+  - id: equality
+    kind: sub
+    title: Равенство и хэш
+    section: objects
+    x: 332
+    'y': 856
+    w: 236
+    h: 36
+    links: [structs/l3]
+  - id: operators
+    kind: sub
+    title: Операторы
+    section: objects
+    x: 332
+    'y': 900
+    w: 236
+    h: 36
+    links: [structs/l4]
+  - id: lab1
+    kind: checkpoint
+    title: Лабораторная 1
+    x: 332
+    'y': 944
+    w: 236
+    h: 36
+    links: [structs/ex]
   - id: delegates
     kind: topic
-    title: Делегаты, лямбды, события
-    section: course
-    x: 500
-    'y': 1311
+    title: Делегаты и события
+    section: functional
+    x: 640
+    'y': 696
     w: 260
     h: 52
-    description: Делегаты, лямбды, замыкания и события.
+    description: Функции как значения, лямбды, захват переменных и события.
     links: [delegates]
+  - id: delegates-box
+    kind: group
+    title: ''
+    x: 640
+    'y': 770
+    w: 260
+    h: 148
+  - id: delegates-basics
+    kind: sub
+    title: Делегаты
+    section: functional
+    x: 652
+    'y': 782
+    w: 236
+    h: 36
+    links: [delegates/l1]
+  - id: lambdas
+    kind: sub
+    title: Лямбды
+    section: functional
+    x: 652
+    'y': 826
+    w: 236
+    h: 36
+    links: [delegates/l2]
+  - id: events
+    kind: sub
+    title: События
+    section: functional
+    x: 652
+    'y': 870
+    w: 236
+    h: 36
+    links: [delegates/l3]
   - id: linq
     kind: topic
-    title: Расширения, LINQ, записи
-    section: course
-    x: 500
-    'y': 1461
+    title: Расширения и LINQ
+    section: functional
+    x: 640
+    'y': 1100
     w: 260
     h: 52
-    description: Методы расширения, IEnumerable, yield, LINQ, записи и pattern matching.
+    description: IEnumerable, yield, LINQ, записи и сопоставление с образцом.
     links: [linq]
+  - id: linq-box
+    kind: group
+    title: Лабораторная 2
+    x: 640
+    'y': 1174
+    w: 260
+    h: 266
+  - id: extensions
+    kind: sub
+    title: Расширения
+    section: functional
+    x: 652
+    'y': 1216
+    w: 236
+    h: 36
+    links: [linq/l1]
+  - id: iterators
+    kind: sub
+    title: Итераторы
+    section: functional
+    x: 652
+    'y': 1260
+    w: 236
+    h: 36
+    links: [linq/l2]
+  - id: queries
+    kind: sub
+    title: LINQ
+    section: functional
+    x: 652
+    'y': 1304
+    w: 236
+    h: 36
+    links: [linq/l3]
+  - id: records
+    kind: sub
+    title: Записи
+    section: functional
+    x: 652
+    'y': 1348
+    w: 236
+    h: 36
+    links: [linq/l4]
+  - id: lab2
+    kind: checkpoint
+    title: Лабораторная 2
+    x: 652
+    'y': 1392
+    w: 236
+    h: 36
+    links: [linq/ex]
 edges:
   - from: start
-    to: dotnet
+    to: start-box
     fromSide: bottom
     toSide: top
-    style: solid
+    style: dotted
   - from: dotnet
-    to: variables
+    to: dotnet-box
     fromSide: bottom
     toSide: top
+    style: dotted
+  - from: start
+    to: dotnet
+    fromSide: right
+    toSide: left
     style: solid
   - from: variables
-    to: control-flow
+    to: variables-box
     fromSide: bottom
     toSide: top
+    style: dotted
+  - from: dotnet
+    to: variables
+    fromSide: right
+    toSide: left
     style: solid
   - from: control-flow
-    to: arrays-strings
+    to: control-flow-box
     fromSide: bottom
     toSide: top
+    style: dotted
+  - from: variables
+    to: control-flow
+    fromSide: right
+    toSide: right
     style: solid
   - from: arrays-strings
-    to: methods
+    to: arrays-strings-box
     fromSide: bottom
     toSide: top
+    style: dotted
+  - from: control-flow
+    to: arrays-strings
+    fromSide: left
+    toSide: right
     style: solid
   - from: methods
-    to: oop
+    to: methods-box
     fromSide: bottom
     toSide: top
+    style: dotted
+  - from: arrays-strings
+    to: methods
+    fromSide: left
+    toSide: right
     style: solid
   - from: oop
-    to: structs
+    to: oop-box
     fromSide: bottom
     toSide: top
+    style: dotted
+  - from: methods
+    to: oop
+    fromSide: left
+    toSide: left
     style: solid
   - from: structs
-    to: delegates
+    to: structs-box
     fromSide: bottom
     toSide: top
+    style: dotted
+  - from: oop
+    to: structs
+    fromSide: right
+    toSide: left
     style: solid
   - from: delegates
-    to: linq
+    to: delegates-box
     fromSide: bottom
     toSide: top
+    style: dotted
+  - from: structs
+    to: delegates
+    fromSide: right
+    toSide: left
+    style: solid
+  - from: linq
+    to: linq-box
+    fromSide: bottom
+    toSide: top
+    style: dotted
+  - from: delegates
+    to: linq
+    fromSide: right
+    toSide: right
     style: solid

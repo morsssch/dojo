@@ -21,10 +21,10 @@ export interface LessonInfo {
   key: string;
   file: string;
   meta: LessonMeta;
-  steps: { title: string; kind: StepKind }[];
+  steps: { title: string; kind: StepKind; variants?: string[] }[];
   required: string[];
   /** обязательные блоки внутри ```variant: id → варианты; fallback — вариант, пока ученик не выбрал свой */
-  variants?: { of: Record<string, string[]>; fallback: string };
+  variants?: { of: Record<string, string[]>; fallback: string; byGroup?: boolean };
 }
 export interface ModuleInfo {
   id: string;
@@ -67,9 +67,9 @@ export function buildManifest(files: Record<string, string>): Manifest {
             key: l.key,
             file: l.file,
             meta: l.meta,
-            steps: parsed.steps.map((s) => ({ title: s.title, kind: s.kind })),
+            steps: parsed.steps.map((s) => ({ title: s.title, kind: s.kind, ...(s.segments.length && s.segments.every((g) => g.variants) ? { variants: [...new Set(s.segments.flatMap((g) => g.variants ?? []))] } : {}) })),
             required: parsed.steps.flatMap((s) => s.required),
-            ...(Object.keys(of).length && opts.length ? { variants: { of, fallback: opts[0] } } : {}),
+            ...(Object.keys(of).length && opts.length ? { variants: { of, fallback: opts[0], byGroup: c.meta.variants?.byGroup } } : {}),
           };
         }),
       })),

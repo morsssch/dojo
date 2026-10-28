@@ -9,6 +9,7 @@ export interface CourseProgress {
   known: Record<string, number>; // lessonKey -> «уже знаю» (через чекпоинт или роадмап)
   last?: { lesson: string; step: number; at: number };
   variant?: string; // выбранный вариант курса (course.yaml → variants)
+  groupNumber?: number; // номер в списке группы; по нему рассчитывается вариант каждой лабы
   resets?: Record<string, number>; // lessonKey → когда сброшен прогресс урока (чтобы синк не вернул старое)
   resetAt?: number; // когда сброшен весь курс
 }
@@ -146,7 +147,11 @@ export const progress = {
     return n;
   },
   setVariant(courseId: string, variant: string) {
-    update(courseId, (c) => ({ ...c, variant }));
+    update(courseId, (c) => ({ ...c, variant, groupNumber: undefined }));
+  },
+  setGroupNumber(courseId: string, groupNumber: number) {
+    if (!Number.isSafeInteger(groupNumber) || groupNumber < 1) throw new Error('Номер в списке должен быть положительным целым числом');
+    update(courseId, (c) => ({ ...c, groupNumber }));
   },
   setKnown(courseId: string, lessons: string[], known: boolean) {
     update(courseId, (c) => {
@@ -300,24 +305,35 @@ export interface LessonStatus {
   pct: number; // 0..1
 }
 
+/** Вариант урока: номер группы циклически выбирает вариант, если он задан. */
+export function variantForLesson(p: ProgressState, courseId: string, l: LessonInfo) {
+  if (!l.variants) return undefined;
+  const c = course(p, courseId);
+  const ids = [...new Set(Object.values(l.variants.of).flat())].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  if (l.variants.byGroup && c.groupNumber && ids.length) return ids[(c.groupNumber - 1) % ids.length];
+  return c.variant ?? l.variants.fallback;
+}
+
 /** Обязательные блоки урока для выбранного варианта курса (блоки чужих вариантов не считаются). */
 export function requiredFor(p: ProgressState, courseId: string, l: LessonInfo) {
   if (!l.variants) return l.required;
-  const v = course(p, courseId).variant ?? l.variants.fallback;
-  return l.required.filter((id) => !l.variants!.of[id] || l.variants!.of[id].includes(v));
+  const v = variantForLesson(p, courseId, l);
+  return l.required.filter((id) => !l.variants!.of[id] || l.variants!.of[id].includes(v!));
 }
 
 export function lessonStatus(p: ProgressState, courseId: string, l0: LessonInfo): LessonStatus {
   const c = course(p, courseId);
   const l = { ...l0, required: requiredFor(p, courseId, l0) };
-  const visited = (c.visited[l.key] ?? []).filter((i) => i < l.steps.length).length;
+  const variant = variantForLesson(p, courseId, l);
+  const visible = l.steps.map((s, i) => (!s.variants || s.variants.includes(variant ?? '') ? i : -1)).filter((i) => i >= 0);
+  const visited = (c.visited[l.key] ?? []).filter((i) => visible.includes(i)).length;
   const solvedMap = c.solved[l.key] ?? {};
   const solved = l.required.filter((id) => solvedMap[id]).length;
   const known = !!c.known[l.key];
-  const units = l.steps.length + l.required.length;
+  const units = visible.length + l.required.length;
   const pct = known ? 1 : units ? (visited + solved) / units : 0;
-  const done = known || (visited >= l.steps.length && solved >= l.required.length && l.steps.length > 0);
-  return { visited, steps: l.steps.length, solved, required: l.required.length, known, done, started: visited > 0 || solved > 0, pct: done ? 1 : pct };
+  const done = known || (visited >= visible.length && solved >= l.required.length && visible.length > 0);
+  return { visited, steps: visible.length, solved, required: l.required.length, known, done, started: visited > 0 || solved > 0, pct: done ? 1 : pct };
 }
 
 // Черновики (ещё не написанные уроки) входят в общий объём как непройденные:

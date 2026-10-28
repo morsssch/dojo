@@ -16,6 +16,7 @@ import { LessonPage } from './pages/Lesson';
 import { RoadmapPage } from './pages/Roadmap';
 import { SandboxPage } from './pages/Sandbox';
 import { SettingsPage } from './pages/Settings';
+import { ArticlePage } from './pages/Article';
 
 export function Logo() {
   return (
@@ -147,6 +148,7 @@ export function App() {
         <Route path="/sandbox" element={<SandboxPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/achievements" element={<AchievementsPage />} />
+        <Route path="/articles/:article" element={<ArticlePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toasts />
