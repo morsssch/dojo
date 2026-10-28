@@ -230,6 +230,7 @@ details.wi .wb > :first-child{margin-top:0}
 .nb p{margin:.35em 0;max-width:none}
 .nb .w{white-space:pre;overflow-x:auto;display:block;max-width:100%}
 .nb .pen{color:var(--red);font-style:italic;font-family:var(--f-body)}
+.nb .why{font-family:var(--f-body);color:var(--ink2);font-size:.93rem;line-height:1.6}
 .nb .hd{font-family:var(--f-body);font-weight:600;color:var(--ink);margin-top:.8em}
 .nb table.st{font-size:.86rem}
 .nb table.st .cell{background:transparent}
@@ -304,3 +305,4 @@ table.st td.wide{padding:0 10px;white-space:nowrap}
 table.st tr.crow td{height:30px}
 
 table.st td.cb:empty{border:0!important}
+.rules.jt0 th{text-transform:none;font-family:var(--f-mono)}
