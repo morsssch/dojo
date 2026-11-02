@@ -1,0 +1,614 @@
+<nav class="aut-toc" aria-label="Содержание"><h2>Содержание</h2><ol><li><a href="#lab">1. Какие задачи будем решать</a><div class="aut-links"><a href="#lab-sub-1">Как оформлять на листке</a></div></li><li><a href="#numbering">2. Нумерация слов</a><div class="aut-links"><a href="#number-to-word">Из номера 689 в слово</a><a href="#word-to-number">Из слова ccabd в номер</a></div></li><li><a href="#rep">3. Повторение</a><div class="aut-links"><a href="#rep-sub-1">Конечный автомат как граф</a><a href="#rep-sub-2">Регулярные выражения</a><a href="#rep-sub-3">На дугах можно писать регулярки</a></div></li><li><a href="#r2a">4. Регулярка → автомат</a><div class="aut-links"></div></li><li><a href="#a2r">5. Автомат → регулярка</a><div class="aut-links"></div></li><li><a href="#paper">6. Как писать на листке</a><div class="aut-links"><a href="#paper-sub-1">Образец 1. Тип А: регулярка → автомат</a><a href="#paper-sub-2">Образец 2. Тип Б: автомат → регулярка</a><a href="#paper-sub-3">Образец 4. Тип Б из исходного материала</a><a href="#paper-sub-4">Образец 5. Тип А из исходного материала</a><a href="#paper-sub-5">Образец 7. Тип Б, вариант 21</a></div></li><li><a href="#tool">7. Тренажёр</a><div class="aut-links"></div></li><li><a href="#det">8. Детерминизация</a><div class="aut-links"><a href="#det-sub-1">Первый лист: автомат без ε</a><a href="#det-sub-2">Второй лист: детерминированный автомат</a></div></li><li><a href="#min">9. Минимизация</a><div class="aut-links"><a href="#min-why">Зачем нужны классы и почему сравниваем их, а не имена</a></div></li><li><a href="#mealy">10. Минимизация преобразователя Мили</a><div class="aut-links"></div></li><li><a href="#equivalence">11. Эквивалентность преобразователей</a><div class="aut-links"></div></li><li><a href="#cheat">12. Шпаргалка</a><div class="aut-links"></div></li></ol></nav><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<marker id="aink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-ink" d="M0,1 L10,5 L0,9 z"/></marker>
+<marker id="ain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-in" d="M0,1 L10,5 L0,9 z"/></marker>
+<marker id="aout" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-out" d="M0,1 L10,5 L0,9 z"/></marker>
+<marker id="alp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-lp" d="M0,1 L10,5 L0,9 z"/></marker>
+<marker id="anw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-nw" d="M0,1 L10,5 L0,9 z"/></marker>
+<marker id="asheet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-sheet" d="M0,1 L10,5 L0,9 z"/></marker>
+<marker id="agh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-gh" d="M0,1 L10,5 L0,9 z"/></marker>
+</defs></svg>
+
+<div class="wrap">
+
+
+<nav class="top" aria-label="Разделы"><div class="in">
+  <a href="#numbering">Нумерация</a><a href="#lab">Введение</a><a href="#rep">Повторение</a><a href="#r2a">R → автомат</a><a href="#a2r">Автомат → R</a><a href="#paper">Листок</a><a href="#tool">Тренажёр</a><a href="#det">Детерминизация</a><a href="#min">Минимизация</a><a href="#mealy">Преобразователи</a><a href="#equivalence">Эквивалентность</a><a href="#cheat">Шпаргалка</a>
+</div></nav>
+
+<!-- ============ ЛАБА ============ -->
+<section class="sec" id="lab">
+  <div class="sec-head"><div><div class="eyebrow">Введение</div><h2>Какие задачи будем решать</h2></div>
+  </div>
+  <p>Регулярные выражения и конечные автоматы описывают одни и те же языки — это утверждение теоремы Клини. Научимся переводить одно в другое, убирать ε-переходы, детерминизировать и минимизировать автоматы. Отдельно разберём нумерацию слов и автоматы с выходом.</p>
+  <div class="two">
+    <div class="box"><h4>Тип А. Регулярка → автомат</h4><p>Дано R, например <span class="re">(x+y<sup>+</sup>)(x<sup>*</sup>y+x)<sup>+</sup>+(x<sup>+</sup>y)<sup>*</sup></span> из примера. Нарисовать конечный автомат, который допускает тот же язык. Автомат может быть недетерминированным и с ε-дугами. Метод: разбиение дуг.</p></div>
+    <div class="box"><h4>Тип Б. Автомат → регулярка</h4><p>Дан граф автомата. Найти регулярное выражение его языка. Метод: нормализуем граф и удаляем вершины по одной, пока не останется одна дуга. Пример — задача Б2.</p></div>
+  </div>
+  <div class="note"><p>В каждой теме: теория → пошаговый разбор → частые вопросы → практика с решением. Тренажёры принимают и твои примеры.</p></div>
+  <h3 id="lab-sub-1">Как оформлять на листке</h3>
+  <p>По образцу листка, который скинул преподаватель. Полные образцы обоих типов — в <a href="#paper">части 5</a>.</p>
+  <ul>
+    <li>шаги пронумерованы: «1. Нормализуем», «2. Удаляем q₂» и так далее;</li>
+    <li>на каждом шаге одна фраза, что делаешь, и перерисованный граф;</li>
+    <li>в типе Б для каждой удаляемой вершины выписываешь пары «откуда → куда» и формулу R₁R₂*R₃ — это то, что преподаватель будет проверять глазами;</li>
+    <li>в конце ответ: в типе А готовый граф, в типе Б выражение R = ….</li>
+  </ul>
+  <div class="note red"><p><b>Не перепутай с ЛР4.</b> ε-замыкания, таблицы S₀, S₁, … и P₀, P₁, … — это детерминизация, её будешь программировать в ЛР4. На ЛР3 автомат может спокойно оставаться недетерминированным. Она разобрана в <a href="#det">части 7</a>, а следующая тема, минимизация, — в <a href="#min">части 8</a>.</p></div>
+</section>
+
+<!-- ============ ПОВТОРЕНИЕ ============ -->
+<section class="sec" id="numbering">
+<div class="sec-head"><h2>Нумерация слов</h2></div>
+<div class="part">Теория</div>
+<p>Зафиксируй порядок букв: Σ = {a, b, c}. Сначала перечисляем слова по длине, а среди слов одной длины — по алфавиту: ε, a, b, c, aa, ab, ac, ba, … Это <b>порядок по длине и лексикографический внутри длины</b> (shortlex). Пустое слово имеет номер 0.</p>
+<p>Буквам присваиваем номера <b>от 1 до n</b>, где n — размер алфавита. Номер слова x₁…xₖ равен:</p>
+<div class="trace">N(x₁…xₖ) = d(x₁)·nᵏ⁻¹ + d(x₂)·nᵏ⁻² + … + d(xₖ)·n⁰.</div>
+<p>Это похоже на позиционную систему счисления, но цифры здесь 1…n. Нулевой буквы нет. Поэтому при обратном переводе остаток 0 означает последнюю букву алфавита, а не отдельный символ.</p>
+<div class="part">Разбор по шагам</div>
+<h3 id="number-to-word">Из номера 689 в слово</h3>
+<p>Σ = {a, b, c}, n = 3. На каждом шаге берём d = ((N − 1) mod n) + 1, затем N ← (N − d)/n. Остатки читаем <b>снизу вверх</b>.</p>
+<div class="tscroll"><table class="dt"><tr><th>N до шага</th><th>d</th><th>буква справа</th><th>N после шага</th></tr><tr><td>689</td><td>2</td><td>b</td><td>229</td></tr><tr><td>229</td><td>1</td><td>a</td><td>76</td></tr><tr><td>76</td><td>1</td><td>a</td><td>25</td></tr><tr><td>25</td><td>1</td><td>a</td><td>8</td></tr><tr><td>8</td><td>2</td><td>b</td><td>2</td></tr><tr><td>2</td><td>2</td><td>b</td><td>0</td></tr></table></div>
+<div class="ansbox">689 ↔ bbaaab</div><p>Проверка: 2·3⁵ + 2·3⁴ + 1·3³ + 1·3² + 1·3 + 2 = 486 + 162 + 27 + 9 + 3 + 2 = 689.</p>
+<h3 id="word-to-number">Из слова ccabd в номер</h3>
+<p>Σ = {a, b, c, d}; d(a)=1, d(b)=2, d(c)=3, d(d)=4. Справа степени начинаются с нуля:</p><div class="trace">N(ccabd) = 3·4⁴ + 3·4³ + 1·4² + 2·4¹ + 4·4⁰ = 988.</div>
+<div class="part">Что если…</div>
+<details class="wi"><summary>…номер делится на n без остатка</summary><div class="wb"><p>Пиши последнюю букву и вычитай её номер до деления. Например, N=3 при Σ={a,b,c}: d=3, (3−3)/3=0 ⇒ c. А N=6: d=3, N=1; затем d=1 ⇒ ac. Обычная запись 6=20₃ здесь не подходит.</p></div></details>
+<details class="wi"><summary>…алфавит состоит из одной буквы</summary><div class="wb"><p>Для Σ={a} порядок ε, a, aa, aaa, …; номер равен длине слова. Формула работает и при n=1.</p></div></details>
+<div class="part">Практика</div><div class="task"><div class="task-h"><span class="task-n">Н1</span><span class="task-t">Σ={a,b}: найди слово №6 и номер baa</span></div><details><summary>Показать решение</summary><div class="task-b"><p>№6 = bb, потому что 2·2+2=6. N(baa)=2·2²+1·2+1=11.</p></div></details></div>
+<div class="tool"><h4>Перевести своё слово или номер</h4><p class="hint">Алфавит — разные одиночные символы в нужном порядке, без разделителей. Пустое слово вводи как ε.</p><div class="field"><label for="num-alpha">Алфавит</label><input class="tx" id="num-alpha" value="abc" maxlength="30"><label for="num-value">Номер или слово</label><input class="tx" id="num-value" value="689"><button class="btn primary" id="num-go" type="button">Разобрать</button></div><div id="num-out" class="aut-output" aria-live="polite"></div></div>
+</section>
+
+<section class="sec" id="rep">
+  <div class="sec-head"><div><div class="eyebrow">~20 мин</div><h2>Повторение</h2></div>
+  </div>
+
+  <h3 id="rep-sub-1">Конечный автомат как граф</h3>
+  <p>Кружок — состояние. Стрелка из ниоткуда — начальное. Двойной кружок — финальное. Дуга с буквой — переход: прочитали букву и перешли. Слово допускается, если есть путь из начального в финальное, буквы на котором складываются в это слово.</p>
+  <p>Три вещи, которые встречаются на каждом графе ЛР3:</p>
+  <div class="rules-grid" id="basics"></div>
+  <p>Пример из лекции 24.09: автомат допускает слова, в которых есть два нуля подряд. Введи слово и посмотри конфигурации, как в конспекте.</p>
+  <div class="box">
+    <div class="gscroll" id="pqr-svg"></div>
+    <div class="field"><label for="pqr-w">Слово</label><input class="tx" id="pqr-w" value="1001" autocomplete="off" spellcheck="false"><button class="btn" id="pqr-go" type="button">Прогнать</button></div>
+    <div id="pqr-out"></div>
+  </div>
+
+  <h3 id="rep-sub-2">Регулярные выражения</h3>
+  <p>Регулярка строится из букв алфавита, ε (пустое слово) и ∅ (пустой язык) тремя операциями. Плюс одно сокращение, которое любят на доске. Под каждой операцией — автомат, который допускает ровно слова из примера: пройди по стрелкам и прочитай буквы.</p>
+  <div class="rules-grid" id="ops"></div>
+  <p><b>Приоритет:</b> сначала <span class="re">*</span> и <span class="re">+</span>-степень, потом склейка, в самом конце сумма. Поэтому <span class="re">ab<sup>*</sup></span> — это a, потом b сколько угодно раз, а не (ab)<sup>*</sup>. И <span class="re">a+bc</span> — это a или bc, а не (a+b)c. Разница на картинке:</p>
+  <div class="rules-grid" id="prio"></div>
+  <p>Быстрая разминка: входит ли слово в язык?</p>
+  <div class="quiz" id="quiz"></div>
+  <h4 style="margin-top:1.6rem">Тождества</h4>
+  <p>Ими упрощаешь ответы в типе Б. Каждое тождество — это два графа, которые допускают одни и те же слова: слева как получилось, справа как можно записать короче. Пунктир с ∅ — дуги на самом деле нет.</p>
+  <div class="rules-grid" id="ids"></div>
+
+  <h3 id="rep-sub-3">На дугах можно писать регулярки</h3>
+  <p>Разрешим писать на дуге не одну букву, а целое регулярное выражение. Дуга p —R→ q значит: из p в q можно пройти по любому слову из R. Такой граф называют обобщённым.</p>
+  <div class="note"><p>Отсюда оба метода. В типе А стартуем с одной дуги q₀ —R→ q<sub>f</sub> и <b>разбиваем</b> её на маленькие, пока на дугах не останутся буквы и ε. В типе Б делаем обратное: <b>сворачиваем</b> граф, удаляя вершины, пока не останется одна дуга. Её метка и есть ответ.</p></div>
+</section>
+
+<!-- ============ R → АВТОМАТ ============ -->
+<section class="sec" id="r2a">
+  <div class="sec-head"><div><div class="eyebrow">~35 мин</div><h2>Регулярка → автомат</h2></div>
+  </div>
+  <div class="part">Теория</div>
+  <p>Рисуем q₀ и q<sub>f</sub>, между ними одна дуга с R. Дальше на каждом шаге берём любую дугу, на которой написано не одна буква и не ε, смотрим на её <b>главную операцию</b> и заменяем по правилу. Базовые случаи из лекции: R = ∅ — дуги нет; R = ε — ε-дуга; R = a — дуга по букве a. Это уже готовые кусочки, их не трогаем.</p>
+  <div class="rules-grid" id="rules-a"></div>
+  <h4 style="margin-top:1.4rem">Как найти главную операцию</h4>
+  <p>Это операция, которая выполняется <b>последней</b>. Смотри на то, что стоит вне всех скобок:</p>
+  <ul>
+    <li>есть <span class="re">+</span> вне скобок → главная сумма: <span class="re">(ab+b<sup>+</sup>)<sup>*</sup>a <b class="c-lp">+</b> (ab)<sup>*</sup></span> — два слагаемых;</li>
+    <li>плюсов вне скобок нет, но кусков несколько → главная склейка: <span class="re">(ab+b<sup>+</sup>)<sup>*</sup> <b class="c-lp">·</b> a</span>;</li>
+    <li>всё выражение — одна скобка или буква со звёздочкой → главная итерация: <span class="re">(ab+b<sup>+</sup>)<b class="c-lp"><sup>*</sup></b></span>;</li>
+    <li>всё выражение в скобках без звёздочки → сними скобки и смотри внутрь.</li>
+  </ul>
+  <ol class="algo">
+    <li>Нарисуй q₀ —R→ q<sub>f</sub>.</li>
+    <li>Найди дугу, где метка не буква и не ε. Определи главную операцию.</li>
+    <li>Замени дугу по правилу: + → параллельные дуги, склейка → цепочка, * → вершина с петлёй и ε-дугами, ⁺ → вершина с петлёй, вход по R.</li>
+    <li>Повторяй, пока все метки — буквы или ε. Петли разбиваются так же, как обычные дуги.</li>
+  </ol>
+
+  <div class="part">Разбор по шагам</div>
+  <p>Пример с лекции 29.09: <span class="re">R = (ab+b<sup>+</sup>)<sup>*</sup>a + (ab)<sup>*</sup></span>. Шаги совпадают с рисунками 1–8 в конспекте. Листай кнопками, стрелками клавиатуры или ползунком. Новые вершины и дуги появляются синим.</p>
+  <div class="stepper" id="demo-r2a"></div>
+
+  <div class="part">Что если в твоей задаче…</div>
+  <details class="wi"><summary>…хочется повесить петлю прямо на старую вершину, без ε-дуг</summary><div class="wb">
+    <p>Нельзя: у вершины могут быть другие дуги, и петля начнёт «смешиваться» с ними. Пример: <span class="re">a<sup>*</sup>b + c</span>. Если повесить петлю a прямо на q₀, получится, что слово <code class="w">ac</code> допускается, хотя в языке его нет: в R буква c стоит одна. Поэтому для звёздочки всегда новая вершина с ε-входом и ε-выходом.</p>
+    <div class="two" id="pitfall"></div></div></details>
+  <details class="wi"><summary>…в старом конспекте петля висит без ε-дуг</summary><div class="wb"><p>В разборе КР для <span class="re">ab<sup>*</sup>c</span> нарисовано S —a→ q (петля b) —c→ …, без ε. Это законно только в цепочке: у вершины ровно одна входящая и одна исходящая дуга, и обе её собственные. Если не уверен, ставь ε-дуги, как на лекции 29.09 — так ошибиться нельзя.</p></div></details>
+  <details class="wi"><summary>…в выражении есть x<sup>+</sup></summary><div class="wb">
+    <p>R<sup>+</sup> = RR<sup>*</sup>. Можно разбить как склейку R и R<sup>*</sup>, а можно короче: новая вершина n, вход p —R→ n, петля R на n, выход n —ε→ q. Тренажёр делает короче. Оба варианта правильные.</p></div></details>
+  <details class="wi"><summary>…получилось много ε-дуг</summary><div class="wb">
+    <p>Это нормально, на ЛР3 автомат может быть с ε-переходами. Убирать их не обязательно. Если преподаватель просит автомат без ε, понадобятся ε-замыкания. Детерминизация — отдельный следующий шаг, если требуется ДКА.</p></div></details>
+  <details class="wi"><summary>…одна и та же буква встречается в выражении несколько раз</summary><div class="wb">
+    <p>Каждому вхождению своя дуга. Не склеивай вершины «по смыслу», даже если кусочки похожи: например, в <span class="re">(ab)<sup>*</sup>+ab</span> будут две разные цепочки a → b.</p></div></details>
+  <details class="wi"><summary>…скобки вложены глубоко</summary><div class="wb">
+    <p>Иди снаружи внутрь, по одной дуге за шаг. Каждая скобка раскроется в своё время. Порядок, какую дугу брать первой, на результат не влияет.</p></div></details>
+  <details class="wi"><summary>…в выражении есть ε как слагаемое, например (ε+a)b</summary><div class="wb">
+    <p>Сумма даёт две параллельные дуги, одна из них ε. То есть «можно пройти, ничего не прочитав». Ничего специального делать не надо.</p></div></details>
+
+  <div class="part">Практика</div>
+  <p>Реши на листке, потом открой решение и сверь по шагам. Расположение вершин на твоём рисунке может отличаться, важно, чтобы совпадала структура.</p>
+  <div class="task"><div class="task-h"><span class="task-n">А1</span><span class="task-t">Построить автомат для <span class="re">a(b+c)<sup>*</sup></span></span></div>
+    <div class="task-b"><p class="hint">Три шага. Начни со склейки.</p></div>
+    <details data-solve="re" data-src="a(b+c)*"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">А2</span><span class="task-t">Построить автомат для <span class="re">(a+b)<sup>*</sup>ab</span></span></div>
+    <div class="task-b"><p class="hint">Склейка из трёх частей: (a+b)<sup>*</sup>, a и b.</p></div>
+    <details data-solve="re" data-src="(a+b)*ab"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">А3</span><span class="task-t">С доски: <span class="re">(x+y<sup>+</sup>)(x<sup>*</sup>y+x)<sup>+</sup>+(x<sup>+</sup>y)<sup>*</sup></span></span></div>
+    <div class="task-b"><p class="hint">Самая длинная, около 15 шагов. Главная операция — сумма двух слагаемых.</p></div>
+    <details data-solve="re" data-src="(x+y^+)(x*y+x)^+ + (x^+y)*"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">А4</span><span class="task-t">Из разбора КР: <span class="re">ab<sup>*</sup>c + (a+b)<sup>*</sup>(c+a<sup>*</sup>)</span></span></div>
+    <div class="task-b"><p class="hint">Главная — сумма. Во втором слагаемом склейка двух частей, в каждой своя звёздочка.</p></div>
+    <details data-solve="re" data-src="ab*c+(a+b)*(c+a*)"><summary>Показать решение</summary></details></div>
+</section>
+
+<!-- ============ АВТОМАТ → R ============ -->
+<section class="sec" id="a2r">
+  <div class="sec-head"><div><div class="eyebrow">~50 мин</div><h2>Автомат → регулярка</h2></div>
+  </div>
+  <div class="part">Теория</div>
+  <p>Цель — свести граф к двум вершинам и одной дуге между ними. Метка на этой дуге — ответ. Делается в три шага.</p>
+  <h4>Шаг 0. Подготовка: недостижимые вершины и нормализация</h4>
+  <p>Сначала сотри <b>недостижимые</b> вершины — те, в которые нельзя попасть из начальной, — вместе с дугами, которые из них выходят. Так делают в разборе КР прошлого года. Если не стереть, ответ не испортится, но будет лишняя работа.</p>
+  <p><b>Нормализация</b> — это подготовка графа к сворачиванию. В конце должна остаться одна дуга <b>s —R→ f</b>, и всё. Значит, нужна ровно одна начальная вершина, <b>в которую ничего не входит</b>, и ровно одна финальная, <b>из которой ничего не выходит</b>. Иначе на них по ходу удаления появятся петли и лишние дуги, и одной меткой ответ не запишешь.</p>
+  <p>Почему можно просто добавить вершины: ε-дуга ничего не читает, поэтому новые s и f язык не меняют. Все случаи на картинках, новое выделено синим:</p>
+  <div class="rules-grid" id="norm"></div>
+  <p>На лекции 24.09 в q₁ ничего не входило, поэтому добавили только q<sub>f</sub> (задача Б2).</p>
+  <h4>Шаг 1. Склейка параллельных дуг</h4>
+  <p>Две дуги p —R₁→ q и p —R₂→ q заменяем одной p —R₁+R₂→ q. Две петли a и b на одной вершине — одна петля a+b. Подпись «0,1» сразу пиши как 0+1.</p>
+  <div class="rules-grid" id="merge"></div>
+  <h4>Шаг 2. Удаление вершин</h4>
+  <p>Берём любую вершину r, кроме s и f. Смотрим на её петлю R₂ и на все дуги, которые в неё входят и из неё выходят. <b>Для каждой пары</b> «вход p —R₁→ r» и «выход r —R₃→ q» рисуем дугу:</p>
+  <div class="rules-grid" id="rules-b"></div>
+  <ul>
+    <li>Петли нет — пишем просто R₁R₃.</li>
+    <li>p и q совпали — новая дуга становится петлёй на p.</li>
+    <li>Между p и q уже была дуга R₀ — склеиваем: R₀ + R₁R₂*R₃.</li>
+    <li>Входов k, выходов m — новых дуг k·m. Самая частая ошибка — забыть пару, поэтому выписывай их списком.</li>
+  </ul>
+  <p>Эти частные случаи на картинках (удаляем r):</p>
+  <div class="rules-grid" id="elimc"></div>
+  <ol class="algo">
+    <li>Нормализуй граф.</li>
+    <li>Склей параллельные дуги и петли.</li>
+    <li>Выбери вершину. Удобнее брать ту, у которой меньше всего пар «вход × выход».</li>
+    <li>Выпиши входы, петлю, выходы и формулу для каждой пары. Упрости ε. Перерисуй граф.</li>
+    <li>Повторяй, пока не останутся только начало и конец. Метка между ними — ответ.</li>
+  </ol>
+  <div class="note"><p><b>Ответы бывают разными по виду.</b> Другой порядок удаления даёт другую запись, но язык тот же. Если у тебя и у соседа разные выражения, это ещё не ошибка. Проверка — подставить несколько слов или прогнать в тренажёре.</p></div>
+
+  <div class="part">Разбор 1. Два нуля подряд</div>
+  <p>Автомат из лекции 24.09 (тот, что выше в повторении). Удаляем в порядке q, r, p. Входы рисуются янтарным, петля красным, выходы зелёным, новые дуги синим.</p>
+  <div class="stepper" id="demo-a2r-1"></div>
+
+  <div class="part">Разбор 2. Две финальные и цикл</div>
+  <p>Тут нужна полная нормализация, а при удалении q₂ появляется петля на q₀ и склейка с уже существующей дугой.</p>
+  <div class="stepper" id="demo-a2r-2"></div>
+
+  <div class="part">Что если в твоей задаче…</div>
+  <details class="wi"><summary>…начальная вершина одновременно финальная</summary><div class="wb">
+    <p>Значит, пустое слово ε в языке. Нормализуй как обычно: s —ε→ q₀ и q₀ —ε→ f. В ответе появится ε как слагаемое или звёздочка снаружи. Пример — задача Б3.</p></div></details>
+  <details class="wi"><summary>…у вершины нет выходов или в неё нельзя попасть</summary><div class="wb">
+    <p>Через неё не проходит ни одно допускаемое слово. Пар «вход × выход» ноль, поэтому просто стираешь вершину вместе с дугами.</p></div></details>
+  <details class="wi"><summary>…между двумя вершинами дуги в обе стороны</summary><div class="wb">
+    <p>Когда удаляешь одну из них, пара «вход из p, выход в p» даёт петлю на p: p —R₁R₂*R₃→ p. Если на p уже была петля, склеиваешь через +.</p></div></details>
+  <details class="wi"><summary>…у удаляемой вершины несколько петель</summary><div class="wb">
+    <p>Сначала склей их в одну: петли a и b = петля a+b. В формулу идёт (a+b)<sup>*</sup>, а не a<sup>*</sup>b<sup>*</sup>.</p></div></details>
+  <details class="wi"><summary>…в метке уже стоит сумма, а её надо склеить</summary><div class="wb">
+    <p>Бери в скобки. Вход 1+00, петля 0, выход 1 дают <span class="re">(1+00)0<sup>*</sup>1</span>, а не 1+000<sup>*</sup>1. Это самая частая ошибка при переписывании.</p></div></details>
+  <details class="wi"><summary>…хочется сокращать быстрее</summary><div class="wb"><p>В разборе КР есть два частных случая правила R₁R₂<sup>*</sup>R₃: p —ε→ r (петля a) —ε→ q даёт <span class="re">a<sup>*</sup></span>, а p —a→ r (петля a) —ε→ q даёт <span class="re">aa<sup>*</sup> = a<sup>+</sup></span>. Если узнаёшь картинку, пиши сразу.</p></div></details>
+  <details class="wi"><summary>…из начала в конец вообще нет пути</summary><div class="wb">
+    <p>Язык пустой: R = ∅.</p></div></details>
+
+  <div class="part">Практика</div>
+  <p>Перерисуй граф на листок, реши, потом сверь. Твой порядок удаления может отличаться от решения, тогда сравни ответы по проверочным словам в конце решения.</p>
+  <div class="task"><div class="task-h"><span class="task-n">Б1</span><span class="task-t">Слова, оканчивающиеся на 01</span></div>
+    <div class="task-b"><div class="gscroll" data-show="B1"></div><p class="hint">Решение удаляет вершины в порядке q₂, q₁, q₀: так выходит короче, чем при порядке q₀ первым.</p></div>
+    <details data-solve="g" data-g="B1"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">Б2</span><span class="task-t">Пример с лекции 24.09, подписанный «3 лаба»</span></div>
+    <div class="task-b"><div class="gscroll" data-show="B2"></div><p class="hint">Это ровно тот автомат, который преподаватель разбирал как пример к ЛР3. В начальную ничего не входит, поэтому добавляем только q<sub>f</sub>. Решение удаляет вершины в его порядке: q₂, q₄, q₃, q₆, q₅. В конспекте R₁ = (1+00)1<sup>*</sup>1, R₂ = 01(01<sup>*</sup>1+0), а ответ записан как R₃ + 011.</p></div>
+    <details data-solve="g" data-g="B2"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">Б4</span><span class="task-t">Задача 2 из контрольной прошлого года</span></div>
+    <div class="task-b"><div class="gscroll" data-show="KR2"></div><p class="hint">Финальных три, значит нужна F. Решение удаляет вершины в порядке разбора КР: q₂, q₁, q₅, q₃, q₄. Ответ в разборе: <span class="re">(ba<sup>*</sup>b+aa)(bba+b)<sup>*</sup>(b(a+ε)+a+ε)</span> — тот же язык, слагаемые просто в другом порядке.</p></div>
+    <details data-solve="g" data-g="KR2"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">Б3</span><span class="task-t">Начальная — она же финальная</span></div>
+    <div class="task-b"><div class="gscroll" data-show="B3"></div></div>
+    <details data-solve="g" data-g="B3"><summary>Показать решение</summary></details></div>
+</section>
+
+
+<!-- ============ ЛИСТОК ============ -->
+<section class="sec" id="paper">
+  <div class="sec-head"><div><div class="eyebrow">~10 мин</div><h2>Как писать на листке</h2></div>
+  </div>
+  <p>Два полных образца, как сдавать работу. Структура та же, что на листке исходного материала: шапка, «Дано», пронумерованные шаги с графом после каждого, ответ в рамке. Красным на полях — пометки для тебя, на листок их не переписывай.</p>
+  <ul>
+    <li><b>Граф перерисовывай заново</b> после каждого шага, старый не исправляй. Так преподаватель видит, где что поменялось.</li>
+    <li><b>Подписывай все вершины и все дуги</b>, ε пиши явно. Финальные — двойным кружком, начальную — стрелкой.</li>
+    <li><b>В типе Б на каждое удаление</b> — три строки: входы, петля, выходы. Ниже пары с формулой. Можно таблицей, как во втором образце.</li>
+    <li><b>В конце проверка</b> парой слов: одно должно подойти, одно нет. Это занимает минуту и сразу ловит потерянную пару.</li>
+  </ul>
+
+  <h3 id="paper-sub-1">Образец 1. Тип А: регулярка → автомат</h3>
+  <div class="sheet">
+    <p class="hdr">Лабораторная работа №3</p>
+    <p class="sub">Построение конечного автомата по регулярному выражению</p>
+    <p class="lbl">Дано:</p>
+    <p class="ind">R = a(b+c)*,&nbsp; Σ = {a, b, c}</p>
+    <p class="lbl">Решение:</p>
+    <p class="st">1. Строим исходную дугу из начального состояния q₀ в финальное q<sub>f</sub> с меткой R.</p>
+    <div class="gscroll" data-sheet="A:0"></div>
+    <p class="st"><span class="side">главн. = послед.</span>2. Главная операция — произведение: a · (b+c)*.<br>Вводим новое состояние q₁: q₀ —a→ q₁ —(b+c)*→ q<sub>f</sub>.</p>
+    <div class="gscroll" data-sheet="A:1"></div>
+    <p class="st">3. (b+c)* — итерация. Вводим q₂:<br><span class="ind">q₁ —ε→ q₂,&nbsp; петля (b+c) на q₂,&nbsp; q₂ —ε→ q<sub>f</sub>.</span></p>
+    <div class="gscroll" data-sheet="A:2"></div>
+    <p class="pen">петлю не на q₁, а на новой вершине!</p>
+    <p class="st">4. Петля b+c — сумма ⇒ две петли: b и c.</p>
+    <div class="gscroll" data-sheet="A:3"></div>
+    <p class="lbl">Ответ:</p>
+    <p class="ind">M = (Σ, Q, δ, q₀, F),&nbsp; Σ = {a, b, c},&nbsp; Q = {q₀, q₁, q₂, q<sub>f</sub>},&nbsp; F = {q<sub>f</sub>}</p>
+    <div class="ind" data-sheet-table="A"></div>
+    <p class="lbl">Проверка:</p>
+    <p class="ind">abcb: q₀ —a→ q₁ —ε→ q₂ —b→ q₂ —c→ q₂ —b→ q₂ —ε→ q<sub>f</sub> ✓ допускается</p>
+    <p class="ind">ba: из q₀ по b перехода нет ✗ не допускается</p>
+  </div>
+
+  <h3 id="paper-sub-2">Образец 2. Тип Б: автомат → регулярка</h3>
+  <div class="sheet">
+    <p class="hdr">Лабораторная работа №3</p>
+    <p class="sub">Построение регулярного выражения по конечному автомату</p>
+    <p class="lbl">Дано:</p>
+    <p class="ind">M = ({0, 1}, {p, q, r}, δ, p, {r})</p>
+    <div class="gscroll" data-sheet="B:0"></div>
+    <p class="lbl">Решение:</p>
+    <p class="st">1. Нормализация.<br><span class="ind">В p входят дуги ⇒ добавляем начальное s и дугу s —ε→ p.</span><br><span class="ind">Из r выходят дуги ⇒ добавляем финальное f и дугу r —ε→ f.</span></p>
+    <p class="st">2. Склеиваем петли на r: 0, 1 ⇒ 0+1.</p>
+    <div class="gscroll" data-sheet="B:2"></div>
+    <p class="st"><span class="side">1×2 = 2 пары</span>3. Удаляем q.</p>
+    <p class="ind">Входы: p —0→ q.&nbsp; Петля: нет.&nbsp; Выходы: q —1→ p,&nbsp; q —0→ r.</p>
+    <div class="ind tscroll"><table class="pt">
+      <tr><th>пара</th><th>R₁R₂*R₃</th><th>итог</th></tr>
+      <tr><td>p → p</td><td>0 · 1 = 01</td><td>петля: 1 + 01</td></tr>
+      <tr><td>p → r</td><td>0 · 0 = 00</td><td>00</td></tr>
+    </table></div>
+    <div class="gscroll" data-sheet="B:4"></div>
+    <p class="st">4. Удаляем r.</p>
+    <p class="ind">Вход: p —00→ r.&nbsp; Петля: 0+1.&nbsp; Выход: r —ε→ f.</p>
+    <p class="ind">p → f:&nbsp; 00(0+1)*ε = 00(0+1)*</p>
+    <div class="gscroll" data-sheet="B:6"></div>
+    <p class="pen">сумму в петле — в скобки!</p>
+    <p class="st">5. Удаляем p.</p>
+    <p class="ind">Вход: s —ε→ p.&nbsp; Петля: 1+01.&nbsp; Выход: p —00(0+1)*→ f.</p>
+    <p class="ind">s → f:&nbsp; ε(1+01)*00(0+1)* = (1+01)*00(0+1)*</p>
+    <div class="gscroll" data-sheet="B:8"></div>
+    <p class="lbl">Ответ:</p>
+    <p class="ind"><span class="frame">R = (1+01)*00(0+1)*</span></p>
+    <p class="lbl">Проверка:</p>
+    <p class="ind">1001 = 1 · 00 · 1 ∈ R ✓&nbsp; автомат: p → p → q → r → r, r ∈ F ✓</p>
+    <p class="ind">0101: нет двух нулей подряд ∉ R ✓&nbsp; автомат: p → q → p → q → p, p ∉ F ✓</p>
+  </div>
+  <p class="hint">Если удалял вершины в другом порядке и ответ вышел другим по виду — нормально. Сверь его с автоматом в тренажёре.</p>
+
+  <h3 id="paper-sub-3">Образец 4. Тип Б из исходного материала</h3>
+  <p class="hint">Автомат с фото: q₀ —0→ q₁, q₀ —1→ q₂, q₁ —0→ q₂, петля 1 на q₂, q₂ —0→ q₄, q₂ —1→ q₃, q₃ —0→ q₄, q₃ —1→ q₅, q₅ —0→ q₄, q₄ —1→ q₆, q₅ —0→ q₆; финальные q₄, q₅, q₆. Фото повёрнуто — если какую-то стрелку я прочитал не так, перерисуй автомат в тренажёре.</p>
+  <div class="sheet" id="sheet-ph-b"></div>
+  <h3 id="paper-sub-4">Образец 5. Тип А из исходного материала</h3>
+  <div class="sheet" id="sheet-ph-a"></div>
+
+  <h3 id="paper-sub-5">Образец 7. Тип Б, вариант 21</h3>
+  <p class="hint">Как прочитан граф: q₀ —0→ q₁; из q₁ по 1 в q₂, q₃ и q₄; q₃ —0→ q₄, q₃ —1→ q₅, q₅ —0→ q₄, q₄ —0→ q₂, на q₂ петля; финальные q₄ и q₅. Подпись петли на фото не видна, на ответ она не влияет: из q₂ нельзя дойти до финальной, поэтому q₂ удаляем первой как тупиковую.</p>
+  <div class="sheet" id="sheet-fr-b"></div>
+  <h3 id="paper-sub-6">Образец 8. Тип А, вариант 21</h3>
+  <div class="sheet" id="sheet-fr-a"></div>
+
+  <h3 id="paper-sub-7">Образец 6. Задача №7: ε-переходы и детерминизация</h3>
+  <div class="sheet" id="sheet-d4"></div>
+
+  <h3 id="paper-sub-8">Образец 3. Детерминизация</h3>
+  <div class="sheet">
+    <p class="hdr">Лабораторная работа №4</p>
+    <p class="sub">Детерминизация конечного автомата с ε-переходами</p>
+    <p class="lbl">Дано:</p>
+    <p class="ind">M<sub>ε</sub> = ({a, b}, {q₀, q₁, q₂, q₃}, δ<sub>ε</sub>, q₀, {q₃})</p>
+    <div class="gscroll" data-sheet-det="g:0"></div>
+    <p class="lbl">Решение:</p>
+    <p class="st">1. Строим ε-замыкания:</p>
+    <p class="ind">S₀ = Ξ(q₀) = {q₀, q₁},&nbsp; S₁ = Ξ(q₁) = {q₁},&nbsp; S₂ = Ξ(q₂) = {q₂},&nbsp; S₃ = Ξ(q₃) = {q₃, q₂}</p>
+    <p class="ind">Начальные: S₀, S₁ (q₀, q₁ ∈ Ξ(q₀)).&nbsp; Финальные: S₃ (содержит q₃).</p>
+    <p class="st"><span class="side">из Sᵢ по a, потом Ξ</span>2. Строим автомат без ε-переходов:</p>
+    <div class="ind" data-sheet-det="h:5"></div>
+    <div class="gscroll" data-sheet-det="g:6"></div>
+    <p class="st">3. Детерминизация. P₀ = {S₀, S₁}:</p>
+    <div class="ind" data-sheet-det="h:10"></div>
+    <p class="pen">новое множество — новое P, пустое — ∅</p>
+    <p class="st">4. Граф детерминированного автомата. Финальные: P₁, P₃ (содержат S₃).</p>
+    <div class="gscroll" data-sheet-det="g:11"></div>
+    <p class="lbl">Проверка:</p>
+    <p class="ind">w = abbba: (P₀, abbba) ⊢ (P₁, bbba) ⊢* (P₁, a) ⊢ (P₃, ε), P₃ ∈ F ⇒ цепочка допускается ✓</p>
+  </div>
+</section>
+
+<!-- ============ ТРЕНАЖЁР ============ -->
+<section class="sec" id="tool">
+  <div class="sec-head"><div><div class="eyebrow">~20 мин</div><h2>Тренажёр</h2></div>
+  </div>
+  <p>Подставь свой вариант: тренажёр решит его по шагам тем же методом. Решай сначала сам, а сюда приходи сверяться.</p>
+  <div class="note"><p><b>Как проверить ответ на паре без тренажёра.</b> Возьми 2–3 коротких слова, которые автомат точно допускает, и 2–3, которые нет. Для каждого проверь: подходит ли оно под твоё выражение. Если хоть одно разошлось, ищи ошибку в шаге, где пропала пара или скобки.</p></div>
+
+  <div class="tool">
+    <h4>Регулярка → автомат</h4>
+    <p class="hint">Сумма <code>+</code>, итерация <code>*</code>, «хотя бы раз» пиши <code>^+</code> или <code>⁺</code>, пустое слово <code>ε</code> или <code>eps</code>.</p>
+    <div class="field"><input class="tx" id="t1-in" value="(x+y^+)(x*y+x)^+ + (x^+y)*" aria-label="Регулярное выражение" autocomplete="off" spellcheck="false">
+      <span class="ins"><button class="btn sm" type="button" data-ins="t1-in" data-v="ε">ε</button><button class="btn sm" type="button" data-ins="t1-in" data-v="⁺">⁺</button><button class="btn sm" type="button" data-ins="t1-in" data-v="*">*</button></span>
+      <button class="btn primary" id="t1-go" type="button">Построить</button></div>
+    <div id="t1-msg"></div>
+    <div id="t1-st"></div>
+  </div>
+
+  <div class="tool">
+    <h4>Автомат → регулярка</h4>
+    <p class="hint">Одна дуга на строку: <code>откуда метка куда</code>. Метка — буква, <code>eps</code>, <code>0,1</code> или целая регулярка. Строки <code>начало:</code> и <code>финал:</code> обязательны, <code>порядок:</code> — если хочешь удалять вершины в своём порядке. Автомат из примера «для самостоятельного решения» на фото читается плохо, перерисуй его сюда.</p>
+    <textarea class="tx" id="t2-in" aria-label="Описание автомата" spellcheck="false">начало: q0
+финал: q2, q3
+q0 a q1
+q1 b q1
+q1 a q2
+q2 b q0
+q0 b q3
+q3 a q3
+# порядок: q1 q3 q2 q0</textarea>
+    <div class="field"><button class="btn primary" id="t2-go" type="button">Решить по шагам</button></div>
+    <div id="t2-msg"></div>
+    <div class="field"><label for="t2-my">Мой ответ</label><input class="tx" id="t2-my" placeholder="например (ab*ab)*(ba*+ab*a)" autocomplete="off" spellcheck="false"><button class="btn" id="t2-cmp" type="button">Сверить с автоматом</button></div>
+    <div id="t2-cmpout"></div>
+    <div id="t2-st"></div>
+  </div>
+
+  <div class="tool">
+    <h4>Сравнить два выражения</h4>
+    <p class="hint">Проверяет, задают ли они один язык: перебирает все слова до некоторой длины и ищет слово, на котором выражения расходятся.</p>
+    <div class="field"><label for="t3-a">R₁</label><input class="tx" id="t3-a" value="(1+01)*00(0+1)*" autocomplete="off" spellcheck="false"></div>
+    <div class="field"><label for="t3-b">R₂</label><input class="tx" id="t3-b" value="(0+1)*00(0+1)*" autocomplete="off" spellcheck="false"><button class="btn primary" id="t3-go" type="button">Сравнить</button></div>
+    <div id="t3-out"></div>
+  </div>
+</section>
+
+
+<!-- ============ ДЕТЕРМИНИЗАЦИЯ ============ -->
+<section class="sec" id="det">
+  <div class="sec-head"><div><div class="eyebrow">~35 мин</div><h2>Детерминизация</h2></div>
+  </div>
+<p>Здесь две разные задачи. <b>Удалить ε</b> — заменить бесплатные перемещения обычными переходами. <b>Детерминизировать</b> — заменить несколько возможных текущих вершин одной вершиной-набором. Сделаем их по очереди на одном маленьком примере.</p>
+<div class="part" id="det-theory">Сначала идея, без новых обозначений</div>
+<p>Будем использовать только q₀,q₁,q₂,q₃. Фигурные скобки означают «все возможные варианты», а не маршрут: {q₁,q₂} — можно находиться в q₁ <b>или</b> q₂. Для допуска слова достаточно одного успешного варианта, поэтому терять варианты нельзя.</p>
+<div class="note"><p><b>Одна клетка при удалении ε:</b> бесплатно до буквы → прочитать одну букву из всех доступных вершин → бесплатно после буквы → записать все результаты. Это правило повторяется для каждой строки и каждой буквы.</p></div>
+<div class="part" id="det-first-demo">Разбор по шагам</div><p>Не пытайся сразу запомнить формулу. Пройди кнопкой «Дальше» сначала одну клетку, затем всю таблицу. На шаге 7 ε уже удалены; только с шага 8 начинается детерминизация.</p><div id="demo-epsilon-first"></div>
+<div class="part" id="det-recipe">Алгоритм, который можно повторить самостоятельно</div>
+<h3 id="det-sub-1">Первый лист: автомат без ε</h3><ol class="algo"><li>Выпиши ε-замыкание каждой q: сама q и всё достижимое только по ε. Обычные буквы пока игнорируй.</li><li>Нарисуй таблицу: строки — старые q, столбцы — буквы алфавита. Для клетки (q,a) начни из замыкания q; собери все концы a-дуг; добавь замыкания этих концов. Запиши получившееся множество q.</li><li>Начальное оставь прежним. Финальными отметь те q, в чьём замыкании есть старый финал. Нарисуй граф по новой таблице, без ε-дуг.</li></ol>
+<h3 id="det-sub-2">Второй лист: детерминированный автомат</h3><ol class="algo"><li>Создай P₀={q₀}. Это начальный набор <b>после</b> удаления ε.</li><li>Возьми первый набор P с незаполненной строкой. Для каждой буквы объедини клетки первого листа всех q из P.</li><li>Если такой набор уже встречался, используй его имя P. Если новый — дай следующее имя и добавь строку. Пустое множество означает отсутствие перехода в неполном ДКА.</li><li>Повторяй, пока у каждого найденного P заполнена вся строка. Финальными сделай наборы, содержащие хотя бы одно финальное q первого листа.</li></ol>
+<div class="note red"><p><b>Не делай два разных старта одновременно.</b> Если работаешь по таблице после удаления ε, начинай с {q₀}. Если пропускаешь промежуточную таблицу и идёшь прямо по исходному ε-графу, начинай с Ξ({q₀}) и добавляй замыкание после каждой буквы. Оба способа правильные; смешивать их шаги не нужно.</p></div>
+<details class="wi"><summary>Проверь себя перед следующим разделом</summary><div class="wb"><p>Почему из q₀ по a получается {q₁,q₂}, а не одна вершина? Почему q₁ стало финальным? Почему P₁ по a идёт в уже созданное P₂? Если ответ пока не очевиден, вернись к шагам 2–4, 7 и 10.</p><details><summary>Ответы</summary><p>Из q₀ можно бесплатно попасть в q₃; a-дуги из q₀ и q₃ дают q₁ и q₂. Из q₁ доступен старый финал q₂ по ε. Из набора P₁={q₁,q₂} по a получаем {q₃}, а это уже имя P₂.</p></details></div></details>
+<details class="wi"><summary>Дополнительно: как читать обозначения S и P в исходном материале</summary><div class="wb"><h3 id="epsilon-intuition">Удаление ε-переходов: что именно сохраняем</h3>
+<p>ε-переход не съедает букву. Если из p можно бесплатно дойти в r, то все способы читать слово из r должны оставаться доступны и из p. <b>Удаляем стрелку, но переносим её возможности</b>. Простое стирание ε-дуг изменит язык.</p>
+<ol class="algo"><li><b>До чтения буквы:</b> найди всё, куда можно бесплатно попасть из текущего состояния — Ξ(q). Поиск продолжай через всю цепочку ε-дуг. В цикле повторно посещённые вершины не добавляй.</li><li><b>Прочитай ровно одну букву:</b> из всех вершин Ξ(q) собери концы дуг с нужной буквой.</li><li><b>После буквы:</b> снова пройди любые ε-дуги из полученных концов. Объедини результаты, удали повторы. Это одна клетка новой таблицы.</li><li><b>Проверь финальность:</b> если Ξ(q) содержит хотя бы одно старое финальное состояние, новое состояние тоже финальное. Так сохраняется в том числе допуск пустого слова.</li></ol>
+<div class="trace">δ′(q,a) = Ξ(move(Ξ({q}),a)), F′ = {q : Ξ({q}) ∩ F ≠ ∅}.</div>
+<p>Здесь можно оставить старые имена q и единственное старое начальное q₀. В исходном материале используется эквивалентное оформление: Sᵢ обозначает ε-замыкание qᵢ, а найденные qⱼ записывают как Sⱼ. Пошаговый тренажёр ниже следует именно этому оформлению.</p>
+<div class="note"><p><b>Не смешивай обозначения.</b> qᵢ — вершина исходного графа; Sᵢ — её замыкание в промежуточной таблице; Pⱼ — множество промежуточных S после детерминизации. Например, S₁={q₁,q₂}, S₂={q₂}. Наборы {S₁} и {S₁,S₂} различаются по записи, но их объединение исходных q одинаково. Поэтому два правильных способа построения могут дать разное число промежуточных вершин. Для сравнения результата проверяй язык, затем минимизируй.</p></div>
+<h3 id="epsilon-worked">Одна клетка без пропусков: пример из разбора</h3>
+<p>Дуги: q₀ —a→ q₁; q₀ —ε→ q₃; q₁ —ε→ q₂; q₁ —a→ q₃; q₃ —a→ q₂; q₃ —b→ q₃. Финальное q₂.</p>
+<p>Ξ(q₀)={q₀,q₃}=S₀, Ξ(q₁)={q₁,q₂}=S₁, Ξ(q₂)={q₂}=S₂, Ξ(q₃)={q₃}=S₃.</p>
+<p><b>Клетка (S₀,a):</b> из q₀ по a приходим в q₁, из q₃ — в q₂. Получили {q₁,q₂}; замыкание снова {q₁,q₂}. В оформлении таблицы S записываем S₁,S₂. По b: из q₀ нет b-дуги, из q₃ попадаем в q₃, значит S₃.</p>
+<div class="tscroll"><table class="dt"><tr><th>Состояние</th><th>a</th><th>b</th></tr><tr><th>→ S₀={q₀,q₃}</th><td>S₁,S₂</td><td>S₃</td></tr><tr><th>* S₁={q₁,q₂}</th><td>S₃</td><td>∅</td></tr><tr><th>* S₂={q₂}</th><td>∅</td><td>∅</td></tr><tr><th>S₃={q₃}</th><td>S₂</td><td>S₃</td></tr></table></div>
+<p>S₁ и S₂ финальные, потому что содержат q₂. При единственном начальном S₀ и уже учтённом замыкании P₀={S₀}; тренажёр дополнительно включает S₃, так как q₃∈Ξ(q₀). Это избыточно, но не меняет язык: S₃ не добавляет возможностей, которых нет в S₀.</p>
+<h3 id="subset-intuition">Детерминизация: одна вершина хранит все варианты</h3>
+<p>НКА после одной буквы может находиться сразу в нескольких состояниях. ДКА хранит <b>весь этот набор как одну вершину</b>. Для каждого нового набора создай строку; на каждой букве объедини переходы всех его элементов. Порядок и повторы не важны: {S₁,S₂}={S₂,S₁,S₁}. Уже встречавшийся набор получает прежнее имя.</p>
+<p>На примере P₀={S₀,S₃}: по a объединяем {S₁,S₂}∪{S₂}={S₁,S₂}=P₁; по b получаем {S₃}=P₂. Из P₁ по a получаем P₂, по b — ∅. Из P₂ по a получаем {S₂}=P₃, по b — P₂. Из P₃ переходов нет. Финальные P₁ и P₃. Останавливаемся, когда <b>заполнены все строки всех найденных наборов</b>.</p>
+<div class="note red"><p><b>∅ и ε — разные вещи.</b> ∅ — ни одного возможного состояния; ε — пустое слово или бесплатный переход. В полный ДКА ∅ входит как нефинальная вершина с петлями по всем буквам. В неполном ДКА клетку можно оставить пустой и считать слово отвергнутым.</p></div>
+<details class="wi"><summary>…хочется обойтись без промежуточной таблицы S</summary><div class="wb"><p>Можно сразу строить ДКА на множествах исходных q: A₀=Ξ({q₀}), δ_D(A,a)=Ξ(move(A,a)). Финальный набор пересекается с F. Для примера A₀={q₀,q₃}; по a получаем A₁={q₁,q₂}, по b A₂={q₃}; далее A₁ —a→ A₂, A₂ —a→ A₃={q₂}, A₂ —b→ A₂. Это тот же язык с более короткими обозначениями. В одном решении придерживайся одной системы.</p></div></details>
+  <p>Ещё один подробный разбор. Метод — как на листке исходного материала и в лекции: сначала автомат без ε, потом детерминизация.</p>
+  <div class="part">Теория</div>
+  <dl class="gloss" >
+    <dt>Детерминированный</dt><dd>δ(q, a) содержит не больше одного состояния для любых q и a: из каждой вершины по каждой букве не больше одной стрелки, ε-дуг нет.</dd>
+    <dt>Полностью определённый</dt><dd>δ(q, a) содержит ровно одно состояние: пустых клеток в таблице нет.</dd>
+    <dt>Теорема</dt><dd>для любого недетерминированного автомата-распознавателя существует эквивалентный ему детерминированный. Доказательство конструктивное — это и есть алгоритм ниже.</dd>
+    <dt>ε-замыкание Ξ(q)</dt><dd>множество состояний, достижимых из q без подачи входного сигнала (по одним ε-дугам), включая само q.</dd>
+    <dt>Переход в автомате без ε</dt><dd>δ(Ξ(q), a) = ∪ Ξ(s) по всем s, куда из состояний Ξ(q) можно уйти по a. По-русски: из ε-замыкания q по букве a, а потом снова ε-замыкание.</dd>
+  </dl>
+  <p>Строим так:</p>
+  <ol class="algo">
+    <li><b>ε-замыкания.</b> Для каждого состояния q находим Ξ(q) — всё, куда из q можно дойти по одним ε-дугам, включая само q. Обозначаем S<sub>i</sub> = Ξ(q<sub>i</sub>).</li>
+    <li><b>Таблица S (автомат без ε).</b> Для S<sub>i</sub> и буквы a: берём все состояния из S<sub>i</sub>, смотрим, куда они уходят по a, к результату добавляем ε-замыкание. Каждое полученное состояние q<sub>x</sub> записываем как S<sub>x</sub>. Финальные S — те, в которых есть исходное финальное.</li>
+    <li><b>Таблица P (детерминизация).</b> P<sub>0</sub> — все начальные S: каждое S<sub>i</sub>, у которого q<sub>i</sub> ∈ Ξ(q<sub>0</sub>). Например, Ξ(q<sub>0</sub>) = {q<sub>0</sub>, q<sub>1</sub>} ⇒ P<sub>0</sub> = {S<sub>0</sub>, S<sub>1</sub>}. Для P и буквы a объединяем клетки таблицы S по всем S из P. Новое множество получает следующее имя P<sub>1</sub>, P<sub>2</sub>, …, уже встречавшееся — своё старое имя, пустое — ∅, стрелки нет. Повторяем, пока у всех P не заполнены строки. Финальные P — те, где есть финальное S.</li>
+    <li><b>Граф</b> по таблице P.</li>
+    <li><b>Проверка цепочки</b>, как в лекции: (P<sub>0</sub>, w) ⊢ … ⊢ (P<sub>k</sub>, ε). P<sub>k</sub> финальное — допускается.</li>
+  </ol>
+  <div class="part">Разбор по шагам</div>
+  <p>Пример из исходного материала. Таблица S совпадает с его фото. Таблица P совпадает с <b>исправленной</b> версией: на листке строка P<sub>0</sub> = {S<sub>0</sub>} зачёркнута и заменена на P<sub>0</sub> = {S<sub>0</sub>, S<sub>1</sub>, S<sub>2</sub>}. Граф на следующей странице листка нарисован ещё по зачёркнутой версии, поэтому там четыре P, а здесь три.</p>
+  <div class="stepper" id="demo-det"></div>
+
+</div></details>
+  <div class="part">Что если…</div>
+  <details class="wi"><summary>…в клетке таблицы ∅</summary><div class="wb"><p>Стрелки по этой букве нет, автомат просто «застревает» и слово отвергается. Если вдруг попросят <b>полностью определённый</b> автомат (без пустых клеток), добавь одно «мёртвое» состояние ∅, направь в него все пустые клетки и повесь на него петлю по всем буквам.</p></div></details>
+  <details class="wi"><summary>…ε-дуг в автомате нет вообще</summary><div class="wb"><p>Тогда Ξ(q) = {q} для каждого q, и таблица S просто повторяет таблицу переходов. Сразу переходи к таблице P: P<sub>0</sub> = {S<sub>0</sub>}, дальше объединения. Пример — задача Д3.</p></div></details>
+  <details class="wi"><summary>…ε-дуги идут цепочкой p —ε→ q —ε→ r</summary><div class="wb"><p>В замыкание попадает вся цепочка: Ξ(p) = {p, q, r}. Иди по ε-дугам, пока есть куда.</p></div></details>
+  <details class="wi"><summary>…непонятно, с чего начинать P<sub>0</sub></summary><div class="wb"><p>P<sub>0</sub> — это не {S<sub>0</sub>}, а все начальные S: берёшь Ξ(q<sub>0</sub>) и для каждого q<sub>i</sub> оттуда пишешь S<sub>i</sub>. В лекции Ξ(q<sub>0</sub>) = {q<sub>0</sub>, q<sub>1</sub>}, поэтому начальные S<sub>0</sub>, S<sub>1</sub> и P<sub>0</sub> = {S<sub>0</sub>, S<sub>1</sub>}. Записывай множествами из S, а не из q.</p></div></details>
+  <details class="wi"><summary>…два P получились одинаковыми множествами</summary><div class="wb"><p>Это одно состояние. Перед тем как давать новое имя, проверь все уже выписанные P. Иначе таблица станет бесконечной.</p></div></details>
+  <div class="part">Практика</div>
+  <div class="task"><div class="task-h"><span class="task-n">Д1</span><span class="task-t">Пример с лекции про детерминизацию</span></div>
+    <div class="task-b"><div class="gscroll" data-show="D1"></div><p class="hint">Построй ε-замыкания, таблицу без ε, таблицу P, граф и проверь цепочку abbba. В решении сначала получи таблицу без ε, затем объедини строки в наборы. Цепочка допускается.</p></div>
+    <details data-solve="det" data-g="D1" data-w="abbba"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">Д2</span><span class="task-t">Задача 3 из контрольной прошлого года</span></div>
+    <div class="task-b"><div class="gscroll" data-show="KR3"></div><p class="hint">Таблица S совпадает с разбором КР. Решение ниже следует основному алгоритму: сначала таблица q без ε, затем наборы P из q. Сопоставь шаги с первым разбором.</p></div>
+    <details data-solve="det" data-g="KR3"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">Д3</span><span class="task-t">Без ε-дуг: слова, оканчивающиеся на 01</span></div>
+    <div class="task-b"><div class="gscroll" data-show="D3"></div><p class="hint">Недетерминированность тут не из-за ε, а из-за двух стрелок по 0 из q₀. Проверь цепочку 1101.</p></div>
+    <details data-solve="det" data-g="D3" data-w="1101"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">Д4</span><span class="task-t">№7 из задачника: удалить ε-переходы, затем детерминизировать</span></div>
+    <div class="task-b"><div class="gscroll" data-show="D4"></div><p class="hint">Два ε-перехода: q₀ → q₁ и q₂ → q₁. В основном способе после удаления ε начальным остаётся q₀. Оформление с промежуточными S — образец 6 в разделе «Как писать на листке».</p></div>
+    <details data-solve="det" data-g="D4" data-w="bab"><summary>Показать решение</summary></details></div>
+  <div class="tool">
+    <h4>Детерминизировать свой автомат</h4>
+    <p class="hint">Тот же формат, что выше. На дугах только буквы и <code>eps</code>, можно через запятую. Разбор следует основному алгоритму: таблица q без ε, затем наборы P из q.</p>
+    <textarea class="tx" id="t4-in" aria-label="Описание автомата для детерминизации" spellcheck="false">начало: p
+финал: r
+p eps,b q
+q a,c p
+q c q
+q b r
+p eps,c r</textarea>
+    <div class="field"><button class="btn primary" id="t4-go" type="button">Детерминизировать</button><label for="t4-w">цепочка</label><input class="tx" id="t4-w" value="" placeholder="например cab" style="max-width:200px" autocomplete="off" spellcheck="false"><button class="btn" id="t4-wgo" type="button">Проверить</button></div>
+    <div id="t4-wout"></div>
+    <div id="t4-msg"></div>
+    <div id="t4-st"></div>
+  </div>
+</section>
+
+
+<!-- ============ МИНИМИЗАЦИЯ ============ -->
+<section class="sec" id="min">
+  <div class="sec-head"><div><div class="eyebrow">~30 мин</div><h2>Минимизация</h2></div>
+  </div>
+  <p>Следующая тема после детерминизации. Метод взят из разбора КР прошлого года (задание 4а, автомат-распознаватель). Своей лекции по ней у тебя пока нет, так что если на паре покажут иначе — верь паре.</p>
+  <div class="part">Теория</div>
+  <p>Два состояния <b>эквивалентны</b>, если из них допускаются одни и те же слова: по поведению их не отличить, значит, их можно склеить в одно. Минимальный автомат — тот, где таких пар не осталось.</p>
+  <dl class="gloss" >
+    <dt>≡⁰ (0-эквивалентность)</dt><dd>два класса: финальные и нефинальные. Пустым словом их уже различить можно, больше ничем.</dd>
+    <dt>≡ᵏ (k-эквивалентность)</dt><dd>состояния в одном классе ≡ᵏ, если они были в одном классе ≡ᵏ⁻¹ и по каждой букве уходят в один и тот же класс ≡ᵏ⁻¹.</dd>
+    <dt>Класс [q]</dt><dd>класс эквивалентности; в квадратных скобках пишут представителя.</dd>
+  </dl>
+  <ol class="algo">
+    <li><b>Если автомат недетерминированный</b> — сначала детерминизируй (часть 7).</li>
+    <li><b>Удали недостижимые вершины</b> вместе с исходящими из них дугами.</li>
+    <li><b>≡⁰</b> = { финальные, остальные }. Обозначь классы C₁, C₂, ….</li>
+    <li><b>≡ᵏ.</b> Для каждого класса ≡ᵏ⁻¹ выпиши все переходы, сгруппировав <b>по буквам</b>: (q, a) → q′ и подпиши, в каком классе q′. Если у всех состояний класса по каждой букве классы совпадают — класс не делится. Если нет — выноси состояния, у которых классы другие, в отдельный класс.</li>
+    <li><b>Сравни ≡ᵏ и ≡ᵏ⁻¹.</b> Равны — стоп, автомат минимизирован. Нет — повтори шаг 4 для k + 1.</li>
+    <li><b>Строим минимальный автомат.</b> Из каждого класса берём представителя [q]. Начальное — класс с исходным начальным, финальные — классы, где есть финальное. Дуги переносим из исходного графа, заменяя состояния их классами (не забудь петли).</li>
+  </ol>
+  <div class="note red"><p><b>Две ловушки из разбора КР.</b> Сравнивай классы в рамках <b>одной и той же буквы</b>: по a все должны вести в один класс, по b — в один класс (может быть другой, чем по a). И в новый класс записывай <b>сами состояния</b>, которые выносишь, а не то, куда ведут их переходы.</p></div>
+  <div class="part">Разбор по шагам</div>
+  <p>Пример из разбора КР: q₄ недостижима, после неё ≡¹ отделяет q₅, и на ≡² всё останавливается. Цвет вершины — её класс.</p>
+  <h3 id="min-why">Зачем нужны классы и почему сравниваем их, а не имена</h3>
+<p>Два состояния можно склеить, если <b>любое оставшееся слово</b> из них либо принимается в обоих случаях, либо отвергается в обоих. Внешне разные дуги ещё не означают разное поведение. Алгоритм ищет различия постепенно: сначала без букв, затем по одной, двум и так далее.</p>
+<ol class="algo"><li>В ≡⁰ финальные отделены от нефинальных: их уже различает пустое слово. Назовём классы F и N.</li><li>Для каждого состояния запиши <b>подпись</b>: классы назначения по a, по b, …, всегда в одном порядке. Например, (N,F).</li><li>Внутри каждого старого класса одинаковые подписи оставь вместе, разные — раздели. Между разными старыми классами ничего не склеиваем.</li><li>Закончи <b>весь проход по старому разбиению</b> и только потом используй новые классы для следующего прохода. Если классы не изменились — стоп.</li></ol>
+<p>В примере q₄ недостижимо. После удаления: F={q₃,q₆}, N={q₀,q₁,q₂,q₅}. У q₀,q₁,q₂ подпись (N,N), у q₅ — (F,F). Значит, отделяется <b>q₅</b>, а не q₃ и q₆, куда оно переходит. F не делится: у обоих его состояний (F,F).</p>
+<p>Теперь три класса: C₁={q₃,q₆}, C₂={q₀,q₁,q₂}, C₃={q₅}. По <b>новому</b> разбиению у q₀,q₁,q₂ подпись (C₂,C₃). Куда именно внутри C₂ ведёт a — в q₁ или q₂ — не важно: эти состояния пока ведут себя одинаково. Все подписи внутри классов совпали: ≡²=≡¹.</p>
+<div class="ansbox">C₂ —a→ C₂, C₂ —b→ C₃; C₃ —a,b→ C₁; C₁ —a,b→ C₁.</div><p>C₂ начальное, C₁ финальное. Слова ε, a, b отвергаются; ba и bb принимаются. Различающее слово между C₂ и C₃ — a: из C₂ оно не принимается, из C₃ принимается. Это подтверждает, почему склеить их нельзя.</p>
+<div class="note red"><p><b>Для неполного ДКА сначала добавь ⊥.</b> Отсутствующая дуга и дуга в нефинальную «мёртвую область» могут вести себя одинаково: никакого принимаемого продолжения нет. Нельзя автоматически объявлять их различием. Тренажёр дополняет все пустые клетки общим поглощающим состоянием, а затем минимизирует полный ДКА. Полученный результат минимален среди полных ДКА над данным алфавитом.</p></div>
+<div class="stepper" id="demo-min"></div>
+  <div class="part">Что если…</div>
+  <details class="wi"><summary>…класс делится не на два, а на три</summary><div class="wb"><p>Группируй по набору классов: у всех с одинаковым набором — свой подкласс. Пример — задача М2, где {q₁, q₂, q₄, q₅} делится на {q₁, q₄} и {q₂, q₅}.</p></div></details>
+  <details class="wi"><summary>…в таблице есть пустые клетки (автомат не полностью определён)</summary><div class="wb"><p>Сначала добавь нефинальное поглощающее состояние ⊥: все пустые клетки ведут в него, а из него по каждой букве переход в себя. Затем минимизируй обычным методом. Дуга в мёртвое состояние и отсутствие дуги могут иметь одинаковое поведение — само по себе это не различие.</p></div></details>
+  <details class="wi"><summary>…уже ≡¹ = ≡⁰</summary><div class="wb"><p>Значит, разбиение уже устойчиво: дальше дробить классы не нужно. Но исходные вершины внутри одного класса ещё надо склеить. Построй автомат по классам: даже если уточнений не было, число вершин может уменьшиться.</p></div></details>
+  <details class="wi"><summary>…какого представителя выбрать</summary><div class="wb"><p>Любого из класса. Обычно первого по номеру: {q₃, q₆} → [q₃]. Начальное определяется по тому, в каком классе лежит q₀, а не по имени представителя.</p></div></details>
+  <div class="part">Практика</div>
+  <div class="task"><div class="task-h"><span class="task-n">М1</span><span class="task-t">Пример из разбора КР</span></div>
+    <div class="task-b"><div class="gscroll" data-show="M1"></div><p class="hint">Ответ из разбора: состояния [q₀], [q₅], [q₃]; [q₀] начальное, [q₃] финальное.</p></div>
+    <details data-solve="min" data-g="M1"><summary>Показать решение</summary></details></div>
+  <div class="task"><div class="task-h"><span class="task-n">М2</span><span class="task-t">Число a делится на 3</span></div>
+    <div class="task-b"><div class="gscroll" data-show="M2"></div><p class="hint">Шесть состояний, а нужно меньше. Попробуй угадать ответ заранее.</p></div>
+    <details data-solve="min" data-g="M2"><summary>Показать решение</summary></details></div>
+  <div class="tool">
+    <h4>Минимизировать свой автомат</h4>
+    <p class="hint">Формат тот же. Если автомат недетерминированный, тренажёр сначала детерминизирует его.</p>
+    <textarea class="tx" id="t5-in" aria-label="Описание автомата для минимизации" spellcheck="false">начало: q0
+финал: q3, q6, q4
+q0 a q1
+q0 b q5
+q1 a q2
+q1 b q5
+q2 a q2
+q2 b q5
+q5 a q3
+q5 b q6
+q3 a q3
+q3 b q6
+q6 a q3
+q6 b q6
+q4 a q0
+q4 b q5</textarea>
+    <div class="field"><button class="btn primary" id="t5-go" type="button">Минимизировать</button></div>
+    <div id="t5-msg"></div>
+    <div id="t5-st"></div>
+  </div>
+</section>
+
+<!-- ============ ШПАРГАЛКА ============ -->
+<section class="sec" id="mealy"><div class="sec-head"><h2>Минимизация преобразователя Мили</h2></div>
+<div class="part">Теория</div><p>Распознаватель отвечает «да/нет» после слова. <b>Преобразователь Мили</b> выдаёт выходной символ на каждом переходе. Метка a/1 означает: прочитать a, выдать 1, перейти в указанное состояние. Здесь F иногда обозначает <b>выходной алфавит</b>, а не финальные вершины. Чтобы не путаться, назовём его Γ.</p>
+<p>Два состояния эквивалентны, если на <b>любом одинаковом входном слове</b> дают одинаковое выходное слово. Начальное разбиение делаем по вектору выходов: λ(q,a), λ(q,b), …; затем уточняем по классам назначения, как при минимизации ДКА.</p>
+<ol class="algo"><li>Составь таблицу «следующее состояние / выход».</li><li>Если начальное состояние задано, убери недостижимые. Если сравниваешь поведение всех состояний без выделенного начального, оставь все.</li><li>≡⁰: объедини состояния с одинаковыми выходами по <b>каждой</b> входной букве.</li><li>≡ᵏ: внутри старых классов сравни подписи классов назначения по каждой букве. Разные подписи раздели.</li><li>Когда разбиение стабильно, замени состояния классами; на дугах сохрани выходы.</li></ol>
+<div class="part">Разбор по шагам</div><p>Таблица из разбора: Σ={a,b}, Γ={0,1,2}. Начальное состояние в таблице не выделено, поэтому сначала рассматриваем все шесть состояний.</p>
+<div class="tscroll"><table class="dt"><tr><th>δ / λ</th><th>a</th><th>b</th></tr><tr><th>q₀</th><td>q₁ / 0</td><td>q₁ / 2</td></tr><tr><th>q₁</th><td>q₂ / 1</td><td>q₅ / 0</td></tr><tr><th>q₂</th><td>q₂ / 1</td><td>q₀ / 0</td></tr><tr><th>q₃</th><td>q₄ / 2</td><td>q₂ / 1</td></tr><tr><th>q₄</th><td>q₁ / 1</td><td>q₄ / 1</td></tr><tr><th>q₅</th><td>q₂ / 0</td><td>q₁ / 2</td></tr></table></div>
+<div id="demo-mealy"></div>
+<div class="part">Что если…</div><details class="wi"><summary>…у двух состояний один выход совпал, другой нет</summary><div class="wb"><p>Они уже различимы входом длины 1. q₁ выдаёт (1,0), q₄ — (1,1): совпадение по a не спасает несовпадение по b. Их сразу разделяем.</p></div></details><details class="wi"><summary>…в ≡¹ получились те же классы</summary><div class="wb"><p>Остановись. В исходном разборе записано «≡¹≠≡⁰», хотя перечисленные разбиения одинаковы. Это описка: в этом примере равенство есть уже после первого уточнения. В интерактиве показано именно равенство.</p></div></details>
+<details class="wi"><summary>…начальным назначили q₀</summary><div class="wb"><p>Тогда q₃ и q₄ недостижимы и для поведения из q₀ не нужны. Останутся два класса {q₀,q₅} и {q₁,q₂}. Четыре класса в разборе — результат сравнения всех состояний, а не удаления недостижимых из выбранного q₀.</p></div></details>
+<div class="part">Практика</div><div class="task"><div class="task-h"><span class="task-n">П1</span><span class="task-t">Можно ли склеить q₀ и q₁?</span></div><details><summary>Показать решение</summary><div class="task-b"><p>Нет. Вход a даёт из q₀ выход 0, из q₁ — 1. Одной буквы достаточно, дальнейшие переходы проверять не нужно.</p></div></details></div>
+</section>
+<section class="sec" id="equivalence"><div class="sec-head"><h2>Эквивалентность преобразователей</h2></div>
+<div class="part">Теория</div><p>Запускаем оба автомата на одном входе одновременно. Состояние совместного запуска — пара (q,s). По входу x идём в (δ₁(q,x),δ₂(s,x)) и сравниваем <b>выходы на этом же шаге</b>. Различие в достижимой паре доказывает неэквивалентность; путь до этой дуги даёт конкретное различающее слово.</p>
+<ol class="algo"><li>Начни с пары начальных состояний. Она достижима по ε.</li><li>Для каждой буквы отдельно выпиши оба перехода и оба выхода.</li><li>Если выходы отличаются — остановись: выписанный вход уже контрпример.</li><li>Если одинаковы — добавь пару новых состояний в очередь, если её ещё не было.</li><li>Когда обработаны все достижимые пары и различий нет — автоматы эквивалентны. Пар не больше |Q₁|·|Q₂|, поэтому проверка конечна.</li></ol>
+<div class="note red"><p><b>Пары «ab» и «ba» — разные выходы.</b> Это не множества букв: первый символ принадлежит первому автомату, второй — второму. На дуге x/ab выходы отличаются. Сам вход x должен быть одинаковым для обоих автоматов.</p></div>
+<div class="part">Разбор по шагам</div><p>В исходном рисунке граф произведения помечен автором как возможный ошибочный. Поэтому ниже построим достижимые пары заново по <b>таблицам исходных переходов</b>. Начала q₁ и s₂.</p>
+<div class="two"><div><h4>Первый автомат</h4><div class="tscroll"><table class="dt"><tr><th></th><th>0</th><th>1</th></tr><tr><th>→q₁</th><td>q₂ / b</td><td>q₃ / a</td></tr><tr><th>q₂</th><td>q₂ / b</td><td>q₃ / b</td></tr><tr><th>q₃</th><td>q₃ / b</td><td>q₃ / a</td></tr></table></div></div><div><h4>Второй автомат</h4><div class="tscroll"><table class="dt"><tr><th></th><th>0</th><th>1</th></tr><tr><th>s₁</th><td>s₁ / b</td><td>s₃ / a</td></tr><tr><th>→s₂</th><td>s₃ / a</td><td>s₁ / a</td></tr><tr><th>s₃</th><td>s₁ / a</td><td>s₃ / b</td></tr></table></div></div></div>
+<div id="demo-equivalence"></div>
+<div class="part">Что если…</div><details class="wi"><summary>…различия есть только в недостижимой паре</summary><div class="wb"><p>Это не контрпример для выбранных начал. Проверяй пары, в которые можно попасть синхронно из начальной. Именно поэтому не нужно механически рисовать всё декартово произведение.</p></div></details><details class="wi"><summary>…совпали все слова длины до 6</summary><div class="wb"><p>Это полезная самопроверка, но не доказательство. Доказательством для конечных детерминированных преобразователей служит исчерпывающий обход достижимых пар. Тренажёр сравнения регулярок выше перебирает только короткие слова и честно сообщает об этом ограничении.</p></div></details>
+<div class="part">Практика</div><div class="task"><div class="task-h"><span class="task-n">Э1</span><span class="task-t">Найди кратчайшее различающее слово для таблиц выше</span></div><details><summary>Показать решение</summary><div class="task-b"><p>Слово 0: из q₁ выход b, из s₂ выход a. Пустой вход в обоих случаях даёт пустой выход, поэтому короче быть не может.</p></div></details></div>
+</section>
+<section class="sec" id="cheat">
+  <div class="sec-head"><div><div class="eyebrow">Для повторения</div><h2>Шпаргалка</h2></div></div>
+  <div class="cheat">
+    <div class="box"><h4>Тип А. R → автомат</h4><ol>
+      <li>q₀ —R→ q<sub>f</sub>.</li>
+      <li>Дуга с R₁+R₂ → две параллельные.</li>
+      <li>Дуга с R₁R₂ → p —R₁→ n —R₂→ q.</li>
+      <li>Дуга с R<sup>*</sup> → p —ε→ n, петля R на n, n —ε→ q.</li>
+      <li>Дуга с R<sup>+</sup> → p —R→ n, петля R на n, n —ε→ q.</li>
+      <li>Петли разбиваются так же. Стоп, когда на всех дугах буквы и ε.</li>
+    </ol></div>
+    <div class="box"><h4>Тип Б. Автомат → R</h4><ol>
+      <li>В начало что-то входит → s —ε→ q₀.</li>
+      <li>Финальных &gt; 1 или из финала что-то выходит → f и ε-дуги в неё.</li>
+      <li>Параллельные дуги и петли склеить через +.</li>
+      <li>Удаляем r: для каждой пары вход × выход дуга R₁R₂<sup>*</sup>R₃.</li>
+      <li>Совпали концы → петля. Была дуга → «+».</li>
+      <li>Остались s и f → метка = ответ.</li>
+    </ol></div>
+    <div class="box"><h4>Где ошибаются</h4><ul>
+      <li>Петля для * повешена прямо на старую вершину.</li>
+      <li>Забыта пара при удалении (входов k, выходов m → k·m дуг).</li>
+      <li>Сумма не взята в скобки при склейке: (1+00)0<sup>*</sup>1.</li>
+      <li>Две петли записаны как a<sup>*</sup>b<sup>*</sup> вместо (a+b)<sup>*</sup>.</li>
+      <li>Забыли, что финальная с исходящими дугами требует новой f.</li>
+    </ul></div>
+    <div class="box"><h4>Упрощения</h4><ul>
+      <li>εR = R, &nbsp;ε<sup>*</sup> = ε.</li>
+      <li>∅R = ∅, &nbsp;R + ∅ = R.</li>
+      <li>(R<sup>*</sup>)<sup>*</sup> = R<sup>*</sup>, &nbsp;(ε+R)<sup>*</sup> = R<sup>*</sup>.</li>
+      <li>RR<sup>*</sup> = R<sup>+</sup>.</li>
+      <li>Проверка: 2–3 слова «да» и 2–3 слова «нет».</li>
+    </ul></div>
+    <div class="box"><h4>Детерминизация</h4><ol>
+      <li>S<sub>i</sub> = Ξ(q<sub>i</sub>) — всё, куда дойти по ε.</li>
+      <li>Клетка (S<sub>i</sub>, a): из S<sub>i</sub> по a, плюс замыкание, каждое q<sub>x</sub> → S<sub>x</sub>.</li>
+      <li>P<sub>0</sub> = {S<sub>i</sub> : q<sub>i</sub> ∈ Ξ(q<sub>0</sub>)}; клетка (P, a) = объединение строк S.</li>
+      <li>Новое множество — новое P, пустое — ∅.</li>
+      <li>Финальные — содержащие финальное.</li>
+      <li>Проверка: (P<sub>0</sub>, w) ⊢ … ⊢ (P<sub>k</sub>, ε).</li>
+    </ol></div>
+    <div class="box"><h4>Минимизация</h4><ol>
+      <li>НКА → сначала детерминизировать.</li>
+      <li>Стереть недостижимые.</li>
+      <li>≡⁰ = {финальные, остальные}.</li>
+      <li>≡ᵏ: в классе по каждой букве — один и тот же класс? Нет → делим.</li>
+      <li>≡ᵏ = ≡ᵏ⁻¹ → стоп.</li>
+      <li>Представители [q], дуги переносим, петли не теряем.</li>
+    </ol></div>
+  </div>
+
+</section>
+</div>
