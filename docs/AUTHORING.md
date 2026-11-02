@@ -132,6 +132,8 @@ width: wide            # text (по умолчанию, колонка текс�
 | `ctx.store.get(key, fallback)` / `.set(key, value)` | хранилище статьи (localStorage с префиксом) |
 | `ctx.on(target, type, fn)` / `ctx.onCleanup(fn)` | подписки и уборка, которые снимутся при уходе со страницы |
 
+Общие правила оформления интерактивных статей и исключение для тетрадных решений — в [ARTICLE_STYLE.md](ARTICLE_STYLE.md). Эталон общих компонентов — статья по ЛП.
+
 **Стиль — только Dojo.** В `style.css` и в коде цвета задаются **только токенами**: `var(--text)`, `var(--muted)`,
 `var(--line)`, `var(--line-2)`, `var(--surface)`, `var(--surface-2)`, `var(--bg)`, `var(--accent)` (главный цвет:
 линии, выделения), `var(--ok)`, `var(--bad)`, `var(--warn)`, `var(--info)`; полупрозрачные — `color-mix(in srgb, var(--accent) 15%, transparent)`.

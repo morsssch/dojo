@@ -9,7 +9,7 @@
   --amber:var(--warn); --amber-soft:color-mix(in srgb,var(--warn) 16%,transparent);
   --grid:color-mix(in srgb,var(--line) 75%,transparent);
   --region:color-mix(in srgb,var(--accent) 15%,transparent); --region2:color-mix(in srgb,var(--accent) 6%,transparent);
-  --f-display:var(--font-display); --f-body:var(--font-ui); --f-mono:var(--font-mono); --f-hand:var(--font-mono); --margin:var(--line-2);
+  --f-display:var(--font-display); --f-body:var(--font-ui); --f-mono:var(--font-mono); --f-hand:var(--font-ui); --margin:var(--line-2);
   --k0:color-mix(in srgb,var(--accent) 18%,transparent);
   --k1:color-mix(in srgb,var(--warn) 18%,transparent);
   --k2:color-mix(in srgb,var(--ok) 18%,transparent);
@@ -212,7 +212,7 @@ details.wi .wb > :first-child{margin-top:0}
 .task details > summary:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 .task details .stepper{margin:0;border:0;border-top:1px solid var(--line);border-radius:0}
 .hint{font-size:.9rem;color:var(--ink2)}
-.pen{color:var(--red);font-style:italic;font-family:var(--f-body)}
+.pen{font-family:var(--f-hand);color:var(--red);font-size:1rem;line-height:1.2}
 
 /* квиз и формы */
 .quiz{display:grid;gap:8px;margin:1rem 0}
@@ -245,20 +245,21 @@ input.tx:focus,textarea.tx:focus{outline:2px solid var(--blue);outline-offset:1p
 .cheat ol,.cheat ul{font-size:.92rem;padding-left:1.2em;margin:.3em 0}
 
 /* лист в клетку */
-.sheet{position:relative;background:var(--surface-2);padding:16px 18px 18px;border:1px solid var(--line);border-radius:var(--r-l);margin:1.4rem 0;color:var(--ink);font-family:var(--f-mono);font-size:.9rem;line-height:1.75}
-.sheet::before{display:none}
-.sheet p{margin:.35em 0;max-width:none}
-.sheet .hdr{font:600 1.2rem/1.25 var(--f-body);text-align:center;margin-bottom:.4em}
-.sheet .sub{text-align:center;font-family:var(--f-body);font-size:1rem}
+.sheet{position:relative;background-color:var(--card);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:20px 20px;border:1px solid var(--line2);border-radius:4px;padding:22px 20px 26px 64px;margin:1.4rem 0;color:var(--blue);font-family:var(--f-hand);font-size:1.4rem;line-height:1.35;box-shadow:0 1px 0 var(--line),0 6px 18px color-mix(in srgb,var(--text) 6%,transparent)}
+.sheet::before{content:"";position:absolute;left:46px;top:0;bottom:0;width:1.5px;background:var(--margin)}
+.sheet p{margin:.25em 0;max-width:none}
+.sheet .hdr{text-align:center;font-size:1.6rem;line-height:1.2;margin-bottom:.4em}
+.sheet .sub{text-align:center;font-size:1.3rem}
 .sheet .lbl{text-decoration:underline;text-underline-offset:4px;margin-top:.6em}
 .sheet .st{margin-top:.7em}
 .sheet .st b{font-weight:600}
-.sheet .ind{padding-left:0}
+.sheet .ind{padding-left:1.3em}
+.sheet .pen{color:var(--red);font-size:1.25rem}
 .sheet .st{position:relative}
-.sheet .side{position:static;display:inline;margin-right:8px;color:var(--red);font-size:.9rem}
+.sheet .side{position:absolute;left:-62px;top:.1em;width:40px;text-align:center;color:var(--red);font-size:1.15rem;line-height:1}
 .sheet .frame{display:inline-block;border:2px solid var(--blue);border-radius:3px;padding:2px 12px;margin:.2em 0}
 .sheet .gscroll{margin:.2em 0 .3em}
-.sheet svg.gr{margin:0;background:var(--card)}
+.sheet svg.gr{margin:0}
 .sheet .gr .ed,.sheet .gr .sta{stroke:var(--blue);stroke-width:1.6}
 .sheet .gr .nd circle{stroke:var(--blue);fill:none}
 .sheet .gr .nd text{fill:var(--blue);font-family:var(--f-hand);font-size:20px;font-weight:600}
@@ -266,10 +267,11 @@ input.tx:focus,textarea.tx:focus{outline:2px solid var(--blue);outline-offset:1p
 .sheet .gr .lb rect{fill:none}
 .sheet .gr .lb text{fill:var(--blue);font-family:var(--f-hand);font-size:19px;font-weight:600}
 .mk-sheet{fill:var(--blue)}
-.sheet table.dt{font-family:var(--f-mono);font-size:.86rem;background:none}
-.sheet table.dt th,.sheet table.dt td{border-color:var(--line2);background:none;padding:2px 12px;color:var(--ink);font-weight:500}
-.sheet table.pt{border-collapse:collapse;margin:.3em 0;font-size:.86rem}
-.sheet table.pt td,.sheet table.pt th{border:1px solid var(--line2);padding:1px 10px;font-weight:500;text-align:left;white-space:nowrap}
+.sheet table.dt{font-family:var(--f-hand);font-size:1.25rem;background:none}
+.sheet table.dt th,.sheet table.dt td{border-color:var(--blue);background:none;padding:2px 12px;color:var(--blue);font-weight:500}
+.sheet table.pt{border-collapse:collapse;margin:.3em 0;font-size:1.25rem}
+.sheet table.pt td,.sheet table.pt th{border:1.5px solid var(--blue);padding:1px 10px;font-weight:500;text-align:left;white-space:nowrap}
+@media (max-width:560px){.sheet{padding-left:44px;font-size:1.25rem}.sheet::before{left:32px}.sheet .side{left:-44px;width:28px;font-size:1rem}}
 footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink2);font-size:.86rem}
 .sp-html .trace,.sp-html .ansbox{animation:fadein .6s .1s both}
 @media (prefers-reduced-motion:reduce){.gr .ed.fresh{stroke-dasharray:none;animation:none}.gr .lb.fresh,.gr .nd.fresh,.sp-html table td.fr,.sp-html .trace,.sp-html .ansbox{animation:none}*{transition:none!important}}
@@ -279,3 +281,7 @@ footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);color:v
 .aut-output{overflow-wrap:anywhere}.aut-output:empty{display:none}.aut-output:focus{outline:2px solid var(--accent)}
 .btn.sm{font-size:13px;padding:5px 10px}
 @media(max-width:560px){.re{white-space:normal;overflow-wrap:anywhere}}
+
+/* Тетрадное оформление образцов решений сохраняется отдельно от общих блоков. */
+.sheet{font-size:1rem;line-height:1.65;padding:20px 24px;box-shadow:none}.sheet::before{display:none}.sheet .side{position:static;display:inline;margin-right:8px}.sheet .hdr{font-size:1.2rem}.sheet .sub{font-size:1rem}.sheet table.dt,.sheet table.pt{font-size:.92rem}.sheet .ind{padding-left:0}
+@media(max-width:560px){.sheet{padding:16px}}
