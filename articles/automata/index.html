@@ -1,4 +1,48 @@
-<nav class="aut-toc" aria-label="Содержание"><h2>Содержание</h2><ol><li><a href="#lab">1. Какие задачи будем решать</a><div class="aut-links"><a href="#lab-sub-1">Как оформлять на листке</a></div></li><li><a href="#numbering">2. Нумерация слов</a><div class="aut-links"><a href="#number-to-word">Из номера 689 в слово</a><a href="#word-to-number">Из слова ccabd в номер</a></div></li><li><a href="#rep">3. Повторение</a><div class="aut-links"><a href="#rep-sub-1">Конечный автомат как граф</a><a href="#rep-sub-2">Регулярные выражения</a><a href="#rep-sub-3">На дугах можно писать регулярки</a></div></li><li><a href="#r2a">4. Регулярка → автомат</a><div class="aut-links"></div></li><li><a href="#a2r">5. Автомат → регулярка</a><div class="aut-links"></div></li><li><a href="#paper">6. Как писать на листке</a><div class="aut-links"><a href="#paper-sub-1">Образец 1. Тип А: регулярка → автомат</a><a href="#paper-sub-2">Образец 2. Тип Б: автомат → регулярка</a><a href="#paper-sub-3">Образец 4. Тип Б из исходного материала</a><a href="#paper-sub-4">Образец 5. Тип А из исходного материала</a><a href="#paper-sub-5">Образец 7. Тип Б, вариант 21</a></div></li><li><a href="#tool">7. Тренажёр</a><div class="aut-links"></div></li><li><a href="#det">8. Детерминизация</a><div class="aut-links"><a href="#det-sub-1">Первый лист: автомат без ε</a><a href="#det-sub-2">Второй лист: детерминированный автомат</a></div></li><li><a href="#min">9. Минимизация</a><div class="aut-links"><a href="#min-why">Зачем нужны классы и почему сравниваем их, а не имена</a></div></li><li><a href="#mealy">10. Минимизация преобразователя Мили</a><div class="aut-links"></div></li><li><a href="#equivalence">11. Эквивалентность преобразователей</a><div class="aut-links"></div></li><li><a href="#cheat">12. Шпаргалка</a><div class="aut-links"></div></li></ol></nav><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<nav class="lpt aut-toc" aria-label="Содержание">
+  <h2 class="lpt-title">Содержание</h2>
+  <ol class="lpt-parts">
+    <li><div class="lpt-head"><span class="lpt-n">1</span><a href="#lab">Какие задачи будем решать</a></div>
+      <p class="lpt-desc">Два типа задач: регулярка → автомат и автомат → регулярка</p>
+      <ul class="lpt-subs"><li><a href="#lab-sub-1">Как оформлять на листке</a></li></ul>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">2</span><a href="#numbering">Нумерация слов</a></div>
+      <p class="lpt-desc">Порядок shortlex, перевод номера в слово и слова в номер</p>
+      <ul class="lpt-subs"><li><a href="#number-to-word">Из номера 689 в слово</a></li><li><a href="#word-to-number">Из слова ccabd в номер</a></li></ul>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">3</span><a href="#rep">Повторение</a><span class="lpt-min">20 мин</span></div>
+      <p class="lpt-desc">Графы автоматов, операции над регулярками и проверка слов</p>
+      <ul class="lpt-subs"><li><a href="#rep-sub-1">Конечный автомат как граф</a></li><li><a href="#rep-sub-2">Регулярные выражения</a></li><li><a href="#rep-sub-3">На дугах можно писать регулярки</a></li></ul>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">4</span><a href="#r2a">Регулярка → автомат</a><span class="lpt-min">35 мин</span></div>
+      <p class="lpt-desc">Разбиение дуг: сумма, склейка, итерация и ε-переходы</p>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">5</span><a href="#a2r">Автомат → регулярка</a><span class="lpt-min">50 мин</span></div>
+      <p class="lpt-desc">Нормализация графа, склейка дуг и удаление вершин</p>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">6</span><a href="#paper">Как писать на листке</a></div>
+      <p class="lpt-desc">Образцы оформления решений на листке</p>
+      <ul class="lpt-subs"><li><a href="#paper-sub-1">Образец 1. Тип А: регулярка → автомат</a></li><li><a href="#paper-sub-2">Образец 2. Тип Б: автомат → регулярка</a></li><li><a href="#paper-sub-3">Образец 4. Тип Б из исходного материала</a></li><li><a href="#paper-sub-4">Образец 5. Тип А из исходного материала</a></li><li><a href="#paper-sub-5">Образец 7. Тип Б, вариант 21</a></li></ul>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">7</span><a href="#tool">Тренажёр</a><span class="lpt-min">20 мин</span></div>
+      <p class="lpt-desc">Свои регулярки и автоматы, пошаговое решение и сверка ответов</p>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">8</span><a href="#det">Детерминизация</a><span class="lpt-min">35 мин</span></div>
+      <p class="lpt-desc">Сначала удаляем ε, затем строим состояния-наборы</p>
+      <ul class="lpt-subs"><li><a href="#det-sub-1">Первый лист: автомат без ε</a></li><li><a href="#det-sub-2">Второй лист: детерминированный автомат</a></li></ul>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">9</span><a href="#min">Минимизация</a><span class="lpt-min">30 мин</span></div>
+      <p class="lpt-desc">Эквивалентность состояний и уточнение классов</p>
+      <ul class="lpt-subs"><li><a href="#min-why">Зачем нужны классы и почему сравниваем их, а не имена</a></li></ul>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">10</span><a href="#mealy">Минимизация преобразователя Мили</a></div>
+      <p class="lpt-desc">Выходы на переходах, классы состояний и минимальный преобразователь</p>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">11</span><a href="#equivalence">Эквивалентность преобразователей</a></div>
+      <p class="lpt-desc">Обход достижимых пар и поиск различающего входного слова</p>
+    </li>
+  </ol>
+  <p class="lpt-cheat"><a href="#cheat">Шпаргалка перед контрольной</a> — все алгоритмы на одном экране.</p>
+</nav><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <marker id="aink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-ink" d="M0,1 L10,5 L0,9 z"/></marker>
 <marker id="ain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-in" d="M0,1 L10,5 L0,9 z"/></marker>
 <marker id="aout" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="mk-out" d="M0,1 L10,5 L0,9 z"/></marker>
@@ -12,7 +56,7 @@
 
 
 <nav class="top" aria-label="Разделы"><div class="in">
-  <a href="#numbering">Нумерация</a><a href="#lab">Введение</a><a href="#rep">Повторение</a><a href="#r2a">R → автомат</a><a href="#a2r">Автомат → R</a><a href="#paper">Листок</a><a href="#tool">Тренажёр</a><a href="#det">Детерминизация</a><a href="#min">Минимизация</a><a href="#mealy">Преобразователи</a><a href="#equivalence">Эквивалентность</a><a href="#cheat">Шпаргалка</a>
+  <a href="#lab">Введение</a><a href="#numbering">Нумерация</a><a href="#rep">Повторение</a><a href="#r2a">R → автомат</a><a href="#a2r">Автомат → R</a><a href="#paper">Листок</a><a href="#tool">Тренажёр</a><a href="#det">Детерминизация</a><a href="#min">Минимизация</a><a href="#mealy">Преобразователи</a><a href="#equivalence">Эквивалентность</a><a href="#cheat">Шпаргалка</a>
 </div></nav>
 
 <!-- ============ ЛАБА ============ -->

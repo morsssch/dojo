@@ -1348,4 +1348,15 @@ t1();t2();t3();t4();t5();
 
 
 mountLearning(root,ctx,Stepper,mkG);
+// Подсветка текущего раздела — как в статье по ЛП.
+(function(){
+  var links=Array.from(root.querySelectorAll("nav.top a"));
+  var sections=links.map(function(a){return root.querySelector(a.getAttribute("href"))});
+  function onScroll(){
+    var cur=-1;
+    sections.forEach(function(s,i){if(s&&s.getBoundingClientRect().top<=120)cur=i});
+    links.forEach(function(a,i){a.classList.toggle("on",i===cur)});
+  }
+  ctx.on(window,"scroll",onScroll,{passive:true});onScroll();
+})();
 }
