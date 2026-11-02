@@ -263,7 +263,8 @@ function drawScene(sc, box, extraCls) {
   var pad = 16, x = box[0] - pad, y = box[1] - pad, W = box[2] - box[0] + 2 * pad, H = box[3] - box[1] + 2 * pad;
   var h = '<svg class="gr ' + (extraCls || "") + '" viewBox="' + f1(x) + " " + f1(y) + " " + f1(W) + " " + f1(H) + '" width="' + Math.round(W) + '" style="max-width:' + Math.round(W) + "px;min-width:" + Math.round(Math.min(W, 360)) + 'px" role="img" aria-label="Граф автомата">';
   sc.edges.forEach(function (e) {
-    var mk = e.cls === "in" ? "ain" : e.cls === "out" ? "aout" : e.cls === "lp" ? "alp" : (e.cls === "nw" || e.cls === "nw fresh") ? "anw" : e.cls === "gh" ? "agh" : "aink";
+    var color = e.cls.split(" ")[0];
+    var mk = color === "in" ? "ain" : color === "out" ? "aout" : color === "lp" ? "alp" : color === "nw" ? "anw" : color === "gh" ? "agh" : "aink";
     h += '<path class="ed ' + e.cls + '" pathLength="1" d="' + e.d + '" marker-end="url(#' + mk + ')"/>';
   });
   sc.nodes.forEach(function (n) {
@@ -811,7 +812,7 @@ function minSteps(g0, opts) {
   if (isNd) {
     var ds = detSteps(g);
     var gp = ds[ds.length - 1].g;
-    steps.push({ title: "0. Сначала детерминизация", g: cloneG(g), o: {}, text: "<p>Автомат недетерминированный (есть ε-дуги или несколько дуг по одной букве). Минимизируют только детерминированный, поэтому сначала строим ДКА методом из части 7. Получился автомат на следующем шаге, дальше работаем с ним.</p>" });
+    steps.push({ title: "0. Сначала детерминизация", g: cloneG(g), o: {}, text: "<p>Автомат недетерминированный (есть ε-дуги или несколько дуг по одной букве). Минимизируют только детерминированный, поэтому сначала строим ДКА методом из части 8. Получился автомат на следующем шаге, дальше работаем с ним.</p>" });
     g = cloneG(gp); tr = expandAtomic(g);
   }
   var ids = g.nodes.map(function (n) { return n.id });
@@ -1068,6 +1069,14 @@ function Stepper(el,steps,legend){
 Stepper.prototype.stop=function(){if(this.timer){clearInterval(this.timer);this.timer=null}this.play.textContent="▶ Авто"};
 Stepper.prototype.go=function(i){if(i<0||i>=this.steps.length)return;this.i=i;var s=this.steps[i];
   this.stage.innerHTML=s.html?'<div class="sp-html">'+s.html+'</div>':drawScene(scene(s.g,s.o),this.box);
+  // Те же fresh/fr, что в исходных разборах: авторская подсветка имеет приоритет.
+  if(!this.stage.querySelector(".ed.fresh")){
+    var edges=this.stage.querySelectorAll(".ed.in,.ed.out,.ed.lp,.ed.nw");
+    if(!edges.length)edges=this.stage.querySelectorAll(".ed");
+    edges.forEach(function(e){e.classList.add("fresh")});
+  }
+  if(!this.stage.querySelector(".nd.fresh"))this.stage.querySelectorAll(".nd").forEach(function(e){e.classList.add("fresh")});
+  if(!this.stage.querySelector("td.fr"))this.stage.querySelectorAll("table td").forEach(function(e){e.classList.add("fr")});
   this.title.textContent=s.title;this.body.innerHTML=s.text;
   this.count.textContent="Шаг "+(i+1)+" / "+this.steps.length;this.range.value=i;
   this.prev.disabled=i===0;this.next.disabled=i===this.steps.length-1};
@@ -1324,7 +1333,7 @@ function alphaOf(list){var o={};list.forEach(function(r){letters(r,o)});return O
 function cmpMsg(r,nameA,nameB){
   if(!r.bad)return'<p class="okm">Совпадают на всех '+r.cnt+' словах длины до '+r.L+'. Это ограниченная проверка: совпадение коротких слов ещё не доказывает эквивалентность.</p>';
   var w=r.bad.w===""?"ε":r.bad.w;return'<p class="err">Расходятся на слове <code class="w">'+w+'</code>: '+nameA+" его "+(r.bad.a?"допускает":"не допускает")+", а "+nameB+" — "+(r.bad.b?"допускает":"нет")+".</p>"}
-$("t2-cmp").onclick=function(){var out=$("t2-cmpout");try{if(!curAut){var pa=parseAutomaton($("t2-in").value);curAut=pa.g}var my=parseRe($("t2-my").value);
+$("t2-cmp").onclick=function(){var out=$("t2-cmpout");try{var pa=parseAutomaton($("t2-in").value);curAut=pa.g;var my=parseRe($("t2-my").value);
   var al=alphaOf(curAut.edges.map(function(e){return e.re}).concat([my]));out.innerHTML=cmpMsg(compareNfa(nfaFromGraph(curAut),nfaFromRe(my),al),"автомат","твоё выражение")}catch(e){out.innerHTML='<p class="err">'+esc(e.message||String(e))+"</p>"}};
 function t3(){var out=$("t3-out");try{var a=parseRe($("t3-a").value),b=parseRe($("t3-b").value);out.innerHTML=cmpMsg(compareNfa(nfaFromRe(a),nfaFromRe(b),alphaOf([a,b])),"R₁","R₂")}catch(e){out.innerHTML='<p class="err">'+esc(e.message||String(e))+"</p>"}}
 $("t3-go").onclick=t3;
