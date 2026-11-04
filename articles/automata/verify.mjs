@@ -2,6 +2,30 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {wordNumber,numberWord,refineMealy,mealyExample,compareMealy,machineA,machineB} from './learning.js';
+import {buildPatternMachine,runPatternMachine} from './pattern.js';
+// Независимая проверка: X сравниваем с буквальным концом всей прочитанной истории.
+for (const pattern of ['A','B','ABAA','ABA','AAA','ABAB','AAB','BAAB','BABAAB']) {
+ const machine=buildPatternMachine(pattern);
+ for(let length=0;length<=10;length++)for(let bits=0;bits<2**length;bits++) {
+  const word=length ? bits.toString(2).padStart(length,'0').replace(/0/g,'A').replace(/1/g,'B') : '';
+  const result=runPatternMachine(machine,word);
+  const expected=Array.from(word,(_,i)=>word.slice(0,i+1).endsWith(pattern)?'X':'Y').join('');
+  assert.equal(result.output,expected,pattern+' / '+word);
+  result.steps.forEach((step,i)=>{
+   const history=word.slice(0,i+1);
+   let longest=0;
+   for(let k=1;k<pattern.length;k++)if(history.endsWith(pattern.slice(0,k)))longest=k;
+   assert.equal(step.to,longest,'Память не равна полезному концу: '+history);
+  });
+ }
+}
+assert.equal(runPatternMachine(buildPatternMachine('ABAA'),'ABAABAA').output,'YYYXYYX');
+assert.throws(()=>buildPatternMachine(''));
+assert.throws(()=>buildPatternMachine('АВАА')); // Кириллические буквы не смешиваем с латинскими.
+assert.throws(()=>buildPatternMachine('A'.repeat(13)));
+assert.throws(()=>runPatternMachine(buildPatternMachine('AB'),'ABC'));
+assert.throws(()=>runPatternMachine(buildPatternMachine('AB'),'A'.repeat(121)));
+console.log('Построение по образцу: 18 423 входных слова для 9 образцов; выход и память сверены с буквальной историей входа.');
 const text=fs.readFileSync(new URL('./automata.js',import.meta.url),'utf8');
 const code=text.slice(text.indexOf('export function mount'),text.indexOf('var RM=ctx')).replace('export function mount(root, ctx) {','');
 const c=vm.createContext({ctx:{},console});vm.runInContext(code,c);

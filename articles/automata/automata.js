@@ -1,4 +1,5 @@
 import { mountLearning } from "./learning.js";
+import { mountPattern } from "./pattern.js";
 export function mount(root, ctx) {
 var FIG;
 
@@ -1348,6 +1349,7 @@ t1();t2();t3();t4();t5();
 
 
 mountLearning(root,ctx,Stepper,mkG);
+mountPattern(root,ctx,Stepper,mkG);
 // Подсветка текущего раздела — как в статье по ЛП.
 (function(){
   var links=Array.from(root.querySelectorAll("nav.top a"));
