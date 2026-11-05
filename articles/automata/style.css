@@ -285,3 +285,10 @@ footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);color:v
 /* Тетрадное оформление образцов решений сохраняется отдельно от общих блоков. */
 .sheet{font-size:1rem;line-height:1.65;padding:20px 24px;box-shadow:none}.sheet::before{display:none}.sheet .side{position:static;display:inline;margin-right:8px}.sheet .hdr{font-size:1.2rem}.sheet .sub{font-size:1rem}.sheet table.dt,.sheet table.pt{font-size:.92rem}.sheet .ind{padding-left:0}
 @media(max-width:560px){.sheet{padding:16px}}
+
+/* Поля общего калькулятора */
+.aut-calc-field{display:grid;gap:6px;margin:.7rem 0}
+.aut-calc-field label{font-weight:500;font-size:.92rem}
+.aut-calc-input{min-width:0;width:100%;max-width:100%;box-sizing:border-box}
+#calc-hint:empty{display:none}
+#calc-answer[hidden]{display:none}

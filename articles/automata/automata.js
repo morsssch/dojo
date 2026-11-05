@@ -1,3 +1,4 @@
+import { mountCalculator } from "./calculator.js";
 import { mountLearning } from "./learning.js";
 import { mountPattern } from "./pattern.js";
 export function mount(root, ctx) {
@@ -614,8 +615,14 @@ function expandAtomic(g) {
 }
 function setStr(arr, pre) { return "{" + arr.map(function (i) { return pre + "<sub>" + i + "</sub>" }).join(", ") + "}" }
 // Основной учебный вариант: сначала таблица q без ε, затем подмножества P из q.
-function clearDetSteps(g0, word) {
+function clearDetSteps(g0, word, { complete = false } = {}) {
   var g=cloneG(g0), tr=expandAtomic(g), ids=g.nodes.map(function(n){return n.id}), alpha=Array.from(new Set(tr.filter(function(t){return t.s!==null}).map(function(t){return t.s}))).sort();
+  if (complete && word !== undefined) {
+    if (word === "ε") word = "";
+    if (word.length > 120) throw new ReErr("Слово должно быть не длиннее 120 букв.");
+    const invalid = Array.from(word).find(c => !alpha.includes(c));
+    if (invalid !== undefined) throw new ReErr("Символа «" + invalid + "» нет в алфавите автомата.");
+  }
   var starts=g.nodes.filter(function(n){return n.start}).map(function(n){return n.id});
   if(starts.length!==1)throw new ReErr("Для этого разбора нужно ровно одно начальное состояние.");
   var nm=function(id){return nameHtml(N(g,id).name)}, list=function(a){return a.length?"{"+a.map(nm).join(", ")+"}":"∅"};
@@ -633,17 +640,17 @@ function clearDetSteps(g0, word) {
     if(PL.length>128)throw new ReErr('Больше 128 подмножеств: сократи пример для пошагового разбора.');
     var row={},lines=[];
     alpha.forEach(function(a){var targets=new Set();PL[q].forEach(function(i){T[i][a].forEach(function(id){targets.add(ids.indexOf(id))})});var arr=Array.from(targets).sort(function(a,b){return a-b});
-      var to=-1,fresh=false;if(arr.length){to=PL.findIndex(function(p){return key(p)===key(arr)});if(to<0){to=PL.length;PL.push(arr);fresh=true}}
-      row[a]=to;lines.push('<li>По '+esc(a)+': '+PL[q].map(function(i){return nm(ids[i])+': '+list(T[i][a])}).join(' ∪ ')+' ⇒ '+list(arr.map(function(i){return ids[i]}))+(to<0?' — перехода нет.':fresh?' — новый набор P<sub>'+to+'</sub>.':' — уже известный P<sub>'+to+'</sub>.')+'</li>');
+      var to=-1,fresh=false;if(arr.length||complete){to=PL.findIndex(function(p){return key(p)===key(arr)});if(to<0){to=PL.length;PL.push(arr);fresh=true}}
+      row[a]=to;lines.push('<li>По '+esc(a)+': '+(PL[q].map(function(i){return nm(ids[i])+': '+list(T[i][a])}).join(' ∪ ')||'∅')+' ⇒ '+list(arr.map(function(i){return ids[i]}))+(to<0?' — перехода нет.':fresh?' — новый набор P<sub>'+to+'</sub>.':' — уже известный P<sub>'+to+'</sub>.')+'</li>');
     });PT.push(row);explanations.push(lines.join(''));
   }
   PF=PL.map(function(a){return a.some(function(i){return F[i]})});
   function pTable(upto){return '<div class="tscroll"><table class="dt"><tr><th>Набор = одна вершина</th>'+alpha.map(function(a){return '<th>'+esc(a)+'</th>'}).join('')+'</tr>'+PL.map(function(a,i){return '<tr><th>'+(i===0?'→':'')+(PF[i]?'*':'')+'P<sub>'+i+'</sub>='+list(a.map(function(j){return ids[j]}))+'</th>'+alpha.map(function(a){return '<td>'+(i>upto?'…':PT[i][a]<0?'∅':'P<sub>'+PT[i][a]+'</sub>')+'</td>'}).join('')+'</tr>'}).join('')+'</table></div>'}
-  PL.forEach(function(a,i){steps.push({title:'5. Обрабатываем P'+i,html:pTable(i),text:'<p>P<sub>'+i+'</sub> хранит '+list(a.map(function(j){return ids[j]}))+'. Объединяем клетки таблицы без ε. Строки с многоточием ещё предстоит заполнить.</p><ul>'+explanations[i]+'</ul>'})});
+  PL.forEach(function(a,i){steps.push({title:'5. Обрабатываем P'+i,html:pTable(i),text:'<p>P<sub>'+i+'</sub> хранит '+list(a.map(function(j){return ids[j]}))+'. '+(a.length?'Объединяем клетки таблицы без ε.':'Пустой набор — ловушка. По любой букве он ведёт в себя.')+' Строки с многоточием ещё предстоит заполнить.</p><ul>'+explanations[i]+'</ul>'})});
   var gp={nodes:PL.map(function(a,i){return {id:'P'+i,name:'P'+i,x:(i%4)*160,y:Math.floor(i/4)*150,start:i===0,final:PF[i]}}),edges:[],eid:0};
   PL.forEach(function(a,i){var by={};alpha.forEach(function(a){var t=PT[i][a];if(t>=0)(by[t]=by[t]||[]).push(a)});Object.keys(by).forEach(function(t){addEdge(gp,'P'+i,'P'+t,sym(by[t].join(',')))})});
   var dfa={PL:PL,PT:PT,PF:PF,alpha:alpha};
-  steps.push({title:'6. ДКА готов: все строки заполнены',g:gp,text:'<p>Новых наборов не осталось. Финальные '+PL.map(function(a,i){return PF[i]?'P<sub>'+i+'</sub>':null}).filter(Boolean).join(', ')+'. В каждом из них есть хотя бы одно финальное q из таблицы без ε. ∅ означает отказ при чтении этой буквы.</p>'+pTable(PL.length)+(word==null?'':dfaTraceHtml(dfa,word))});
+  steps.push({title:'6. ДКА готов: все строки заполнены',g:gp,text:'<p>Новых наборов не осталось. Финальные '+PL.map(function(a,i){return PF[i]?'P<sub>'+i+'</sub>':null}).filter(Boolean).join(', ')+'. В каждом из них есть хотя бы одно финальное q из таблицы без ε. '+(complete?'У каждого состояния есть переход по каждой букве.':'∅ означает отказ при чтении этой буквы.')+'</p>'+pTable(PL.length)+(word==null?'':dfaTraceHtml(dfa,word))});
   steps.dfa=dfa;return steps;
 }
 
@@ -795,10 +802,10 @@ function dfaRun(d, w) {
 }
 function dfaTraceHtml(d, w) {
   var r = dfaRun(d, w), parts = [];
-  r.path.forEach(function (p, i) { parts.push("(P<sub>" + p + "</sub>, " + (w.slice(i) || "ε") + ")") });
+  r.path.forEach(function (p, i) { parts.push("(P<sub>" + p + "</sub>, " + esc(w.slice(i) || "ε") + ")") });
   var h = '<div class="trace">' + parts.join(" ⊢ ") + (r.stuck >= 0 ? " ⊢ ∅" : "") + "</div>";
   var last = r.path[r.path.length - 1];
-  if (r.stuck >= 0) h += '<p class="err">Из P<sub>' + last + "</sub> по «" + w[r.stuck] + "» перехода нет — цепочка не допускается.</p>";
+  if (r.stuck >= 0) h += '<p class="err">Из P<sub>' + last + "</sub> по «" + esc(w[r.stuck]) + "» перехода нет — цепочка не допускается.</p>";
   else h += '<p class="' + (r.ok ? "okm" : "err") + '">Остановились в P<sub>' + last + "</sub>, оно " + (r.ok ? "финальное — автомат цепочку допускает." : "не финальное — цепочка не допускается.") + "</p>";
   return h;
 }
@@ -983,7 +990,10 @@ function compareNfa(a, b, alpha) {
 /* ================= текстовый формат автомата ================= */
 function parseAutomaton(text) {
   var g = { nodes: [], edges: [], eid: 0 }, start = null, finals = [], order = null, seen = {}, list = [];
-  function node(id) { if (!seen[id]) { seen[id] = 1; list.push(id) } }
+  function node(id) {
+    if (!/^[\wА-Яа-яЁё']+$/.test(id) || Object.hasOwn(Object.prototype, id)) throw new ReErr("Недопустимое имя состояния «" + id + "».");
+    if (!seen[id]) { seen[id] = 1; list.push(id) }
+  }
   text.split(/\n/).forEach(function (raw, ln) {
     var line = raw.replace(/#.*$/, "").trim();
     if (!line) return;
@@ -1047,6 +1057,12 @@ var EX={
   PH:function(){return mkG([["q0",0,60,"s"],["q1",150,-20],["q2",150,140],["q3",320,-20],["q4",320,140,"f"],["q5",490,-20,"f"],["q6",490,140,"f"]],[["q0","0","q1"],["q0","1","q2"],["q1","0","q2"],["q2","1","q2"],["q2","0","q4"],["q2","1","q3"],["q3","0","q4"],["q3","1","q5"],["q5","0","q4"],["q4","1","q6"],["q5","0","q6"]])},
   D4:function(){return mkG([["q0",0,0,"s"],["q1",170,100],["q2",340,0,"f"]],[["q0","ε","q1"],["q0","b","q2"],["q1","a","q0"],["q1","b","q1"],["q1","a","q2"],["q2","ε","q1"]])},
   FR:function(){return mkG([["q0",0,40,"s"],["q1",150,-40],["q2",150,140],["q3",320,-40],["q4",320,140,"f"],["q5",480,40,"f"]],[["q0","0","q1"],["q1","1","q3"],["q1","1","q2"],["q1","1","q4"],["q3","0","q4"],["q3","1","q5"],["q5","0","q4"],["q4","0","q2"],["q2","0","q2"]])},
+  TicketToRegex: function () {
+    return mkG(
+      [["q0", 0, 0, "s"], ["q1", 165, 0, "f"]],
+      [["q0", "a", "q0"], ["q0", "b", "q1"], ["q1", "b", "q1"]]
+    );
+  },
   B3:function(){return mkG([["q0",0,0,"sf"],["q1",170,0],["q2",340,0,"f"]],[["q0","a","q1"],["q1","b","q0"],["q1","c","q2"],["q2","c","q2"]])}
 };
 var ORDER={B1:["q2","q1","q0"],B2:["q2","q4","q3","q6","q5"],KR2:["q2","q1","q5","q3","q4"]};
@@ -1237,6 +1253,41 @@ root.querySelectorAll("details[data-solve]").forEach(function(d){
 
 /* ---------- листки, собранные из шагов ---------- */
 function shSvg(g,o){return '<div class="gscroll">'+svgGraph(g,o||{}).replace(/url\(#a(ink|nw|in|out|lp|gh)\)/g,"url(#asheet)")+'</div>'}
+// Графы к тетрадному билету. «!» оставляет метку Мили буквальной.
+const ticketGraphs = {
+  TicketFromRegex: [
+    [["s", 0, 0, "s"], ["r", 125, 0], ["p", 250, 0], ["q", 375, 0], ["f", 500, 0, "f"]],
+    [["s", "ε", "r"], ["r", "!a,b", "r"], ["r", "ε", "p"], ["p", "a", "q"], ["q", "b", "f"]],
+  ],
+  TicketDfa: [
+    [["P0", 0, 30, "s"], ["P1", 170, -55, "f"], ["P2", 170, 120, "f"], ["P3", 375, 120]],
+    [["P0", "a", "P1"], ["P0", "b", "P2"], ["P1", "a", "P1"], ["P1", "b", "P2"],
+     ["P2", "a", "P1"], ["P2", "b", "P3"], ["P3", "a", "P1"], ["P3", "b", "P3"]],
+  ],
+  TicketMinDfa: [
+    [["A", 0, 0, "s"], ["B", 160, 0], ["C", 320, 0, "f"]],
+    [["A", "!a,b", "B"], ["B", "a", "B"], ["B", "b", "C"], ["C", "!a,b", "C"]],
+  ],
+  TicketMinMealy: [
+    [["U", 0, 0, "s"], ["V", 175, 0]],
+    [["U", "!a/0", "U"], ["U", "!b/1", "V"], ["V", "!a/1", "V"], ["V", "!b/0", "U"]],
+  ],
+  TicketProduct: [
+    [["P0", 0, 0, "s"], ["P1", 195, -75], ["P2", 195, 100]],
+    [["P0", "!0/(a,a)", "P1"], ["P0", "!1/(b,b)", "P2"], ["P1", "!0/(a,a)", "P0"],
+     ["P1", "!1/(b,b)", "P2"], ["P2", "!0/(b,b)", "P2"], ["P2", "!1/(a,b)", "P1"]],
+  ],
+  TicketPattern: [
+    [["q0", 0, 0, "s"], ["q1", 160, 0], ["q2", 320, 0], ["q3", 320, 150]],
+    [["q0", "!A/Y", "q1"], ["q0", "!B/Y", "q0"], ["q1", "!A/Y", "q1"], ["q1", "!B/Y", "q2"],
+     ["q2", "!A/Y", "q3"], ["q2", "!B/Y", "q0"], ["q3", "!A/X", "q1"], ["q3", "!B/Y", "q2"]],
+  ],
+};
+for (const host of root.querySelectorAll("[data-ticket-sheet]")) {
+  const [nodes, edges] = ticketGraphs[host.getAttribute("data-ticket-sheet")];
+  const svg = FIG.G(nodes, edges).replaceAll("url(#aink)", "url(#asheet)");
+  host.innerHTML = '<div class="gscroll">' + svg + '</div>';
+}
 function shRe(e,ctx){return pr(e,ctx||0,true)}
 function shName(id){return nameHtml(id)}
 function findPath(g,w,acc){/* путь в автомате с буквенными дугами */
@@ -1350,6 +1401,7 @@ t1();t2();t3();t4();t5();
 
 mountLearning(root,ctx,Stepper,mkG);
 mountPattern(root,ctx,Stepper,mkG);
+mountCalculator(root,ctx,{Stepper,mkG,parseAutomaton,regexSteps,elimSteps,clearDetSteps,minSteps});
 // Подсветка текущего раздела — как в статье по ЛП.
 (function(){
   var links=Array.from(root.querySelectorAll("nav.top a"));

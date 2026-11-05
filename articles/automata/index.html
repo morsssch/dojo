@@ -44,6 +44,17 @@
     <li><div class="lpt-head"><span class="lpt-n">12</span><a href="#equivalence">Эквивалентность преобразователей</a></div>
       <p class="lpt-desc">Обход достижимых пар и поиск различающего входного слова</p>
     </li>
+    <li><div class="lpt-head"><span class="lpt-n">13</span><a href="#ticket">Полное решение билета</a></div>
+      <p class="lpt-desc">Шесть заданий в тетрадном оформлении: условия, расчёты, таблицы и ответы</p>
+      <ul class="lpt-subs">
+        <li><a href="#ticket-1">1. Нумерация</a></li><li><a href="#ticket-2">2. Регулярки</a></li>
+        <li><a href="#ticket-3">3. Детерминизация</a></li><li><a href="#ticket-4">4. Минимизация</a></li>
+        <li><a href="#ticket-5">5. Произведение</a></li><li><a href="#ticket-6">6. Построение</a></li>
+      </ul>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">14</span><a href="#calculator">Калькулятор всех задач</a></div>
+      <p class="lpt-desc">Подставь свои данные и получи решение по шагам</p>
+    </li>
   </ol>
   <p class="lpt-cheat"><a href="#cheat">Шпаргалка перед контрольной</a> — все алгоритмы на одном экране.</p>
 </nav><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -60,7 +71,7 @@
 
 
 <nav class="top" aria-label="Разделы"><div class="in">
-  <a href="#lab">Введение</a><a href="#numbering">Нумерация</a><a href="#rep">Повторение</a><a href="#r2a">R → автомат</a><a href="#a2r">Автомат → R</a><a href="#paper">Листок</a><a href="#tool">Тренажёр</a><a href="#det">Детерминизация</a><a href="#min">Минимизация</a><a href="#pattern">Построение по условию</a><a href="#mealy">Преобразователи</a><a href="#equivalence">Эквивалентность</a><a href="#cheat">Шпаргалка</a>
+  <a href="#lab">Введение</a><a href="#numbering">Нумерация</a><a href="#rep">Повторение</a><a href="#r2a">R → автомат</a><a href="#a2r">Автомат → R</a><a href="#paper">Листок</a><a href="#tool">Тренажёр</a><a href="#det">Детерминизация</a><a href="#min">Минимизация</a><a href="#pattern">Построение по условию</a><a href="#mealy">Преобразователи</a><a href="#equivalence">Эквивалентность</a><a href="#ticket">Билет</a><a href="#cheat">Шпаргалка</a><a href="#calculator">Калькулятор</a>
 </div></nav>
 
 <!-- ============ ЛАБА ============ -->
@@ -637,8 +648,203 @@ q4 b q5</textarea>
 <div class="part">Разбор по шагам</div><p>В исходном рисунке граф произведения помечен автором как возможный ошибочный. Поэтому ниже построим достижимые пары заново по <b>таблицам исходных переходов</b>. Начала q₁ и s₂.</p>
 <div class="two"><div><h4>Первый автомат</h4><div class="tscroll"><table class="dt"><tr><th></th><th>0</th><th>1</th></tr><tr><th>→q₁</th><td>q₂ / b</td><td>q₃ / a</td></tr><tr><th>q₂</th><td>q₂ / b</td><td>q₃ / b</td></tr><tr><th>q₃</th><td>q₃ / b</td><td>q₃ / a</td></tr></table></div></div><div><h4>Второй автомат</h4><div class="tscroll"><table class="dt"><tr><th></th><th>0</th><th>1</th></tr><tr><th>s₁</th><td>s₁ / b</td><td>s₃ / a</td></tr><tr><th>→s₂</th><td>s₃ / a</td><td>s₁ / a</td></tr><tr><th>s₃</th><td>s₁ / a</td><td>s₃ / b</td></tr></table></div></div></div>
 <div id="demo-equivalence"></div>
+<p>Если в условии требуют перемножить автоматы, выпиши таблицу всех пар, затем выдели достижимые. <a href="#ticket-5">Полный пример оформления прямого произведения</a>.</p>
 <div class="part">Что если…</div><details class="wi"><summary>…различия есть только в недостижимой паре</summary><div class="wb"><p>Это не контрпример для выбранных начал. Проверяй пары, в которые можно попасть синхронно из начальной. Именно поэтому не нужно механически рисовать всё декартово произведение.</p></div></details><details class="wi"><summary>…совпали все слова длины до 6</summary><div class="wb"><p>Это полезная самопроверка, но не доказательство. Доказательством для конечных детерминированных преобразователей служит исчерпывающий обход достижимых пар. Тренажёр сравнения регулярок выше перебирает только короткие слова и честно сообщает об этом ограничении.</p></div></details>
 <div class="part">Практика</div><div class="task"><div class="task-h"><span class="task-n">Э1</span><span class="task-t">Найди кратчайшее различающее слово для таблиц выше</span></div><details><summary>Показать решение</summary><div class="task-b"><p>Слово 0: из q₁ выход b, из s₂ выход a. Пустой вход в обоих случаях даёт пустой выход, поэтому короче быть не может.</p></div></details></div>
+</section>
+<section class="sec" id="ticket">
+  <div class="sec-head"><div><div class="eyebrow">Образец для листка</div><h2>Полное решение билета по автоматам</h2></div></div>
+  <p>Тренировочный вариант из шести заданий. Под каждым условием — запись, которую можно перенести на листок: что дано, как получены промежуточные результаты и что записать в ответ.</p>
+
+  <h3 id="ticket-1">1. Нумерация слов</h3>
+  <p><b>Условие.</b> Найти слово № 689 в алфавите a, b, c и номер слова <code>ccabd</code> в алфавите a, b, c, d. Слова идут по длине, внутри одной длины — по алфавиту. Номер ε равен 0.</p>
+  <div class="sheet">
+    <h4>а) Номер → слово</h4>
+    <p>Берём n = 3 и цифры a = 1, b = 2, c = 3. На каждом шаге представляем N как 3Q + d, где d от 1 до 3. Цифра d даёт последнюю букву оставшегося слова, затем продолжаем с Q.</p>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Разложение N</th><th>Буква справа</th></tr></thead>
+      <tbody>
+        <tr><td>689 = 3·229 + 2</td><td>b</td></tr>
+        <tr><td>229 = 3·76 + 1</td><td>a</td></tr>
+        <tr><td>76 = 3·25 + 1</td><td>a</td></tr>
+        <tr><td>25 = 3·8 + 1</td><td>a</td></tr>
+        <tr><td>8 = 3·2 + 2</td><td>b</td></tr>
+        <tr><td>2 = 3·0 + 2</td><td>b</td></tr>
+      </tbody>
+    </table></div>
+    <p>Q = 0. Читаем второй столбец снизу вверх. <b>Ответ: bbaaab.</b></p>
+    <h4>б) Слово → номер</h4>
+    <p>Здесь n = 4 и цифры a = 1, b = 2, c = 3, d = 4. Слева направо цифры слова <code>ccabd</code> — 3, 3, 1, 2, 4. Последняя цифра умножается на 4⁰.</p>
+    <p>N = 3·4⁴ + 3·4³ + 1·4² + 2·4¹ + 4·4⁰ = 768 + 192 + 16 + 8 + 4 = <b>988</b>.</p>
+  </div>
+
+  <h3 id="ticket-2">2. Регулярное выражение и автомат</h3>
+  <p><b>Условие.</b> а) Построить НКА по R = (a+b)<sup>*</sup>ab методом разбиения дуг. б) Для автомата ниже получить регулярку удалением состояний.</p>
+  <div class="gscroll" data-show="TicketToRegex"></div>
+  <div class="sheet">
+    <h4>а) Из регулярки в автомат</h4>
+    <ol class="algo">
+      <li>Рисуем начальную вершину s, финальную f и дугу с меткой (a+b)<sup>*</sup>ab.</li>
+      <li>Делим эту дугу на три последовательные: s —(a+b)<sup>*</sup>→ p —a→ q —b→ f.</li>
+      <li>Дугу s —(a+b)<sup>*</sup>→ p заменяем путём s —ε→ r —ε→ p и петлёй a+b на r. Если пройти сразу в p, повторов будет ноль.</li>
+      <li>Петлю a+b заменяем двумя петлями на r, по a и по b. Теперь каждая дуга читает одну букву или ε.</li>
+    </ol>
+    <div data-ticket-sheet="TicketFromRegex"></div>
+    <p><b>Ответ.</b> Полученный НКА принимает слова на a, b, которые оканчиваются на ab. Например, <code>ab</code> проходит без повторов на r, <code>bab</code> — с одним повтором по b, а <code>aba</code> не принимается.</p>
+    <h4>б) Из автомата в регулярку</h4>
+    <ol class="algo">
+      <li>На начальной q₀ есть петля a, поэтому добавляем новый старт s и дугу s —ε→ q₀. Из финальной q₁ есть исходящая петля b, поэтому добавляем новый финал f и дугу q₁ —ε→ f. Старые отметки начала и финала снимаем.</li>
+      <li>Удаляем q₀. Вход из s по ε, петля a, выход в q₁ по b. Получаем s —a<sup>*</sup>b→ q₁, потому что ε·a<sup>*</sup>·b = a<sup>*</sup>b.</li>
+      <li>Удаляем q₁. Вход из s по a<sup>*</sup>b, петля b, выход в f по ε. Получаем s —a<sup>*</sup>bb<sup>*</sup>→ f.</li>
+    </ol>
+    <p><b>Ответ.</b> R = a<sup>*</sup>bb<sup>*</sup>. Сначала идёт сколько угодно a, затем хотя бы одна b. Например, <code>b</code> и <code>aabb</code> подходят, <code>ba</code> — нет.</p>
+  </div>
+
+  <h3 id="ticket-3">3. Удаление ε-переходов и детерминизация</h3>
+  <p><b>Условие.</b> Для автомата ниже убрать ε-переходы и построить полный ДКА. Проверить слово <code>bb</code>.</p>
+  <div class="gscroll" data-show="D4"></div>
+  <div class="sheet">
+    <h4>Шаг 1. Замыкания и финалы</h4>
+    <p>Из q₀ по ε можно дойти в q₁. Из q₂ по ε тоже можно дойти в q₁. Из q₁ ε-стрелок нет. В каждое замыкание включаем саму исходную вершину.</p>
+    <p>E(q₀) = {q₀,q₁}, E(q₁) = {q₁}, E(q₂) = {q₁,q₂}.</p>
+    <p>Старт остаётся q₀. Только E(q₂) содержит старый финал q₂, поэтому финал после удаления ε тоже один: q₂.</p>
+    <h4>Шаг 2. Таблица без ε</h4>
+    <p>Для каждой клетки берём замыкание до буквы, читаем ровно одну букву и добавляем замыкания после неё. Например, из E(q₀) по b из q₀ попадаем в q₂, а из q₁ — в q₁. После b объединяем E(q₂) и E(q₁). Получаем {q₁,q₂}.</p>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Откуда</th><th>По a сразу</th><th>По a с замыканием</th><th>По b сразу</th><th>По b с замыканием</th></tr></thead>
+      <tbody>
+        <tr><th>→q₀</th><td>{q₀,q₂}</td><td>{q₀,q₁,q₂}</td><td>{q₁,q₂}</td><td>{q₁,q₂}</td></tr>
+        <tr><th>q₁</th><td>{q₀,q₂}</td><td>{q₀,q₁,q₂}</td><td>{q₁}</td><td>{q₁}</td></tr>
+        <tr><th>*q₂</th><td>{q₀,q₂}</td><td>{q₀,q₁,q₂}</td><td>{q₁}</td><td>{q₁}</td></tr>
+      </tbody>
+    </table></div>
+    <p class="hint">«Сразу» означает результат одного перехода по букве из E(q). В таблицу автомата без ε идут столбцы «с замыканием».</p>
+    <h4>Шаг 3. Строки ДКА</h4>
+    <p>P₀ = {q₀}. Из P₀ по a получаем P₁ = {q₀,q₁,q₂}, по b — P₂ = {q₁,q₂}. Из P₁ по b объединяем {q₁,q₂} ∪ {q₁} ∪ {q₁} и получаем тот же P₂. Из P₂ по b объединяем {q₁} ∪ {q₁}, получаем новый P₃ = {q₁}. По a любая из этих непустых строк даёт P₁. Из P₃ по b снова P₃, поэтому новых наборов больше нет.</p>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Набор</th><th>a</th><th>b</th></tr></thead>
+      <tbody>
+        <tr><th>→P₀ = {q₀}</th><td>P₁</td><td>P₂</td></tr>
+        <tr><th>*P₁ = {q₀,q₁,q₂}</th><td>P₁</td><td>P₂</td></tr>
+        <tr><th>*P₂ = {q₁,q₂}</th><td>P₁</td><td>P₃</td></tr>
+        <tr><th>P₃ = {q₁}</th><td>P₁</td><td>P₃</td></tr>
+      </tbody>
+    </table></div>
+    <p><b>Ответ.</b> Начало P₀, финалы P₁ и P₂, поскольку в них есть q₂. Для <code>bb</code> путь P₀ —b→ P₂ —b→ P₃. После первой b мы в финале, но осталась вторая буква. Конечное P₃ нефинальное, поэтому <code>bb</code> отклоняется.</p>
+    <div data-ticket-sheet="TicketDfa"></div>
+  </div>
+
+  <h3 id="ticket-4">4. Минимизация ДКА и преобразователя Мили</h3>
+  <p><b>Условие.</b> Минимизировать два автомата по исходным таблицам. В а) звёздочка отмечает финал. В б) каждая клетка содержит «куда перейти / что выдать».</p>
+  <div class="sheet">
+    <h4>а) Распознаватель</h4>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Состояние</th><th>a</th><th>b</th></tr></thead>
+      <tbody>
+        <tr><th>→q₀</th><td>q₁</td><td>q₂</td></tr>
+        <tr><th>q₁</th><td>q₁</td><td>q₃</td></tr>
+        <tr><th>q₂</th><td>q₂</td><td>q₃</td></tr>
+        <tr><th>*q₃</th><td>q₃</td><td>q₃</td></tr>
+        <tr><th>q₄</th><td>q₄</td><td>q₄</td></tr>
+      </tbody>
+    </table></div>
+    <p>Из q₀ достижимы q₁ по a, q₂ по b и q₃ по ab. В q₄ ведут только его собственные петли, поэтому удаляем q₄.</p>
+    <p><b>Разбиение 0.</b> N = {q₀,q₁,q₂}, F = {q₃}. Выписываем классы назначения в порядке a, b. У q₀ подпись (N,N), у q₁ и q₂ — (N,F), у q₃ — (F,F). Делим N на A = {q₀} и B = {q₁,q₂}. Класс C = {q₃} остаётся отдельно.</p>
+    <p><b>Разбиение 1.</b> В новых классах у q₀ подпись (B,B), у q₁ и q₂ — (B,C), у q₃ — (C,C). Класс B больше не делится, а A и C уже одиночные.</p>
+    <p><b>Ответ.</b> Минимальный ДКА имеет три состояния. Берём переходы у любого представителя каждого класса.</p>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Класс</th><th>a</th><th>b</th></tr></thead>
+      <tbody>
+        <tr><th>→A</th><td>B</td><td>B</td></tr>
+        <tr><th>B</th><td>B</td><td>C</td></tr>
+        <tr><th>*C</th><td>C</td><td>C</td></tr>
+      </tbody>
+    </table></div>
+    <div data-ticket-sheet="TicketMinDfa"></div>
+
+    <h4>б) Преобразователь Мили</h4>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Состояние</th><th>a</th><th>b</th></tr></thead>
+      <tbody>
+        <tr><th>→q₀</th><td>q₁ / 0</td><td>q₂ / 1</td></tr>
+        <tr><th>q₁</th><td>q₀ / 0</td><td>q₂ / 1</td></tr>
+        <tr><th>q₂</th><td>q₂ / 1</td><td>q₀ / 0</td></tr>
+      </tbody>
+    </table></div>
+    <p>Все состояния достижимы. Сначала группируем по выходам в порядке a, b: q₀ и q₁ выдают (0,1), q₂ выдаёт (1,0). Получаем U = {q₀,q₁}, V = {q₂}.</p>
+    <p>Проверяем назначения. Из q₀ и q₁ по a остаёмся в U, по b идём в V. У обоих подпись (U,V). У q₂ подпись (V,U). Классы больше не делятся.</p>
+    <p><b>Ответ.</b> Два состояния. В каждой клетке переносим и класс назначения, и выход.</p>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Класс</th><th>a</th><th>b</th></tr></thead>
+      <tbody>
+        <tr><th>→U</th><td>U / 0</td><td>V / 1</td></tr>
+        <tr><th>V</th><td>V / 1</td><td>U / 0</td></tr>
+      </tbody>
+    </table></div>
+    <div data-ticket-sheet="TicketMinMealy"></div>
+  </div>
+
+  <h3 id="ticket-5">5. Сравнение автоматов прямым произведением</h3>
+  <p><b>Условие.</b> Сравнить два преобразователя Мили по таблицам. Построить полное произведение, выделить достижимые пары и, если есть различие, выписать входное слово.</p>
+  <div class="two">
+    <div><h4>Автомат A</h4><div class="tscroll"><table class="dt">
+      <thead><tr><th>Состояние</th><th>0</th><th>1</th></tr></thead>
+      <tbody>
+        <tr><th>→q₀</th><td>q₀ / a</td><td>q₁ / b</td></tr>
+        <tr><th>q₁</th><td>q₁ / b</td><td>q₀ / a</td></tr>
+      </tbody>
+    </table></div></div>
+    <div><h4>Автомат B</h4><div class="tscroll"><table class="dt">
+      <thead><tr><th>Состояние</th><th>0</th><th>1</th></tr></thead>
+      <tbody>
+        <tr><th>→s₀</th><td>s₁ / a</td><td>s₂ / b</td></tr>
+        <tr><th>s₁</th><td>s₀ / a</td><td>s₂ / b</td></tr>
+        <tr><th>s₂</th><td>s₂ / b</td><td>s₁ / b</td></tr>
+      </tbody>
+    </table></div></div>
+  </div>
+  <div class="sheet">
+    <h4>Шаг 1. Полная таблица A × B</h4>
+    <p>Берём каждое q из A с каждым s из B: всего 2·3 = 6 пар. Начальная пара (q₀,s₀). Чтобы заполнить клетку, смотрим одну и ту же входную цифру в обеих таблицах.</p>
+    <p>Например, строка (q₁,s₂), столбец 1. В A из q₁ по 1 идём в q₀ с выходом a. В B из s₂ по 1 идём в s₁ с выходом b. Запись в произведении: <b>(q₀,s₁) / (a,b)</b>. Слева пара состояний назначения, справа пара выходов в порядке A, B.</p>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Пара</th><th>0</th><th>1</th><th>Вход из старта</th></tr></thead>
+      <tbody>
+        <tr><th>→(q₀,s₀)</th><td>(q₀,s₁) / (a,a)</td><td>(q₁,s₂) / (b,b)</td><td>ε</td></tr>
+        <tr><th>(q₀,s₁)</th><td>(q₀,s₀) / (a,a)</td><td>(q₁,s₂) / (b,b)</td><td>0</td></tr>
+        <tr><th>(q₀,s₂)</th><td>(q₀,s₂) / (a,b)</td><td>(q₁,s₁) / (b,b)</td><td>—</td></tr>
+        <tr><th>(q₁,s₀)</th><td>(q₁,s₁) / (b,a)</td><td>(q₀,s₂) / (a,b)</td><td>—</td></tr>
+        <tr><th>(q₁,s₁)</th><td>(q₁,s₀) / (b,a)</td><td>(q₀,s₂) / (a,b)</td><td>—</td></tr>
+        <tr><th>(q₁,s₂)</th><td>(q₁,s₂) / (b,b)</td><td><strong>(q₀,s₁) / (a,b)</strong></td><td>1</td></tr>
+      </tbody>
+    </table></div>
+    <h4>Шаг 2. Удаляем недостижимые пары</h4>
+    <p>Из старта по 0 попадаем в (q₀,s₁), по 1 — в (q₁,s₂). Из этих двух пар все стрелки ведут обратно в уже найденную тройку. Вычёркиваем (q₀,s₂), (q₁,s₀), (q₁,s₁) вместе с их дугами.</p>
+    <p>На графе P₀ = (q₀,s₀), P₁ = (q₀,s₁), P₂ = (q₁,s₂). Метка <code>1/(a,b)</code> показывает одну входную букву и два выхода на этом шаге.</p>
+    <div data-ticket-sheet="TicketProduct"></div>
+    <h4>Шаг 3. Сравниваем выходы</h4>
+    <p>Из P₀ по 1 приходим в P₂ с выходами (b,b). Из P₂ по следующей 1 приходим в P₁ с выходами (a,b). Значит, на входе <code>11</code> автомат A выдаёт <code>ba</code>, автомат B — <code>bb</code>.</p>
+    <p><b>Ответ.</b> Автоматы неэквивалентны. Кратчайший контрпример — <code>11</code>, так как на обоих односимвольных входах выходы совпадают.</p>
+  </div>
+
+  <h3 id="ticket-6">6. Построение преобразователя по условию</h3>
+  <p><b>Условие.</b> Построить автомат Мили, который выдаёт X сразу после чтения буквы, если последние четыре входных символа — ABAA. На остальных шагах выход Y. Алфавит входа — A, B.</p>
+  <div class="sheet">
+    <p><b>Состояния.</b> q₀ помнит ε, q₁ — A, q₂ — AB, q₃ — ABA. Это самый длинный конец прочитанного слова, который совпадает с началом ABAA и может пригодиться для следующего совпадения.</p>
+    <p><b>Переходы.</b> К памяти дописываем входную букву. Если получился конец ABAA, пишем выход X, иначе Y. Для назначения ищем самый длинный подходящий конец из ε, A, AB, ABA. Например, ABA + B = ABAB оканчивается на AB, поэтому пишем q₂ / Y. После ABA + A = ABAA пишем q₁ / X, потому что последняя A может начать следующее совпадение.</p>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th>Состояние и память</th><th>A</th><th>B</th></tr></thead>
+      <tbody>
+        <tr><th>→q₀ (ε)</th><td>q₁ / Y</td><td>q₀ / Y</td></tr>
+        <tr><th>q₁ (A)</th><td>q₁ / Y</td><td>q₂ / Y</td></tr>
+        <tr><th>q₂ (AB)</th><td>q₃ / Y</td><td>q₀ / Y</td></tr>
+        <tr><th>q₃ (ABA)</th><td>q₁ / X</td><td>q₂ / Y</td></tr>
+      </tbody>
+    </table></div>
+    <div data-ticket-sheet="TicketPattern"></div>
+    <p><b>Проверка.</b> Вход <code>ABAABAA</code> даёт путь q₀ → q₁ → q₂ → q₃ → q₁ → q₂ → q₃ → q₁. Выход <code>YYYXYYX</code>: X на четвёртой и седьмой буквах.</p>
+    <p><b>Ответ.</b> Четыре состояния, старт q₀, переходы и выходы указаны в таблице и на графе.</p>
+  </div>
 </section>
 <section class="sec" id="cheat">
   <div class="sec-head"><div><div class="eyebrow">Для повторения</div><h2>Шпаргалка</h2></div></div>
@@ -692,5 +898,33 @@ q4 b q5</textarea>
     </ol></div>
   </div>
 
+</section>
+<section class="sec" id="calculator">
+  <div class="sec-head"><div><div class="eyebrow">Свой вариант</div><h2>Калькулятор всех задач</h2></div></div>
+  <p>Выбери задание и подставь свои данные вместо примера. В пошаговом решении кнопка «К ответу» открывает итоговую таблицу, граф или выражение.</p>
+  <div class="tool">
+    <form id="calc-form">
+      <div class="aut-calc-field"><label for="calc-kind">Задание</label>
+        <select class="tx aut-calc-input" id="calc-kind">
+          <option value="unrank">1а. Номер → слово</option>
+          <option value="rank">1б. Слово → номер</option>
+          <option value="r2a">2а. Регулярка → автомат</option>
+          <option value="a2r">2б. Автомат → регулярка</option>
+          <option value="det">3. Удалить ε и построить ДКА</option>
+          <option value="dfa">4а. Минимизировать ДКА</option>
+          <option value="mealy">4б. Минимизировать Мили</option>
+          <option value="compare">5. Сравнить Мили произведением</option>
+          <option value="pattern">6. Построить автомат по образцу</option>
+        </select>
+      </div>
+      <p class="hint" id="calc-hint"></p>
+      <div id="calc-fields"></div>
+      <div class="field"><button class="btn primary" type="submit">Решить</button>
+        <button class="btn" id="calc-answer" type="button" hidden>К ответу</button>
+      </div>
+    </form>
+    <div id="calc-result" aria-live="polite"></div>
+    <div id="calc-player"></div>
+  </div>
 </section>
 </div>
