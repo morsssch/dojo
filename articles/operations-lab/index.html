@@ -1,0 +1,404 @@
+<nav class="lpt" aria-label="Содержание">
+  <h2 class="lpt-title">Содержание</h2>
+  <ol class="lpt-parts">
+    <li><div class="lpt-head"><span class="lpt-n">1</span><a href="#simplex">Обычный симплекс</a></div>
+      <p class="lpt-desc">Ведущий элемент, преобразования строк и критерий остановки</p>
+      <ul class="lpt-subs"><li><a href="#defense-simplex">Где в коде</a></li><li><a href="#simplex-data">Переменные</a></li><li><a href="#simplex-functions">Функции</a></li><li><a href="#simplex-play">Анимация</a></li><li><a href="#simplex-check">Самопроверка</a></li></ul>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">2</span><a href="#optimality">Проверка на оптимальность</a></div>
+      <p class="lpt-desc">Заданный план, множества J и I, Гаусс и проверка двойственной задачи</p>
+      <ul class="lpt-subs"><li><a href="#defense-optimality">Где в коде</a></li><li><a href="#optimality-data">Переменные</a></li><li><a href="#optimality-functions">Функции</a></li><li><a href="#optimality-play">Анимация</a></li><li><a href="#optimality-check">Самопроверка</a></li></ul>
+    </li>
+  </ol>
+  <p class="lpt-cheat"><a href="#defense">Вопросы на защите</a> · <a href="#difference">Как различить две проверки</a></p>
+</nav>
+
+<p>Держи рядом свою симплекс-таблицу и исходную задачу. В каждом разделе сначала разберём, куда попадают числа при вводе, затем пройдём от маленьких функций к одной операции вкладки. В карточках функций открываются строки из снимка исходников лабораторной.</p>
+<div class="note">
+  <p><strong>Как читать типы.</strong> <code>Fraction</code> хранит числитель и знаменатель как целые <code>BigInt</code>. <code>Fraction[]</code> — строка или вектор точных дробей, <code>Fraction[][]</code> — массив таких строк. <code>number</code> здесь обычно индекс или счётчик, <code>boolean</code> — результат проверки. <code>null</code> обозначает отсутствие значения там, где оно может появиться.</p>
+  <p>Например, <code>a.over(b)</code> — точное \(a/b\), <code>a.compare(b)</code> возвращает −1, 0 или 1, <code>a.sign</code> — знак числа. Напечатанное <code>x1</code> соответствует индексу 0. Дроби сравниваются без округления.</p>
+</div>
+<nav class="top op-nav" aria-label="Разделы"><div class="in">
+  <a href="#defense">На защите</a><a href="#simplex">Обычный симплекс</a><a href="#optimality">Проверка плана</a><a href="#difference">Шпаргалка</a>
+</div></nav>
+
+<section class="sec" id="defense">
+  <div class="sec-head"><h2>Где это в коде</h2></div>
+  <p>Если преподаватель спросит «Где вы делаете этот шаг?», найди вопрос по названию действия. Раскрой карточку, скажи ответ своими словами и покажи выделенные строки.</p>
+  <div class="op-defense" data-defense>
+    <div class="op-defense-search">
+      <label for="op-defense-search">Найти вопрос</label>
+      <input id="op-defense-search" type="search" placeholder="Например, ведущая строка" autocomplete="off">
+      <button class="btn small" type="button" data-clear-defense hidden>Сбросить</button>
+    </div>
+    <p class="op-defense-status" data-defense-status role="status"></p>
+    <div id="defense-simplex" data-defense-group="simplex">
+      <h3>Обычный симплекс</h3>
+      <div data-defense-cards></div>
+    </div>
+    <div id="defense-optimality" data-defense-group="optimality">
+      <h3>Проверка на оптимальность</h3>
+      <div data-defense-cards></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="simplex">
+  <div class="sec-head"><div><div class="eyebrow">Часть 1</div><h2>Обычный симплекс</h2></div></div>
+  <h3 id="simplex-data">Переменные, названия и типы</h3>
+  <div class="op-table"><table><caption class="op-sr">Переменные, типы и запись на бумаге</caption>
+    <thead><tr><th scope="col">Имя в коде</th><th scope="col">Тип</th><th scope="col">Почему так и что на бумаге</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>data.c</code>, <code>data.A</code>, <code>data.b</code>, <code>data.signs</code>, <code>data.sense</code></th><td>массив значений, матрица, массив значений, массив строк, строка</td><td>В бланке это \(c,A,b\), знаки строк и направление цели. Короткие имена на входе следуют обозначениям задачи. В поле может быть строка <code>"3/4"</code>.</td></tr>
+      <tr><th scope="row"><code>problem.objective</code>, <code>problem.constraints</code>, <code>problem.bounds</code>, <code>problem.relations</code>, <code>problem.sense</code></th><td><code>Fraction[]</code>, <code>Fraction[][]</code>, <code>Fraction[]</code>, <code>string[]</code>, <code>"max" | "min"</code></td><td>Те же пять частей после чтения ввода. Полные имена напоминают, где коэффициенты цели, где матрица ограничений, а где правые части. <code>constraints[i][j]</code> — коэффициент при переменной \(j+1\) в ограничении \(i+1\).</td></tr>
+      <tr><th scope="row"><code>table.matrix</code>, <code>table.right</code>, <code>table.prices</code></th><td><code>Fraction[][]</code>, <code>Fraction[]</code>, <code>Fraction[]</code></td><td>Рабочая матрица, правый столбец \(\delta\) и коэффициенты текущей цели \(c_j\). На бумаге ты можешь зачеркнуть старый коэффициент. В коде изменяется только рабочая таблица, а исходная цель остаётся в <code>problem.objective</code>. Название <code>prices</code> означает коэффициенты цели при переменных.</td></tr>
+      <tr><th scope="row"><code>table.basic</code>, <code>table.nonbasic</code>, <code>table.variableNames</code></th><td><code>number[]</code>, <code>number[]</code>, <code>string[]</code></td><td>В тетради подпиши строки базисными \(x_i\), а колонки свободными. В коде базис и свободные хранят номера столбцов с нуля. <code>basic[1] = 3</code> означает, что строку 2 подписывает переменная из столбца 4. Напечатанное имя берётся из <code>variableNames[3]</code>.</td></tr>
+      <tr><th scope="row"><code>table.artificial</code>, <code>originalRows</code>, <code>flipped</code></th><td><code>Set&lt;number&gt;</code>, <code>number[]</code>, объект соответствий строк</td><td>Множество искусственных столбцов удобно проверять через <code>has</code>. <code>originalRows</code> хранит номера исходных строк, когда удаляются зависимые. <code>flipped</code> — таблица смены знаков при умножении ограничения на −1.</td></tr>
+      <tr><th scope="row"><code>estimates</code>, <code>enteringOptions</code>, <code>entering</code></th><td><code>Fraction[]</code>, <code>number[]</code>, <code>number</code></td><td>Строка оценок \(\Delta_j=z_j-c_j\), кандидаты на вход в базис и номер выбранного столбца. Массив кандидатов сортируется. По имени <code>entering</code> видно, что это входящая переменная.</td></tr>
+      <tr><th scope="row"><code>ratios</code>, <code>leavingOptions</code>, <code>leaving</code>, <code>pivot</code></th><td><code>(Fraction | null)[]</code>, <code>number[]</code>, <code>number</code>, <code>Fraction</code></td><td>Столбец отношений \(\delta/a\), номера допустимых строк, индекс выходящей строки и её разрешающий элемент. <code>null</code> соответствует прочерку в тетради. Отношение 0 при положительном делителе остаётся допустимым.</td></tr>
+      <tr><th scope="row"><code>pivotRow</code>, <code>pivotRight</code>, <code>scale</code></th><td><code>Fraction[]</code>, <code>Fraction</code>, <code>Fraction</code></td><td>Разделённая ведущая строка, её разделённая правая часть и старый коэффициент в ведущем столбце другой строки. <code>scale</code> показывает, сколько копий ведущей строки нужно вычесть.</td></tr>
+      <tr><th scope="row"><code>visited</code>, <code>key</code>, <code>useBland</code>, <code>iteration</code>, <code>limit</code></th><td><code>Set&lt;string&gt;</code>, <code>string</code>, <code>boolean</code>, <code>number</code>, <code>number</code></td><td>Код запоминает состав каждого базиса. Строка <code>"2,3,4"</code> — ключ отсортированного набора индексов. При повторе <code>useBland</code> переключает выбор на правило Бланда. <code>limit = 300</code> ограничивает число пересчётов.</td></tr>
+      <tr><th scope="row"><code>route</code>, <code>status</code>, <code>point</code>, <code>value</code>, <code>steps</code></th><td><code>string[]</code>, строка статуса, <code>Fraction[]</code>, <code>Fraction | null</code>, массив снимков</td><td>В тетради это последовательность методов, вывод, ответ и таблицы по порядку. В поле <code>value</code> лежит значение исходной цели, а до нахождения оптимума используется <code>null</code>.</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>На листе ты ведёшь компактную таблицу: строки — базис, колонки — свободные переменные. В памяти программа хранит и единичные столбцы базиса. Поэтому <code>exchange</code> выполняет обычные операции над полными строками вместо подстановки четырёх разных формул в компактную таблицу. Результат в столбцах, которые видны в отчёте, тот же.</p>
+  <p>Для таблицы на максимум тетрадная формула выглядит так: \(f=c_B^T b-\sum_{j\text{ свободный}}\Delta_jx_j\). Если все \(\Delta_j\ge0\), увеличение свободной переменной не поднимет цель. Если \(\Delta_j&lt;0\), проверяем, насколько можно увеличить \(x_j\): в строках с \(a_{ij}&gt;0\) правые части базисных значений уменьшаются, поэтому берём минимум \(\delta_i/a_{ij}\).</p>
+  <div class="op-flow" aria-label="Передача данных в симплекс-методе">
+    <code>createTableau</code><span aria-hidden="true">→</span><code>estimates</code><span aria-hidden="true">→</span><span>два выбора</span><span aria-hidden="true">→</span><code>exchange</code><span aria-hidden="true">→</span><code>point</code>
+  </div>
+
+  <h3 id="simplex-functions">От вспомогательных функций к решению</h3>
+  <h4>От арифметики к таблице</h4>
+  <details class="op-function" data-source="simplex:indices">
+    <summary><code>indices</code> — что делает</summary>
+    <p>Строит массив 0…n−1. Он нужен для нумерации столбцов и для пересчёта индексов после удаления искусственных переменных.</p>
+    <p><strong>На бумаге.</strong> На бумаге ты выписываешь номера столбцов вручную, начиная с 1.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:dot">
+    <summary><code>dot</code> — что делает</summary>
+    <p>Идёт по двум массивам одинаковой длины, перемножает соответствующие элементы и накапливает точную сумму.</p>
+    <p><strong>На бумаге.</strong> Так ты считаешь \(c_B^TA_j\), \(c_B^Tb\) или подставляешь числа в линейное выражение.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:point">
+    <summary><code>point</code> — что делает</summary>
+    <p>Создаёт нулевой массив размером со все переменные таблицы. Для каждого базисного столбца записывает его правую часть.</p>
+    <p><strong>На бумаге.</strong> Небазисные переменные приравниваешь к нулю, базисные считываешь из \(\delta\).</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:basicPrices">
+    <summary><code>basicPrices</code> — что делает</summary>
+    <p>Берёт коэффициенты цели по индексам <code>basic</code> в порядке строк.</p>
+    <p><strong>На бумаге.</strong> Слева от строк выписываешь цены базисных переменных \(c_B\).</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:estimates">
+    <summary><code>estimates</code> — что делает</summary>
+    <p>Для каждого столбца берёт его коэффициенты, вычисляет скалярное произведение с <code>basicPrices()</code> и вычитает цену самого столбца.</p>
+    <p><strong>На бумаге.</strong> Это нижняя строка \(\Delta_j=z_j-c_j\). Для базисных столбцов она нулевая, поэтому отчёт печатает только свободные.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:objective">
+    <summary><code>objective</code> — что делает</summary>
+    <p>Умножает вектор базисных цен на правый столбец и суммирует.</p>
+    <p><strong>На бумаге.</strong> Это значение цели в текущем базисном плане, правый нижний угол таблицы.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:exchange">
+    <summary><code>exchange</code> — что делает</summary>
+    <p>Делит ведущую строку и её правую часть на <code>pivot</code>. Для других строк вычитает нужную кратность новой строки, затем меняет индексы базиса.</p>
+    <p><strong>На бумаге.</strong> Это жорданов пересчёт. Код хранит и базисные столбцы, поэтому ведущий столбец становится единичным.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:note">
+    <summary><code>note</code> — что делает</summary>
+    <p>Записывает название этапа и текст без числового снимка.</p>
+    <p><strong>На бумаге.</strong> Это пояснение между таблицами, например переход к правилу Бланда.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:record">
+    <summary><code>record</code> — что делает</summary>
+    <p>Передаёт текущие оценки, значение цели, отношения и координаты ведущего элемента в <code>tableauSnapshot</code>.</p>
+    <p><strong>На бумаге.</strong> Так сохраняется вид таблицы до пересчёта, включая выделенный ведущий элемент.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:constructor">
+    <summary><code>constructor</code> — что делает</summary>
+    <p>Собирает поля таблицы, определяет свободные индексы, сохраняет номера исходных строк и заводит список снимков.</p>
+    <p><strong>На бумаге.</strong> Подготавливаешь заголовки, подписываешь базис, отделяешь правую часть и фиксируешь каноническую запись.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:appendColumn">
+    <summary><code>appendColumn</code> — что делает</summary>
+    <p>Добавляет имя, нулевую цену и по одному коэффициенту в каждую строку матрицы. Только выбранная строка получает ненулевое значение.</p>
+    <p><strong>На бумаге.</strong> Так добавляешь столбец запаса, избытка или искусственного базиса.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:createTableau">
+    <summary><code>createTableau</code> — что делает</summary>
+    <p>Приводит цель к максимуму, меняет направление нужных строк и формирует базис. Колонку с ненулевым коэффициентом только в одной строке приводит к единичной. В режиме допустимого старта добавляет \(W\), если обычный базис собрать не удалось.</p>
+    <p><strong>На бумаге.</strong> Начинаешь с канонической записи. Обычный старт допускает отрицательные правые части, чтобы ветка выбора могла распознать двойственно допустимую таблицу.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <h4>Итерация и выходы из неё</h4>
+  <details class="op-function" data-source="simplex:primalSimplex">
+    <summary><code>primalSimplex</code> — что делает</summary>
+    <p>На каждом шаге заново считает оценки, выбирает входящий столбец среди отрицательных оценок и выходящую строку по минимальному допустимому отношению. Записывает снимок, пересчитывает таблицу и повторяет. Отдаёт <code>optimal</code>, <code>unbounded</code> или <code>limit</code>.</p>
+    <p><strong>На бумаге.</strong> Идёшь от строки оценок к ведущей колонке, от колонки к отношениям, затем меняешь базис. Засчитываешь нулевое отношение, если ведущий коэффициент положительный.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:restorePrimalFeasibility">
+    <summary><code>restorePrimalFeasibility</code> — что делает</summary>
+    <p>Запасная ветка при неотрицательных оценках и отрицательном \(\delta\). Берёт отрицательную правую часть и выбирает колонку по максимальному \(\Delta/a\) среди отрицательных коэффициентов строки. При отсутствии кандидата ограничения несовместны.</p>
+    <p><strong>На бумаге.</strong> Когда старт прямого симплекса невозможен, в этих условиях можно восстановить допустимость двойственным пересчётом. Эта функция остаётся внутри файла вкладки.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:dropRow">
+    <summary><code>dropRow</code> — что делает</summary>
+    <p>Удаляет строку, её правую часть, базисный столбец из списка базиса и исходный номер строки.</p>
+    <p><strong>На бумаге.</strong> В первой фазе зависимая строка может свестись к \(0=0\). Её можно вычеркнуть.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:finishPhaseOne">
+    <summary><code>finishPhaseOne</code> — что делает</summary>
+    <p>Отбирает обычные столбцы, возвращает исходные цены и перенумеровывает базисные и небазисные индексы.</p>
+    <p><strong>На бумаге.</strong> Ты зачёркиваешь \(W\), заново подписываешь столбцы и возвращаешь целевую функцию исходной задачи.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:artificialBasis">
+    <summary><code>artificialBasis</code> — что делает</summary>
+    <p>При отсутствии подходящего старта запускает фазу I с целью \(-\sum W_i\). При нулевом максимуме убирает искусственные столбцы, при отрицательном фиксирует несовместность. Затем запускает фазу II с исходной целью.</p>
+    <p><strong>На бумаге.</strong> На черновике сначала ищешь допустимый начальный план. Когда искусственные переменные выведены, решаешь исходную задачу. Эта ветка нужна при открытии сложной задачи во вкладке обычного симплекса.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <h4>От условия до ответа</h4>
+  <details class="op-function" data-source="simplex:linearResult">
+    <summary><code>linearResult</code> — что делает</summary>
+    <p>Если найден оптимум, отрезает служебные столбцы от вектора и вычисляет исходную цель. Для остальных статусов возвращает пустой план и <code>null</code>.</p>
+    <p><strong>На бумаге.</strong> В ответ выписываешь исходные \(x\) и \(f(x)\). Для задачи на минимум значение считается по исходным коэффициентам.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:solveFromInitialTableau">
+    <summary><code>solveFromInitialTableau</code> — что делает</summary>
+    <p>Выбирает один из трёх описанных маршрутов по знакам правых частей и оценок. Сохраняет названия реально пройденных шагов.</p>
+    <p><strong>На бумаге.</strong> Перед первой таблицей проверяешь, выполнены ли условия старта выбранного алгоритма.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="simplex:run">
+    <summary><code>run</code> — что делает</summary>
+    <p>Читает данные формы, вызывает функцию выбора маршрута. Для успешного расчёта извлекает финальные \(\delta\) и \(\Delta\) свободных столбцов и передаёт их в отчёт.</p>
+    <p><strong>На бумаге.</strong> Переписываешь условие, решаешь, затем отдельно показываешь критерий остановки и ответ.</p>
+    <div class="op-excerpt"></div>
+  </details>
+
+  <h3 id="simplex-play">Пересчёт таблицы по шагам</h3>
+  <p>Возьми первый пример вкладки: \(3x_1+2x_2\to\max\), \(x_1+x_2\le4\), \(x_1\le2\), \(x_2\le3\). Здесь \(x_3,x_4,x_5\) — запасы. Плеер показывает полную таблицу, а на последнем кадре — компактную, как в окне лабораторной.</p>
+  <div data-trace="simplex" aria-label="Шаги прямого симплекса"></div>
+  <h3 id="simplex-check">Самопроверка</h3>
+  <div class="note"><p><strong>Ноль и прочерк различаются.</strong> Если \(a&gt;0\) и \(\delta=0\), отношение равно нулю и участвует в выборе. При \(a\le0\) код возвращает <code>null</code>. Если базис повторился, выбираются переменные с меньшими индексами по правилу Бланда, а не более отрицательная оценка.</p></div>
+  <details class="op-function"><summary>Почему после первого обмена в базис ещё входит x₂?</summary><p>После обмена \(x_1\leftrightarrow x_4\) оценка \(x_2\) всё ещё \(-2\). Во второй итерации отношения для строк \(x_3\) и \(x_5\) равны 2 и 3. Выходит \(x_3\). Итог \(x=(2;2)\), \(f=10\).</p></details>
+</section>
+
+<section class="sec" id="optimality">
+  <div class="sec-head"><div><div class="eyebrow">Часть 2</div><h2>Проверка на оптимальность</h2></div></div>
+  <h3 id="optimality-data">Переменные, названия и типы</h3>
+  <div class="op-table"><table><caption class="op-sr">Переменные, типы и запись на бумаге</caption>
+    <thead><tr><th scope="col">Имя в коде</th><th scope="col">Тип</th><th scope="col">Почему так и что на бумаге</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>problem</code>, <code>plan</code></th><td>объект задачи, <code>Fraction[]</code></td><td>Условие и заданный \(x\). <code>plan</code> называется так, потому что его вписываешь ты. Строки \(A\) и правые части \(b\) читаются как в обычном симплексе.</td></tr>
+      <tr><th scope="row"><code>primal</code>, <code>left</code>, <code>right</code>, <code>relation</code>, <code>valid</code>, <code>negative</code></th><td>массив объектов, две <code>Fraction</code>, строка знака, <code>boolean</code>, <code>number[]</code></td><td>В тетради по очереди подставляешь \(x\) в ограничения. На каждую строку код хранит левую и правую части, знак и итог сравнения. <code>negative</code> хранит номера отрицательных компонент плана.</td></tr>
+      <tr><th scope="row"><code>model.columns</code>, <code>model.names</code>, <code>model.relation</code>, <code>model.domains</code>, <code>model.statement</code></th><td><code>Fraction[][]</code>, <code>string[]</code>, строка, <code>(string | null)[]</code>, <code>string[]</code></td><td>Столбцы исходной \(A\) становятся левой частью ограничений двойственной задачи. <code>names</code> хранит \(y_1,y_2,\ldots\), <code>relation</code> — общий знак двойственных ограничений, <code>domains</code> — знаки отдельных \(y_i\), <code>statement</code> — строки записи. <code>null</code> в <code>domains</code> означает любой знак.</td></tr>
+      <tr><th scope="row"><code>positive</code>, <code>strict</code></th><td><code>number[]</code>, <code>number[]</code></td><td>Это бумажные множества \(J\) и \(I\). Названия читаются как «положительные компоненты» и «строгие ограничения». Массивы содержат индексы с нуля в исходном порядке. В отчёте к каждому прибавляется 1.</td></tr>
+      <tr><th scope="row"><code>tightDualConstraints</code>, <code>zeroDualVariables</code>, <code>equations</code></th><td>три массива строк расширенной матрицы <code>Fraction[][]</code></td><td>Строки первого списка означают \(A_{:j}^{T}y=c_j\), второго — \(y_i=0\). Последний элемент каждой строки — правая часть. <code>equations</code> соединяет оба набора в систему.</td></tr>
+      <tr><th scope="row"><code>width</code>, <code>matrix</code>, <code>pivots</code>, <code>nextRow</code>, <code>source</code>, <code>pivot</code>, <code>normalized</code>, <code>scale</code></th><td><code>number</code>, <code>Fraction[][]</code>, <code>number[]</code>, два <code>number</code>, <code>Fraction</code>, <code>Fraction[]</code>, <code>Fraction</code></td><td>Обозначения из Гаусса. <code>width</code> — число неизвестных без правого столбца. <code>nextRow</code> — куда поставить следующую ведущую строку, <code>source</code> — откуда её взять, <code>pivots</code> — индексы ведущих столбцов.</td></tr>
+      <tr><th scope="row"><code>system.consistent</code>, <code>system.solution</code>, <code>point</code>, <code>verification</code></th><td><code>boolean</code>, два <code>Fraction[]</code>, объект проверок</td><td>Совместность СЛАУ, решение с нулевыми свободными координатами, текущий кандидат \(y\) и итоги всех двойственных проверок. <code>point</code> может поменяться при поиске другого решения в том же семействе.</td></tr>
+      <tr><th scope="row"><code>hasFreeVariables</code>, <code>familySearch</code>, <code>parts</code>, <code>row</code>, <code>factor</code></th><td>два <code>boolean</code>, массив объектов, <code>number</code>, <code>Fraction</code></td><td>Если свободные есть и первый кандидат не подходит, проверяем совместность равенств вместе с неравенствами. <code>parts</code> связывает новые неотрицательные переменные с номером старого \(y_i\) и множителем +1 или −1.</td></tr>
+      <tr><th scope="row"><code>primalValue</code>, <code>dualValue</code>, <code>equalObjectives</code>, <code>optimal</code></th><td>две <code>Fraction</code>, два <code>boolean</code></td><td>В тетради это \(f(x)\), \(g(y)\), их равенство и вывод. Код сравнивает значения точно и требует, чтобы кандидат \(y\) удовлетворял всем условиям двойственной задачи.</td></tr>
+      <tr><th scope="row"><code>messages</code>, <code>status</code>, <code>reason</code></th><td>объект строк, строка статуса, строка пояснения</td><td>В отчёте верхняя плашка берётся из <code>messages[status]</code>, а <code>reason</code> объясняет, где именно прошла или оборвалась проверка.</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Здесь ты уже знаешь \(x\) и хочешь проверить его. В тетради отмечаешь положительные \(x_j\) и строгие исходные ограничения. Код переносит эти две группы в равенства для \(y\). Условия дополняющей нежёсткости обнуляют произведения «компонента × запас». Поэтому при допустимых \(x,y\) цели совпадают.</p>
+  <p>Для задачи на максимум с ограничениями ≤ это два набора произведений: \(x_j((A^Ty)_j-c_j)=0\) и \(y_i(b_i-(Ax)_i)=0\). При \(x_j&gt;0\) обязана обнулиться двойственная невязка, при строгом исходном ограничении обязан обнулиться \(y_i\). В коде это <code>tightDualConstraints</code> и <code>zeroDualVariables</code>. Остальные неравенства сохраняются и проверяются позже.</p>
+  <div class="op-flow" aria-label="Передача данных при проверке плана">
+    <span>подстановка x</span><span aria-hidden="true">→</span><span>J и I</span><span aria-hidden="true">→</span><code>solveEquations</code><span aria-hidden="true">→</span><code>inspectDual</code><span aria-hidden="true">→</span><span>вывод</span>
+  </div>
+
+  <h3 id="optimality-functions">От вспомогательных функций к решению</h3>
+  <h4>Проверка чисел и построение двойственной</h4>
+  <details class="op-function" data-source="optimality:indices">
+    <summary><code>indices</code> — что делает</summary>
+    <p>Строит массив 0…n−1. Он нужен для нумерации столбцов и для пересчёта индексов после удаления искусственных переменных.</p>
+    <p><strong>На бумаге.</strong> Перечисляешь места неизвестных и ведущих столбцов с учётом нулевой нумерации.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:dot">
+    <summary><code>dot</code> — что делает</summary>
+    <p>Идёт по двум массивам одинаковой длины, перемножает соответствующие элементы и накапливает точную сумму.</p>
+    <p><strong>На бумаге.</strong> Подставляешь \(x\) в строки \(A\), \(y\) в столбцы \(A\), затем считаешь значения целей.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:satisfies">
+    <summary><code>satisfies</code> — что делает</summary>
+    <p>Сравнивает две дроби один раз, затем интерпретирует результат по знаку <code>=</code>, <code>&lt;=</code> или <code>&gt;=</code>.</p>
+    <p><strong>На бумаге.</strong> По вычисленной левой части проверяешь требуемое равенство или неравенство.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:dualModel">
+    <summary><code>dualModel</code> — что делает</summary>
+    <p>Собирает столбцы \(A\), называет двойственные переменные, выбирает общий знак ограничений и индивидуальные знаки \(y_i\). Для исходного равенства сохраняет <code>null</code>.</p>
+    <p><strong>На бумаге.</strong> Для максимума записываешь \(g=b^Ty\to\min\), \(A^Ty\ge c\). Строке ≤ соответствует \(y_i\ge0\), строке ≥ — \(y_i\le0\); для минимума направления меняются.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:inspectDual">
+    <summary><code>inspectDual</code> — что делает</summary>
+    <p>Подставляет кандидата во все ограничения двойственной задачи и отдельно проверяет знаки \(y_i\). Возвращает две таблицы проверок и общий результат.</p>
+    <p><strong>На бумаге.</strong> После решения системы из \(I,J\) проверяешь также те двойственные условия, которые не превратились в равенства.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <h4>Гаусс и свободные переменные</h4>
+  <details class="op-function" data-source="optimality:reduceRows">
+    <summary><code>reduceRows</code> — что делает</summary>
+    <p>Копирует расширенную матрицу, ищет ненулевой коэффициент в очередном столбце, поднимает строку, нормирует её и обнуляет столбец в остальных строках. Возвращает матрицу и ведущие столбцы.</p>
+    <p><strong>На бумаге.</strong> Это исключение Гаусса–Жордана для СЛАУ по \(y\), с перестановкой строк. Столбец без ведущего элемента пропускается.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:solveEquations">
+    <summary><code>solveEquations</code> — что делает</summary>
+    <p>Проверяет оставшиеся строки после ведущих. Правая часть ненулевая в строке с нулевыми коэффициентами означает противоречие. Затем заполняет частное решение, оставляя свободные координаты равными нулю.</p>
+    <p><strong>На бумаге.</strong> Читаешь либо \(0=d\) при \(d\ne0\), либо решение с параметрами. Нулевые параметры дают один удобный кандидат.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:convertRow">
+    <summary><code>convertRow</code> — что делает</summary>
+    <p>Внутреннее преобразование <code>findDualPoint</code>. Для каждой новой неотрицательной координаты берёт старый коэффициент и умножает на знак из <code>parts</code>.</p>
+    <p><strong>На бумаге.</strong> Подставляешь \(y_i=z_i\), \(y_i=-z_i\) или \(y_i=z_i^+-z_i^-\) во все строки.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:findDualPoint">
+    <summary><code>findDualPoint</code> — что делает</summary>
+    <p>Добавляет к условиям из \(I,J\) все двойственные неравенства. Преобразует знаки переменных, ставит нулевую цель, ищет допустимую точку и восстанавливает исходный \(y\).</p>
+    <p><strong>На бумаге.</strong> При свободных параметрах подставляешь семейство решений в неравенства. Код решает эквивалентную задачу допустимости.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <h4>Что выполняется при поиске точки семейства</h4>
+  <details class="op-function" data-source="optimality:appendColumn">
+    <summary><code>appendColumn</code> — что делает</summary>
+    <p>Внутренний помощник <code>createFeasibleTableau</code>. Добавляет новый столбец с нулевой ценой и ненулевым коэффициентом только в заданной строке.</p>
+    <p><strong>На бумаге.</strong> Вписываешь запас, избыток или искусственную переменную для одного ограничения.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:createFeasibleTableau">
+    <summary><code>createFeasibleTableau</code> — что делает</summary>
+    <p>Делает правые части неотрицательными, приводит доступные опорные столбцы к единичным и добавляет искусственные там, где базисного столбца нет.</p>
+    <p><strong>На бумаге.</strong> Создаёшь стартовую таблицу с допустимым расширенным планом для проверки совместности.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:point">
+    <summary><code>point</code> — что делает</summary>
+    <p>Создаёт нулевой массив размером со все переменные таблицы. Для каждого базисного столбца записывает его правую часть.</p>
+    <p><strong>На бумаге.</strong> Небазисные переменные приравниваешь к нулю, базисные считываешь из \(\delta\).</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:basicPrices">
+    <summary><code>basicPrices</code> — что делает</summary>
+    <p>Берёт коэффициенты цели по индексам <code>basic</code> в порядке строк.</p>
+    <p><strong>На бумаге.</strong> Слева от строк выписываешь цены базисных переменных \(c_B\).</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:estimates">
+    <summary><code>estimates</code> — что делает</summary>
+    <p>Для каждого столбца берёт его коэффициенты, вычисляет скалярное произведение с <code>basicPrices()</code> и вычитает цену самого столбца.</p>
+    <p><strong>На бумаге.</strong> Это нижняя строка \(\Delta_j=z_j-c_j\). Для базисных столбцов она нулевая, поэтому отчёт печатает только свободные.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:objective">
+    <summary><code>objective</code> — что делает</summary>
+    <p>Умножает вектор базисных цен на правый столбец и суммирует.</p>
+    <p><strong>На бумаге.</strong> Это значение цели в текущем базисном плане, правый нижний угол таблицы.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:exchange">
+    <summary><code>exchange</code> — что делает</summary>
+    <p>Делит ведущую строку и её правую часть на <code>pivot</code>. Для других строк вычитает нужную кратность новой строки, затем меняет индексы базиса.</p>
+    <p><strong>На бумаге.</strong> Это жорданов пересчёт. Код хранит и базисные столбцы, поэтому ведущий столбец становится единичным.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:note">
+    <summary><code>note</code> — что делает</summary>
+    <p>Записывает название этапа и текст без числового снимка.</p>
+    <p><strong>На бумаге.</strong> Это пояснение между таблицами, например переход к правилу Бланда.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:record">
+    <summary><code>record</code> — что делает</summary>
+    <p>Передаёт текущие оценки, значение цели, отношения и координаты ведущего элемента в <code>tableauSnapshot</code>.</p>
+    <p><strong>На бумаге.</strong> Так сохраняется вид таблицы до пересчёта, включая выделенный ведущий элемент.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:dropRow">
+    <summary><code>dropRow</code> — что делает</summary>
+    <p>Удаляет строку, её правую часть, базисный столбец из списка базиса и исходный номер строки.</p>
+    <p><strong>На бумаге.</strong> В первой фазе зависимая строка может свестись к \(0=0\). Её можно вычеркнуть.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:finishPhaseOne">
+    <summary><code>finishPhaseOne</code> — что делает</summary>
+    <p>Отбирает обычные столбцы, возвращает исходные цены и перенумеровывает базисные и небазисные индексы.</p>
+    <p><strong>На бумаге.</strong> Ты зачёркиваешь \(W\), заново подписываешь столбцы и возвращаешь целевую функцию исходной задачи.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:constructor">
+    <summary><code>constructor</code> — что делает</summary>
+    <p>Собирает поля таблицы, определяет свободные индексы, сохраняет номера исходных строк и заводит список снимков.</p>
+    <p><strong>На бумаге.</strong> Подготавливаешь заголовки, подписываешь базис, отделяешь правую часть и фиксируешь каноническую запись.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:optimizeFeasibleBasis">
+    <summary><code>optimizeFeasibleBasis</code> — что делает</summary>
+    <p>Локальный прямой симплекс для фаз внутренней задачи. Выбирает колонку по отрицательной оценке и строку по отношениям, вызывает <code>exchange</code>.</p>
+    <p><strong>На бумаге.</strong> Улучшаешь вспомогательную цель \(-\sum W_i\) до нуля, если это возможно. После удаления искусственных столбцов нулевая цель поиска допустимости уже оптимальна.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:artificialBasis">
+    <summary><code>artificialBasis</code> — что делает</summary>
+    <p>Организует две фазы, удаляет зависимые строки и возвращает таблицу с допустимой точкой или статус ошибки совместности.</p>
+    <p><strong>На бумаге.</strong> Проверяешь, можно ли полностью обнулить искусственные переменные, сохранив все исходные ограничения на \(y\).</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <h4>Вся проверка заданного плана</h4>
+  <details class="op-function" data-source="optimality:checkPlan">
+    <summary><code>checkPlan</code> — что делает</summary>
+    <p>Проверяет допустимость \(x\), строит \(J,I\), решает полученную систему, проверяет двойственные условия. При необходимости ищет другую точку в семействе. Затем сравнивает цели.</p>
+    <p><strong>На бумаге.</strong> Это весь порядок проверки из разбора контрольной, от подстановки \(x\) до вывода об оптимальности.</p>
+    <div class="op-excerpt"></div>
+  </details>
+  <details class="op-function" data-source="optimality:run">
+    <summary><code>run</code> — что делает</summary>
+    <p>Преобразует введённые координаты в точные дроби и проверяет соответствие числа координат размерности задачи. Вызывает <code>checkPlan</code> и отдаёт готовые поля отчёту.</p>
+    <p><strong>На бумаге.</strong> Проверяешь, что записал по координате для каждой переменной. В ответ переносишь найденный \(y\), результат проверки и при успехе значение цели.</p>
+    <div class="op-excerpt"></div>
+  </details>
+
+  <h3 id="optimality-play">Проверка планов из разбора контрольной</h3>
+  <p>Исходная задача \(-x_1+2x_2\to\max\), \(x_1-3x_2\le3\), \(-x_1+x_2\le1\), \(-x_1+2x_2\le4\). В первом плеере проверяем \((4;4)\). Во втором — \((0;1)\). В третьем — отдельный случай со свободной переменной в системе при проверке плана.</p>
+  <h4>Оптимальный план (4; 4)</h4>
+  <div data-trace="optimal" aria-label="Проверка оптимального плана"></div>
+  <h4>Допустимый план (0; 1)</h4>
+  <div data-trace="rejected" aria-label="Проверка неоптимального плана"></div>
+  <h4>Система допускает целое семейство y</h4>
+  <div data-trace="family" aria-label="Поиск допустимого двойственного вектора"></div>
+  <h3 id="optimality-check">Самопроверка</h3>
+  <div class="note"><p><strong>Решить систему из J и I ещё недостаточно.</strong> План \((0;1)\) даёт решение \(y=(0;2;0)\), однако первое двойственное ограничение нарушается. При нескольких решениях приходится проверять, есть ли в семействе хотя бы одно допустимое. Равенство целей само по себе также не спасает недопустимый двойственный вектор.</p></div>
+  <details class="op-function"><summary>На каком шаге отсеется план (0; 2)?</summary><p>При подстановке в прямую задачу. Во втором ограничении \(-0+2=2&gt;1\). Код вернёт <code>basis_infeasible</code> до построения системы равенств для \(y\).</p></details>
+</section>
+<section class="sec" id="difference">
+  <div class="sec-head"><h2>Как различить две проверки на защите</h2></div>
+  <div class="box">
+    <p><strong>В конце обычного симплекса</strong> у меня есть таблица на максимум и базис. Проверяю неотрицательность правых частей и оценок. Из таблицы читаю найденный план.</p>
+    <p><strong>Во вкладке проверки оптимальности</strong> у меня есть произвольный заданный план. Проверяю допустимость, строю систему дополняющей нежёсткости и ищу допустимый двойственный вектор. Симплекс-таблица исходной задачи для этой проверки не нужна.</p>
+  </div>
+  <p>Сопоставление сделано по текущим <code>ui/methods/simplex.js</code> и <code>ui/methods/optimality.js</code> и по записи в «ИО_Разбор_кр_1.png». В последней подстановке оптимального плана для второго двойственного ограничения получается \(2\ge2\). В отчёте программы используется значение, пересчитанное из коэффициентов задачи.</p>
+</section>

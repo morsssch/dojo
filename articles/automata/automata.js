@@ -856,7 +856,7 @@ function minSteps(g0, opts) {
     steps.push({title:"2. Дополняем неполный ДКА",g:cloneG(g),o:{},text:"<p>Пустые клетки направляем в нефинальное поглощающее состояние ⊥. Из него по каждой букве переход в себя. Теперь обычный алгоритм разбиений корректен: ⊥ может объединиться с уже существующими состояниями, из которых финал недостижим.</p>"});
   }
   var fin = ids.filter(function (id) { return N(g, id).final }), non = ids.filter(function (id) { return !N(g, id).final });
-  var part = [fin, non].filter(function (c) { return c.length });
+  var part = (opts.keepClassNumbers ? [non, fin] : [fin, non]).filter(function (c) { return c.length });
   var setH = function (c) { return "{" + c.map(nm).join(", ") + "}" };
   var partH = function (p) { return "{ " + p.map(function (c, i) { return '<span class="kc k' + (i % 6) + '">' + setH(c) + "</span>" }).join(", ") + " }" };
   var colorOf = function (p) { var o = {}; p.forEach(function (c, i) { c.forEach(function (id) { o[id] = "k" + (i % 6) }) }); return o };
@@ -870,15 +870,22 @@ function minSteps(g0, opts) {
   while (guard++ <= ids.length) {
     var cls = {}; part.forEach(function (c, i) { c.forEach(function (id) { cls[id] = i }) });
     var sig = function (id) { return alpha.map(function (a) { var t = T[id][a]; return t ? cls[t] : -1 }).join("|") };
-    var np = [], blocks = [];
+    var np = [], newClasses = [], blocks = [];
     part.forEach(function (c) {
       var groups = [], keys = [];
       c.forEach(function (id) { var s = sig(id), i = keys.indexOf(s); if (i < 0) { keys.push(s); groups.push([id]) } else groups[i].push(id) });
       blocks.push({ c: c, groups: groups, firstSig: keys[0], sig: sig });
-      groups.forEach(function (gg) { np.push(gg) });
+      if (opts.keepClassNumbers) {
+        np.push(groups[0]);
+        newClasses.push(...groups.slice(1));
+      } else {
+        np.push(...groups);
+      }
     });
-    var tbl = '<div class="mink">' + blocks.map(function (b) {
-      var h = '<div class="mblk"><div class="mh">Для ' + setH(b.c) + "</div><table class=\"mt\">";
+    np.push(...newClasses);
+    var tbl = '<div class="mink">' + blocks.map(function (b, i) {
+      var className = opts.keepClassNumbers ? "C<sub>" + (i + 1) + "</sub> = " : "";
+      var h = '<div class="mblk"><div class="mh">Для ' + className + setH(b.c) + "</div><table class=\"mt\">";
       alpha.forEach(function (a, ai) {
         b.c.forEach(function (id, j) {
           var t = T[id][a], odd = b.sig(id) !== b.firstSig;
@@ -889,7 +896,7 @@ function minSteps(g0, opts) {
     }).join("") + "</div>";
     var same = np.length === part.length;
     steps.push({
-      title: k + "-эквивалентность ≡" + supNum(k), html: tbl + gsvg(np) + legend(np),
+      title: k + "-эквивалентность ≡" + supNum(k), classTables: tbl, html: tbl + gsvg(np) + legend(np),
       text: "<p>Берём классы ≡" + supNum(k - 1) + " = " + partH(part) + ". Для каждого класса выписываем переходы по каждой букве и смотрим, <b>в какой класс</b> ≡" + supNum(k - 1) + " ведёт каждый переход. Состояния, у которых по каждой букве классы совпадают, остаются вместе; остальные выносим в отдельный класс. Сравнивать надо в рамках одной и той же буквы. Записываем именно сами состояния, а не то, куда они ведут.</p><p>≡" + supNum(k) + " = " + partH(np) + "</p>" + (same ? "<p><b>≡" + supNum(k) + " = ≡" + supNum(k - 1) + "</b>: классы больше не дробятся ⇒ автомат минимизирован, переходим к построению.</p>" : "<p>≡" + supNum(k) + " ≠ ≡" + supNum(k - 1) + " ⇒ продолжаем для k = " + (k + 1) + ".</p>")
     });
     part = np;
@@ -1031,7 +1038,10 @@ function parseAutomaton(text) {
 function mkG(nodes, edges) {
   var g = { nodes: [], edges: [], eid: 0 };
   nodes.forEach(function (n) { g.nodes.push({ id: n[0], name: n[0], x: n[1], y: n[2], start: /s/.test(n[3] || ""), final: /f/.test(n[3] || "") }) });
-  edges.forEach(function (e) { g.edges.push({ id: "e" + (++g.eid), from: e[0], to: e[2], re: parseRe(e[1]) }) });
+  edges.forEach(function ([from, label, to]) {
+    const re = label.startsWith("!") ? sym(label.slice(1)) : parseRe(label);
+    g.edges.push({ id: "e" + (++g.eid), from, to, re });
+  });
   return g;
 }
 
@@ -1253,8 +1263,20 @@ root.querySelectorAll("details[data-solve]").forEach(function(d){
 
 /* ---------- листки, собранные из шагов ---------- */
 function shSvg(g,o){return '<div class="gscroll">'+svgGraph(g,o||{}).replace(/url\(#a(ink|nw|in|out|lp|gh)\)/g,"url(#asheet)")+'</div>'}
-// Графы к тетрадному билету. «!» оставляет метку Мили буквальной.
-const ticketGraphs = {
+// Графы к тетрадным решениям. «!» сохраняет метку дуги как текст.
+const sheetGraphs = {
+  Lab6Input: [
+    [["q0", 0, 80, "s"], ["q1", 155, 0], ["q2", 310, 0], ["q3", 465, 0, "f"],
+     ["q4", 155, 155], ["q5", 310, 155, "f"]],
+    [["q0", "a", "q1"], ["q0", "b", "q4"], ["q1", "a", "q4"], ["q1", "b", "q2"],
+     ["q2", "a", "q5"], ["q2", "b", "q3"], ["q3", "!a,b", "q3"],
+     ["q4", "a", "q4"], ["q4", "b", "q2"], ["q5", "a", "q5"], ["q5", "b", "q3"]],
+  ],
+  Lab6Minimum: [
+    [["C1", 0, 0, "s"], ["C4", 145, 0], ["C3", 290, 0], ["C2", 435, 0, "f"]],
+    [["C1", "!a,b", "C4"], ["C4", "a", "C4"], ["C4", "b", "C3"],
+     ["C3", "!a,b", "C2"], ["C2", "!a,b", "C2"]],
+  ],
   TicketFromRegex: [
     [["s", 0, 0, "s"], ["r", 125, 0], ["p", 250, 0], ["q", 375, 0], ["f", 500, 0, "f"]],
     [["s", "ε", "r"], ["r", "!a,b", "r"], ["r", "ε", "p"], ["p", "a", "q"], ["q", "b", "f"]],
@@ -1283,10 +1305,16 @@ const ticketGraphs = {
      ["q2", "!A/Y", "q3"], ["q2", "!B/Y", "q0"], ["q3", "!A/X", "q1"], ["q3", "!B/Y", "q2"]],
   ],
 };
-for (const host of root.querySelectorAll("[data-ticket-sheet]")) {
-  const [nodes, edges] = ticketGraphs[host.getAttribute("data-ticket-sheet")];
+for (const host of root.querySelectorAll("[data-ticket-sheet], [data-sheet-graph]")) {
+  const [nodes, edges] = sheetGraphs[host.dataset.sheetGraph ?? host.dataset.ticketSheet];
   const svg = FIG.G(nodes, edges).replaceAll("url(#aink)", "url(#asheet)");
   host.innerHTML = '<div class="gscroll">' + svg + '</div>';
+}
+const lab6Partitions = root.querySelectorAll("[data-lab6-partition]");
+if (lab6Partitions.length) {
+  const steps = minSteps(mkG(...sheetGraphs.Lab6Input), { keepClassNumbers: true });
+  const refinements = steps.filter(step => step.classTables);
+  lab6Partitions.forEach((host, i) => { host.innerHTML = refinements[i].classTables; });
 }
 function shRe(e,ctx){return pr(e,ctx||0,true)}
 function shName(id){return nameHtml(id)}
@@ -1349,27 +1377,44 @@ function sheetA(src){
   if(no)h+='<p class="ind">'+no+': пути в q<sub>f</sub> нет ✗ не допускается</p>';
   return h}
 
-function sheetDet(g0,word){
-  var st=detSteps(g0,word),g=st[0].g,n=g.nodes.length,al={};g.edges.forEach(function(e){letters(e.re,al)});al=Object.keys(al).sort();
+function sheetD4(){
+  var word="bab",st=detSteps(EX.D4(),word),g=st[0].g,n=g.nodes.length,al={};g.edges.forEach(function(e){letters(e.re,al)});al=Object.keys(al).sort();
   var start=g.nodes.filter(function(x){return x.start})[0],fins=g.nodes.filter(function(x){return x.final});
   var cl=st[1].text.match(/<li>[\s\S]*?<\/li>/g).map(function(s){return s.replace(/<\/?li>/g,"")});
   var startLine=(st[1].text.match(/<b>Начальные<\/b>[^:]*:([^.]*)\./)||[])[1]||"";
   var sG=st[2+n].g,pRows=st.length-2-(3+n),lastP=st[st.length-2],fin=st[st.length-1];
   var fS=sG.nodes.filter(function(x){return x.final}).map(function(x){return nameHtml(x.name)}).join(", ");
   var fP=fin.g.nodes.filter(function(x){return x.final}).map(function(x){return nameHtml(x.name)}).join(", ");
-  var h='<p class="hdr">Лабораторная работа №4</p><p class="sub">Удаление ε-переходов и детерминизация конечного автомата</p>';
+  var h='<p class="hdr">Лабораторная работа №4</p><p class="sub">Удаление ε-переходов, детерминизация и минимизация</p>';
   h+='<p class="lbl">Дано:</p><p class="ind">M<sub>ε</sub> = ({'+al.join(", ")+'}, {'+g.nodes.map(function(x){return nameHtml(x.id)}).join(", ")+'}, δ<sub>ε</sub>, '+nameHtml(start.id)+', {'+fins.map(function(x){return nameHtml(x.id)}).join(", ")+'})</p>'+shSvg(g);
   h+='<p class="lbl">Решение:</p><p class="st">1. Строим ε-замыкания:</p><p class="ind">'+cl.join(",&nbsp; ")+'</p>';
   h+='<p class="ind">Начальные:'+startLine+'.&nbsp; Финальные: '+fS+' (содержат финальное исходного).</p>';
   h+='<p class="st"><span class="side">из Sᵢ по букве, потом Ξ</span>2. Удаляем ε-переходы — таблица автомата без ε:</p><div class="ind">'+st[1+n].html+'</div>'+shSvg(sG);
   h+='<p class="st">3. Детерминизация. '+(lastP.html.match(/P<sub>0<\/sub> = \{[^}]*\}/)||[""])[0]+':</p><div class="ind">'+lastP.html+'</div><p class="pen">новое множество — новое P, пустое — ∅</p>';
   h+='<p class="st">4. Граф детерминированного автомата. Финальные: '+fP+'.</p>'+shSvg(fin.g);
+  h+=`
+    <p class="st"><b>5. Минимизация ДКА.</b></p>
+    <p class="ind">Из P₀ достижимы P₁ по a, P₂ по b и P₃ по bb. Все переходы по a и b заданы, поэтому сразу переходим к разбиению.</p>
+    <p class="ind"><b>≡⁰.</b> Финальные F = {P₁, P₂}, нефинальные N = {P₀, P₃}. Состояния из разных классов различает пустое слово ε.</p>
+    <p class="ind"><b>≡¹.</b> По таблице P выписываем классы, в которые ведут переходы по a и b. В каждой клетке рядом с состоянием указан его класс в ≡⁰.</p>
+    <div class="ind tscroll"><table class="dt">
+      <thead><tr><th scope="col">Состояние</th><th scope="col">a</th><th scope="col">b</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">P₁</th><td>P₁ ∈ F</td><td>P₂ ∈ F</td></tr>
+        <tr><th scope="row">P₂</th><td>P₁ ∈ F</td><td>P₃ ∈ N</td></tr>
+        <tr><th scope="row">P₀</th><td>P₁ ∈ F</td><td>P₂ ∈ F</td></tr>
+        <tr><th scope="row">P₃</th><td>P₁ ∈ F</td><td>P₃ ∈ N</td></tr>
+      </tbody>
+    </table></div>
+    <p class="ind">Буква b разделяет оба класса. Из P₁ и P₀ она ведёт в финальное P₂, а из P₂ и P₃ — в нефинальное P₃. Получаем ≡¹ = {{P₀}, {P₁}, {P₂}, {P₃}}. Каждый класс уже состоит из одного состояния, поэтому ≡² = ≡¹.</p>
+    <p class="lbl">Ответ после минимизации.</p>
+    <p class="ind">В минимальном ДКА четыре состояния. Граф и таблица переходов из шагов 3–4 сохраняются. Начальное состояние P₀, финальные — P₁ и P₂.</p>`;
   var tr=(fin.text.match(/<div class="trace">([\s\S]*?)<\/div>/)||[])[1]||"";
   h+='<p class="lbl">Проверка:</p><p class="ind">w = '+word+': '+tr+' ⇒ '+(/допускает/.test(fin.text)&&!/не допускается/.test(fin.text)?"цепочка допускается ✓":"не допускается")+'</p>';
   return h}
 $("sheet-fr-b").innerHTML=sheetB(EX.FR(),["q2","q3","q5","q4","q1"]);
 $("sheet-fr-a").innerHTML=sheetA("(a+b*)(b+c)^+ + (a^+b)*");
-$("sheet-d4").innerHTML=sheetDet(EX.D4(),"bab");
+$("sheet-d4").innerHTML=sheetD4();
 
 $("sheet-ph-b").innerHTML=sheetB(EX.PH());
 $("sheet-ph-a").innerHTML=sheetA("(a^++b)*b+b^++(bc)*+a");

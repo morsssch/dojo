@@ -21,7 +21,9 @@
     </li>
     <li><div class="lpt-head"><span class="lpt-n">6</span><a href="#paper">Как писать на листке</a></div>
       <p class="lpt-desc">Образцы оформления решений на листке</p>
-      <ul class="lpt-subs"><li><a href="#paper-sub-1">Образец 1. Тип А: регулярка → автомат</a></li><li><a href="#paper-sub-2">Образец 2. Тип Б: автомат → регулярка</a></li><li><a href="#paper-sub-3">Образец 4. Тип Б из исходного материала</a></li><li><a href="#paper-sub-4">Образец 5. Тип А из исходного материала</a></li><li><a href="#paper-sub-5">Образец 7. Тип Б, вариант 21</a></li></ul>
+      <ul class="lpt-subs"><li><a href="#paper-sub-1">Образец 1. Тип А: регулярка → автомат</a></li><li><a href="#paper-sub-2">Образец 2. Тип Б: автомат → регулярка</a></li><li><a href="#paper-sub-3">Образец 4. Тип Б из исходного материала</a></li><li><a href="#paper-sub-4">Образец 5. Тип А из исходного материала</a></li><li><a href="#paper-sub-5">Образец 7. Тип Б, вариант 21</a></li><li><a href="#paper-sub-7">Задача №7. От ε-переходов до минимального ДКА</a></li>
+        <li><a href="#paper-lab6">ЛР6. Минимизация, вариант 7</a></li>
+      </ul>
     </li>
     <li><div class="lpt-head"><span class="lpt-n">7</span><a href="#tool">Тренажёр</a><span class="lpt-min">20 мин</span></div>
       <p class="lpt-desc">Свои регулярки и автоматы, пошаговое решение и сверка ответов</p>
@@ -52,7 +54,10 @@
         <li><a href="#ticket-5">5. Произведение</a></li><li><a href="#ticket-6">6. Построение</a></li>
       </ul>
     </li>
-    <li><div class="lpt-head"><span class="lpt-n">14</span><a href="#calculator">Калькулятор всех задач</a></div>
+    <li><div class="lpt-head"><span class="lpt-n">14</span><a href="#lab-7-grammars">ЛР7. Грамматики, вариант 7</a></div>
+      <p class="lpt-desc">Цепочки, состав грамматики, правила и выводы по образцу из тетради</p>
+    </li>
+    <li><div class="lpt-head"><span class="lpt-n">15</span><a href="#calculator">Калькулятор всех задач</a></div>
       <p class="lpt-desc">Подставь свои данные и получи решение по шагам</p>
     </li>
   </ol>
@@ -71,7 +76,7 @@
 
 
 <nav class="top" aria-label="Разделы"><div class="in">
-  <a href="#lab">Введение</a><a href="#numbering">Нумерация</a><a href="#rep">Повторение</a><a href="#r2a">R → автомат</a><a href="#a2r">Автомат → R</a><a href="#paper">Листок</a><a href="#tool">Тренажёр</a><a href="#det">Детерминизация</a><a href="#min">Минимизация</a><a href="#pattern">Построение по условию</a><a href="#mealy">Преобразователи</a><a href="#equivalence">Эквивалентность</a><a href="#ticket">Билет</a><a href="#cheat">Шпаргалка</a><a href="#calculator">Калькулятор</a>
+  <a href="#lab">Введение</a><a href="#numbering">Нумерация</a><a href="#rep">Повторение</a><a href="#r2a">R → автомат</a><a href="#a2r">Автомат → R</a><a href="#paper">Листок</a><a href="#tool">Тренажёр</a><a href="#det">Детерминизация</a><a href="#min">Минимизация</a><a href="#pattern">Построение по условию</a><a href="#mealy">Преобразователи</a><a href="#equivalence">Эквивалентность</a><a href="#ticket">Билет</a><a href="#cheat">Шпаргалка</a><a href="#lab-7-grammars">ЛР7. Грамматики</a><a href="#calculator">Калькулятор</a>
 </div></nav>
 
 <!-- ============ ЛАБА ============ -->
@@ -365,8 +370,48 @@
   <h3 id="paper-sub-6">Образец 8. Тип А, вариант 21</h3>
   <div class="sheet" id="sheet-fr-a"></div>
 
-  <h3 id="paper-sub-7">Образец 6. Задача №7: ε-переходы и детерминизация</h3>
+  <h3 id="paper-sub-7">Образец 6. Задача №7. Удаление ε-переходов, детерминизация и минимизация</h3>
   <div class="sheet" id="sheet-d4"></div>
+
+  <h3 id="paper-lab6">ЛР6. Минимизация, вариант 7</h3>
+  <div class="sheet" id="sheet-lab6">
+    <p class="hdr">Лабораторная работа №6</p>
+    <p class="sub">Минимизация детерминированного конечного автомата, вариант 7</p>
+    <p class="lbl">Дано</p>
+    <p class="ind">Σ = {a, b}, начальное — q₀, финальные — q₃ и q₅. Все состояния достижимы.</p>
+    <div data-sheet-graph="Lab6Input"></div>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th scope="col">δ</th><th scope="col">a</th><th scope="col">b</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">→q₀</th><td>q₁</td><td>q₄</td></tr>
+        <tr><th scope="row">q₁</th><td>q₄</td><td>q₂</td></tr>
+        <tr><th scope="row">q₂</th><td>q₅</td><td>q₃</td></tr>
+        <tr><th scope="row">*q₃</th><td>q₃</td><td>q₃</td></tr>
+        <tr><th scope="row">q₄</th><td>q₄</td><td>q₂</td></tr>
+        <tr><th scope="row">*q₅</th><td>q₅</td><td>q₃</td></tr>
+      </tbody>
+    </table></div>
+    <p class="lbl">Разбиение на классы</p>
+    <p class="st"><b>1. ≡⁰ → ≡¹</b></p>
+    <div data-lab6-partition></div>
+    <p class="st"><b>2. ≡¹ → ≡²</b></p>
+    <div data-lab6-partition></div>
+    <p class="st"><b>3. ≡² → ≡³</b></p>
+    <div data-lab6-partition></div>
+    <p class="ind">≡³ = ≡².</p>
+    <p class="lbl">Ответ</p>
+    <div class="tscroll"><table class="dt">
+      <thead><tr><th scope="col">Класс</th><th scope="col">a</th><th scope="col">b</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">→C₁</th><td>C₄</td><td>C₄</td></tr>
+        <tr><th scope="row">C₄</th><td>C₄</td><td>C₃</td></tr>
+        <tr><th scope="row">C₃</th><td>C₂</td><td>C₂</td></tr>
+        <tr><th scope="row">*C₂</th><td>C₂</td><td>C₂</td></tr>
+      </tbody>
+    </table></div>
+    <div data-sheet-graph="Lab6Minimum"></div>
+    <p class="ind"><code>aba</code> допускается (C₂), <code>ab</code> отвергается (C₃).</p>
+  </div>
 
   <h3 id="paper-sub-8">Образец 3. Детерминизация</h3>
   <div class="sheet">
@@ -508,7 +553,7 @@ q3 a q3
     <div class="task-b"><div class="gscroll" data-show="D3"></div><p class="hint">Недетерминированность тут не из-за ε, а из-за двух стрелок по 0 из q₀. Проверь цепочку 1101.</p></div>
     <details data-solve="det" data-g="D3" data-w="1101"><summary>Показать решение</summary></details></div>
   <div class="task"><div class="task-h"><span class="task-n">Д4</span><span class="task-t">№7 из задачника: удалить ε-переходы, затем детерминизировать</span></div>
-    <div class="task-b"><div class="gscroll" data-show="D4"></div><p class="hint">Два ε-перехода: q₀ → q₁ и q₂ → q₁. В основном способе после удаления ε начальным остаётся q₀. Оформление с промежуточными S — образец 6 в разделе «Как писать на листке».</p></div>
+    <div class="task-b"><div class="gscroll" data-show="D4"></div><p class="hint">Два ε-перехода: q₀ → q₁ и q₂ → q₁. В основном способе после удаления ε начальным остаётся q₀. <a href="#paper-sub-7">Запись решения с промежуточными S и минимизацией</a> есть в разделе «Как писать на листке».</p></div>
     <details data-solve="det" data-g="D4" data-w="bab"><summary>Показать решение</summary></details></div>
   <div class="tool">
     <h4>Детерминизировать свой автомат</h4>
@@ -899,6 +944,36 @@ q4 b q5</textarea>
   </div>
 
 </section>
+<section class="sec" id="lab-7-grammars">
+  <div class="sec-head"><h2>ЛР7. Грамматики, вариант 7</h2></div>
+  <div class="sheet grammar-notebook">
+    <div class="grammar-notebook-top">
+      <p>\(L(G)=\{(10)^{n-1}(01)^{n+1}\mid n&gt;0\}\)</p>
+      <p>В-7</p>
+    </div>
+    <p>Цепочки: \(0101,\ 10010101,\)<br>\(101001010101\)</p>
+    <p class="st">\(G=\langle T,N,S,P\rangle\)</p>
+    <p>\(T=\{0,1\}\)</p>
+    <p>\(N=\{S\}\)</p>
+    <p class="st">Начальный символ \(S=S\)</p>
+    <div class="grammar-notebook-rules">
+      <div class="frame">
+        <p>\(S\to10S01\)</p>
+        <p>\(S\to0101\)</p>
+      </div>
+      <div>
+        <p>— контекстно-свободное</p>
+        <p>— \(A\to w\) (подходит и праволинейной, и леволинейной)</p>
+      </div>
+    </div>
+    <p class="st">Выводы:</p>
+    <p>1) \(S\) ⇒ \(0101\)</p>
+    <p>2) \(S\) ⇒ \(10S01\) ⇒ \(10010101\)</p>
+    <p>3) \(S\) ⇒ \(10S01\) ⇒<br>\(1010S0101\) ⇒ \(101001010101\)</p>
+    <p>4) \(S\) ⇒ \(10S01\) ⇒ \(1010S0101\) ⇒<br>\(101010S010101\) ⇒ \(1010100101010101\)</p>
+  </div>
+</section>
+
 <section class="sec" id="calculator">
   <div class="sec-head"><div><div class="eyebrow">Свой вариант</div><h2>Калькулятор всех задач</h2></div></div>
   <p>Выбери задание и подставь свои данные вместо примера. В пошаговом решении кнопка «К ответу» открывает итоговую таблицу, граф или выражение.</p>
